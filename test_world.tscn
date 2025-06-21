@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=15 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
 [ext_resource type="PackedScene" uid="uid://cp74r48rxpi4c" path="res://planet_3d.tscn" id="2_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
-[ext_resource type="PackedScene" uid="uid://b5r7lckxnnfq4" path="res://models/island.glb" id="5_lf0gk"]
+[ext_resource type="PackedScene" uid="uid://d26gy3iv8nnql" path="res://Pre-Prefab/island.tscn" id="5_lf0gk"]
+[ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="6_cnaw2"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -19,6 +20,11 @@ sky = SubResource("Sky_lf0gk")
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf0gk"]
+metallic = 1.0
+metallic_specular = 0.0
+roughness = 0.0
+
 [sub_resource type="BoxMesh" id="BoxMesh_dsnr4"]
 size = Vector3(1, 50, 10)
 
@@ -27,6 +33,9 @@ points = PackedVector3Array(5, 25, 2.5, -0.5, 25, 2.5, 5, -25, 2.5, 5, 25, -2.5,
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_dsnr4"]
 points = PackedVector3Array(0.5, 25, 2.5, -0.5, 25, 2.5, 0.5, -25, 2.5, 0.5, 25, -2.5, -0.5, 25, -2.5, -0.5, -25, 2.5, 0.5, -25, -2.5, -0.5, -25, -2.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cnaw2"]
+size = Vector3(13.2854, 9.69617, 12.9125)
 
 [node name="SubViewportContainer" type="SubViewportContainer"]
 offset_right = 1920.0
@@ -61,10 +70,13 @@ top_level = true
 bounce_force = 35.0
 
 [node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.5314, 2.7756, -0.606771)
+transform = Transform3D(-0.206717, 0, -0.978401, 0, 1, 0, 0.978401, 0, -0.206717, -92.5314, 3.7756, -0.606771)
 
 [node name="Planet3D2" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, -47, -2, 0)
+
+[node name="MeshInstance3D" parent="SubViewport/test world/Planet3D2" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_lf0gk")
 
 [node name="Bouncepad" parent="SubViewport/test world/Planet3D2" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
@@ -100,11 +112,20 @@ transform = Transform3D(0.552711, -0.00205079, -5.30126, -3.99801, 3.49999, -0.4
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
 bounce_force = 35.0
 
-[node name="island" parent="SubViewport/test world" instance=ExtResource("5_lf0gk")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -90.1391, 0.993986, -2.25998)
-
 [node name="Bouncepad" parent="SubViewport/test world" instance=ExtResource("4_dsnr4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.9467, 1.80003, -0.841223)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.5669, 2.63798, 1.56872)
+bounce_force = 50.0
+
+[node name="island" parent="SubViewport/test world" instance=ExtResource("5_lf0gk")]
+transform = Transform3D(-8.56743e-08, 0, -1.96, 0, 1.96, 0, 1.96, 0, -8.56743e-08, -91.8646, 1.08065, 0)
+
+[node name="Area3D" type="Area3D" parent="SubViewport/test world/island" groups=["gravity_fields"]]
+transform = Transform3D(1.96, 0, 0, 0, 1.96, 0, 0, 0, 1.96, 0, 0, 0)
+gravity_space_override = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/island/Area3D"]
+transform = Transform3D(1.96, 0, 0, 0, 1.96, 0, 0, 0, 1.96, 0.232056, 2.34808, -0.0598755)
+shape = SubResource("BoxShape3D_cnaw2")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
@@ -117,7 +138,7 @@ handle_input_locally = false
 render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.781717, 0, -0.623634, 0, 1, 0, 0.623634, 0, -0.781717, -64.8736, 5.52022, -58.7291)
+transform = Transform3D(-0.961765, 0, -0.273875, 0, 1, 0, 0.273875, 0, -0.961765, -64.8736, 5.52022, -95.6489)
 
 [node name="Label" type="Label" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 offset_left = 2.0
@@ -127,3 +148,18 @@ offset_bottom = 508.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 50
 text = "pov: you are god"
+
+[node name="CenterContainer" type="CenterContainer" parent="SubViewport/CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="TextureRect" type="TextureRect" parent="SubViewport/CanvasLayer/CenterContainer"]
+modulate = Color(0, 1, 0, 1)
+layout_mode = 2
+texture = ExtResource("6_cnaw2")
+
+[editable path="SubViewport/test world/Planet3D2"]
