@@ -1,0 +1,64 @@
+[gd_scene load_steps=7 format=3 uid="uid://djealuhqfpp8l"]
+
+[ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
+[ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
+[ext_resource type="PackedScene" uid="uid://cp74r48rxpi4c" path="res://planet_3d.tscn" id="2_1lwx6"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
+panorama = ExtResource("1_1lwx6")
+energy_multiplier = 0.2
+
+[sub_resource type="Sky" id="Sky_lf0gk"]
+sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
+
+[sub_resource type="Environment" id="Environment_cnaw2"]
+background_mode = 2
+sky = SubResource("Sky_lf0gk")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="SubViewportContainer" type="SubViewportContainer"]
+offset_right = 1920.0
+offset_bottom = 1080.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="."]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="test world" type="Node3D" parent="SubViewport"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/test world"]
+environment = SubResource("Environment_cnaw2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world"]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Planet3D" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, -2, 0)
+
+[node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="SubViewport/test world"]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/test world/CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SubViewport" type="SubViewport" parent="SubViewport/test world/CanvasLayer/SubViewportContainer"]
+handle_input_locally = false
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport/test world/CanvasLayer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, -0.866025, 18.5679, 5.52022, -30.4169)
+
+[node name="Label" type="Label" parent="SubViewport/test world/CanvasLayer/SubViewportContainer/SubViewport"]
+offset_left = 2.0
+offset_top = 439.0
+offset_right = 401.0
+offset_bottom = 508.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 50
+text = "pov: you are god"
