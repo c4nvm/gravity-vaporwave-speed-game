@@ -26,3 +26,4 @@ gravity_direction = Vector3(0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("SphereShape3D_rorap")
+debug_color = Color(0, 0.6, 0.701961, 1)

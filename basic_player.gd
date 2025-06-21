@@ -47,6 +47,11 @@ var mouse_rotation := Vector2.ZERO  # Stores the yaw (x) and pitch (y) rotation 
 # Debugging variables.
 var debug_timer := 0.0
 const DEBUG_PRINT_INTERVAL := 0.2  # Sets the frequency for logging debug information.
+
+var just_jumped := false
+var jump_cooldown := 0.2  # Time in seconds after jumping where gravity isn't multiplied
+var jump_timer := 0.0
+
 #endregion
 
 #
@@ -134,14 +139,30 @@ func _update_nearest_gravity_field():
 # Calculates the direction of gravity based on the character's position relative to the nearest gravity field
 func _update_gravity():
 	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
-		gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized()
-		up_direction = -gravity_direction
+		# Check the type of the gravity field using the enum
+		if nearest_gravity_field.gravity_point == true:
+			# This is the original logic for planetary gravity
+			gravity_direction = (nearest_gravity_field.global_position - global_position).normalized()
+			
+		elif nearest_gravity_field.gravity_point == false:
+				# This is the new logic for directional gravity
+				gravity_direction = nearest_gravity_field.gravity_direction.normalized()
+		else:
+			gravity_direction = Vector3(0, 0, 0)
+		
+		# Set the character's up direction based on the final gravity vector
+		self.up_direction = -gravity_direction
 
-# Applies gravitational force to the character's velocity vector.
 func _apply_gravity(delta):
-	# This part is fine. It correctly adds gravity when airborne.
+	var gravity_multiplier = 1.0  # Default gravity strength
+	
+	# Check if we should apply stronger gravity
+	if ground_ray.is_colliding() and not Input.is_action_just_pressed("jump"):
+		gravity_multiplier = 2.0  # Example: 2x gravity when grounded (not jumping)
+	
+	# Always apply gravity (with possible multiplier)
 	if not is_on_floor():
-		velocity += gravity_direction * gravity * delta
+		velocity += gravity_direction * gravity * gravity_multiplier * delta
 
 # Corrected _handle_movement
 func _handle_movement(delta):
@@ -152,7 +173,7 @@ func _handle_movement(delta):
 	
 	if is_on_planet:
 		# 1. Store the vertical velocity and remove it from the main velocity.
-		var vertical_velocity = velocity.project(up_direction) # up_direction is -gravity_direction
+		var vertical_velocity = velocity.project(self.up_direction) # up_direction is -gravity_direction
 		var horizontal_velocity = velocity - vertical_velocity
 
 		# 2. Calculate the desired horizontal movement.
@@ -166,7 +187,7 @@ func _handle_movement(delta):
 		# 4. Handle the jump. It modifies the vertical velocity.
 		if Input.is_action_just_pressed("jump"):
 			if is_on_floor() or ground_ray.is_colliding():
-				vertical_velocity = up_direction * jump_force
+				vertical_velocity = self.up_direction * jump_force
 
 		# 5. Recombine the horizontal and vertical components.
 		velocity = horizontal_velocity + vertical_velocity
@@ -174,7 +195,10 @@ func _handle_movement(delta):
 		# Your free-space logic should also be checked for similar issues.
 		var move_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
 		velocity += move_dir * acceleration * delta
-		velocity = velocity.lerp(Vector3.ZERO, deceleration * delta)
+		if input_dir != Vector2.ZERO:
+			velocity += move_dir * acceleration * delta
+		else:
+			velocity = velocity.lerp(Vector3.ZERO, deceleration * delta)
 		
 		if Input.is_action_just_pressed("jump") and is_on_floor():
 			velocity += -transform.basis.y * jump_force * 0.5
