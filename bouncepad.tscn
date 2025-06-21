@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://dmq25rgcwlmhp"]
+
+[ext_resource type="Script" uid="uid://d3i8ry5puv7h0" path="res://bouncepad.gd" id="1_tihdl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tihdl"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_uvrkt"]
+height = 0.1
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_frlnh"]
+height = 0.2
+radius = 0.6
+
+[node name="Bouncepad" type="Area3D"]
+script = ExtResource("1_tihdl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_tihdl")
+mesh = SubResource("CylinderMesh_uvrkt")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CylinderShape3D_frlnh")
+
+[node name="DirectionRay" type="RayCast3D" parent="."]
+target_position = Vector3(0, 10, 0)

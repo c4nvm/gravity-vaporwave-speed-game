@@ -33,6 +33,7 @@ project/assembly_name="gravity-vaporwave-speed-game"
 
 player=""
 planets=""
+gravity_fields=""
 
 [input]
 
