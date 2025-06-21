@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=12 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
 [ext_resource type="PackedScene" uid="uid://cp74r48rxpi4c" path="res://planet_3d.tscn" id="2_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
+[ext_resource type="PackedScene" uid="uid://b5r7lckxnnfq4" path="res://models/island.glb" id="5_lf0gk"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -60,7 +61,7 @@ top_level = true
 bounce_force = 35.0
 
 [node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46.2899, 13.4926, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.5314, 2.7756, -0.606771)
 
 [node name="Planet3D2" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, -47, -2, 0)
@@ -73,7 +74,6 @@ bounce_force = 35.0
 transform = Transform3D(-0.707107, -0.707107, 0, 0.707107, -0.707107, 0, 0, 0, 1, 37, 27, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/test world/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("BoxMesh_dsnr4")
 
 [node name="Area3D" type="Area3D" parent="SubViewport/test world/StaticBody3D/MeshInstance3D" groups=["gravity_fields"]]
@@ -99,6 +99,12 @@ transform = Transform3D(0.552711, -0.00205079, -5.30126, -3.99801, 3.49999, -0.4
 [node name="Bouncepad" parent="SubViewport/test world/Planet3D3" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
 bounce_force = 35.0
+
+[node name="island" parent="SubViewport/test world" instance=ExtResource("5_lf0gk")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -90.1391, 0.993986, -2.25998)
+
+[node name="Bouncepad" parent="SubViewport/test world" instance=ExtResource("4_dsnr4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.9467, 1.80003, -0.841223)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
