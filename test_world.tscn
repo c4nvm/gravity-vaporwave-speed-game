@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=17 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -26,11 +26,6 @@ fog_mode = 1
 fog_density = 1.0
 volumetric_fog_gi_inject = 1.65
 volumetric_fog_temporal_reprojection_amount = 0.99
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf0gk"]
-metallic = 1.0
-metallic_specular = 0.0
-roughness = 0.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_dsnr4"]
 size = Vector3(1, 50, 10)
@@ -77,14 +72,8 @@ transform = Transform3D(0.787301, 0.616569, 0, -0.616569, 0.787301, 0, 0, 0, 1, 
 top_level = true
 bounce_force = 35.0
 
-[node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
-transform = Transform3D(-0.206717, 0, -0.978401, 0, 1, 0, 0.978401, 0, -0.206717, -92.5314, 3.7756, -0.606771)
-
 [node name="Planet3D2" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, -47, -2, 0)
-
-[node name="MeshInstance3D" parent="SubViewport/test world/Planet3D2" index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_lf0gk")
 
 [node name="Bouncepad" parent="SubViewport/test world/Planet3D2" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
@@ -122,7 +111,6 @@ bounce_force = 35.0
 
 [node name="Bouncepad" parent="SubViewport/test world" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.5669, 2.63798, 1.56872)
-bounce_force = 50.0
 
 [node name="island" parent="SubViewport/test world" instance=ExtResource("5_lf0gk")]
 transform = Transform3D(-8.56743e-08, 0, -1.96, 0, 1.96, 0, 1.96, 0, -8.56743e-08, -91.8646, 1.08065, 0)
@@ -159,6 +147,9 @@ transform = Transform3D(0.869588, 0.311474, 0.383145, 0.0750937, 0.6835, -0.7260
 [node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_4tg7h")]
 transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0.0426454, -0.922198, -0.249157, -0.295756, -85.487, 2.17939, -2.4436)
 
+[node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.3987, 4.17434, 2.54632)
+
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/CanvasLayer"]
@@ -170,7 +161,7 @@ handle_input_locally = false
 render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.961765, 0, -0.273875, 0, 1, 0, 0.273875, 0, -0.961765, -64.8736, 5.52022, -95.6489)
+transform = Transform3D(-0.961765, 0, -0.273875, 0, 1, 0, 0.273875, 0, -0.961765, -6.47356, 5.52022, -20.3322)
 
 [node name="Label" type="Label" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 offset_left = 2.0
@@ -193,5 +184,3 @@ metadata/_edit_use_anchors_ = true
 modulate = Color(0, 1, 0, 1)
 layout_mode = 2
 texture = ExtResource("6_cnaw2")
-
-[editable path="SubViewport/test world/Planet3D2"]

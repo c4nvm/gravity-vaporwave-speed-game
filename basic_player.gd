@@ -1,55 +1,54 @@
-#
+#region
 # PlayerController.gd
 #
-# This script governs all player-character behaviors, including movement,
-# camera orientation, and interactions with planetary gravitational fields.
-# It is intended for use with a CharacterBody3D node.
+# By c4nvm / Nathaniel Denzler
 #
+# Governs player behavior, including movement, camera control, and interaction
+# with planetary gravity. Designed for a CharacterBody3D node.
+#endregion
 
 extends CharacterBody3D
 
 #region #################### Configuration Properties ####################
-# @tool
 @export_group("Movement")
 const MAX_SLOPE_ANGLE := 40.0
-@export var speed := 10.0  # Defines the maximum movement speed of the character.
-@export var jump_force := 10.0  # Specifies the initial velocity applied during a jump action.
-@export var gravity := 30.0  # Determines the magnitude of the gravitational force.
-@export var acceleration := 15.0  # Controls the rate at which the character reaches maximum speed.
-@export var deceleration := 20.0  # Controls the rate at which the character comes to a stop.
-@export var terminal_velocity := 50.0  # The maximum speed the character can fall.
-@export var fall_lerp_weight := 5.0    # How quickly the character reaches terminal velocity.
+@export var speed := 10.0
+@export var jump_force := 10.0
+@export var gravity := 30.0
+@export var acceleration := 15.0
+@export var deceleration := 20.0
+@export var terminal_velocity := 50.0
+@export var fall_lerp_weight := 5.0
 
 @export_group("Camera")
-@export var mouse_sensitivity := 0.002  # Scales the sensitivity of mouse input for camera control.
-@export var max_look_angle := 89.0  # Constrains the vertical look angle of the camera, in degrees.
-@export var gravity_smoothness: float = 5.0
-@export var look_smoothness: float = 30.0
+@export var mouse_sensitivity := 0.002
+@export var max_look_angle := 89.0 # Vertical look limit, in degrees.
+@export var gravity_smoothness: float = 5.0 # How quickly the player aligns to a new gravity vector.
 
 #endregion
 
 #region #################### Private Member Variables ####################
-# Node references, initialized during the _ready() lifecycle event.
+# Node references, assigned in _ready().
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var direction_ray: RayCast3D = $DirectionRay
 @onready var ground_ray: RayCast3D = $GroundRay
 
 # Planetary interaction variables.
-var gravity_fields: Array[Node] = []  # Array to cache all gravity field areas
-var nearest_gravity_field: Area3D = null  # The currently active gravity field
-var is_on_planet := false  # Flag indicating if the character is within a planet's gravitational influence.
-var gravity_direction := Vector3.DOWN  # The current direction of gravity, dynamically updated.
+var gravity_fields: Array[Node] = []
+var nearest_gravity_field: Area3D = null
+var is_on_planet := false
+var gravity_direction := Vector3.DOWN # Current direction of gravity.
 
-# Character orientation and view variables.
-var mouse_rotation := Vector2.ZERO  # Stores the yaw (x) and pitch (y) rotation from mouse input.
+# Stores vertical camera rotation from mouse input.
+var mouse_pitch := 0.0
 
 # Debugging variables.
 var debug_timer := 0.0
-const DEBUG_PRINT_INTERVAL := 0.2  # Sets the frequency for logging debug information.
+const DEBUG_PRINT_INTERVAL := 0.2
 
 var just_jumped := false
-var jump_cooldown := 0.2  # Time in seconds after jumping where gravity isn't multiplied
+var jump_cooldown := 0.2
 var jump_timer := 0.0
 
 #endregion
@@ -59,62 +58,52 @@ var jump_timer := 0.0
 #
 
 func _ready():
-	# Cache all gravity field areas in the scene
 	_cache_gravity_fields()
-	
-	# Configure the mouse input mode for first-person camera control.
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-
-	# Convert the maximum look angle from degrees to radians for internal calculations.
+	# Convert angle to radians for internal calculations.
 	max_look_angle = deg_to_rad(max_look_angle)
 
 func _input(event):
-	# Process mouse movement events for camera rotation.
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		# Update the yaw component based on horizontal mouse movement.
-		mouse_rotation.x -= event.relative.x * mouse_sensitivity
-		# Normalize yaw to the range [-PI, PI] for rotational consistency.
-		mouse_rotation.x = wrapf(mouse_rotation.x, -PI, PI)
+		# Horizontal rotation (yaw) is applied to the entire CharacterBody.
+		rotate(transform.basis.y, -event.relative.x * mouse_sensitivity)
 
-		# Update the pitch component based on vertical mouse movement, clamped by max_look_angle.
-		mouse_rotation.y = clamp(mouse_rotation.y - event.relative.y * mouse_sensitivity, -max_look_angle, max_look_angle)
-		
-		# Apply the calculated pitch to the camera pivot's rotation.
-		camera_pivot.rotation.x = mouse_rotation.y
+		# Vertical rotation (pitch) is applied only to the camera pivot,
+		# and is clamped to prevent looking straight up or down.
+		mouse_pitch = clamp(mouse_pitch - event.relative.y * mouse_sensitivity, -max_look_angle, max_look_angle)
+		camera_pivot.rotation.x = mouse_pitch
 
 func _physics_process(delta):
-	# Find the nearest gravity field
 	_update_nearest_gravity_field()
 	
-	# When under planetary influence, apply gravity and surface alignment logic.
 	if is_on_planet and nearest_gravity_field:
+		# Planetary physics: custom gravity and surface alignment.
 		_update_gravity()
 		_apply_gravity(delta)
 		_handle_movement(delta)
 		_align_with_surface(delta)
 		move_and_slide()
 	else:
-		# In the absence of planetary influence, apply standard free-space physics.
+		# Standard free-space physics.
 		_handle_movement(delta)
 		move_and_slide()
 	
-	# Periodically output debugging information.
 	_update_debug_print(delta)
 
 #
 # Internal Logic and Helper Functions
 #
 
-# Caches all gravity field areas in the scene that belong to the "gravity_fields" group
+# Finds and stores all nodes in the "gravity_fields" group.
 func _cache_gravity_fields():
 	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
 	if gravity_fields.size() > 0:
 		nearest_gravity_field = gravity_fields[0]
 		is_on_planet = true
-		# Configure the maximum slope angle for movement on planetary surfaces.
+		# Set the CharacterBody3D's slope handling for planetary surfaces.
 		floor_max_angle = deg_to_rad(MAX_SLOPE_ANGLE)
 
-# Finds the nearest gravity field from the cached array
+# Iterates through cached fields to find the one with the strongest influence.
 func _update_nearest_gravity_field():
 	if gravity_fields.is_empty():
 		is_on_planet = false
@@ -136,63 +125,59 @@ func _update_nearest_gravity_field():
 		nearest_gravity_field = new_nearest
 		is_on_planet = nearest_gravity_field != null
 
-# Calculates the direction of gravity based on the character's position relative to the nearest gravity field
+# Sets gravity based on the nearest field's properties. Supports both
+# point gravity (for planets) and directional gravity.
 func _update_gravity():
 	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
-		# Check the type of the gravity field using the enum
 		if nearest_gravity_field.gravity_point == true:
-			# This is the original logic for planetary gravity
-			gravity_direction = (nearest_gravity_field.global_position - global_position).normalized()
-			
-		elif nearest_gravity_field.gravity_point == false:
-				# This is the new logic for directional gravity
-				gravity_direction = nearest_gravity_field.gravity_direction.normalized()
+			# Point Gravity: Pulls towards the center of the field.
+			gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized()
 		else:
-			gravity_direction = Vector3(0, 0, 0)
-		
-		# Set the character's up direction based on the final gravity vector
+			# Directional Gravity: Pulls in a fixed direction.
+			gravity_direction = nearest_gravity_field.gravity_direction
+
 		self.up_direction = -gravity_direction
 
+
 func _apply_gravity(delta):
-	var gravity_multiplier = 1.0  # Default gravity strength
+	var gravity_multiplier = 1.0
 	
-	# Check if we should apply stronger gravity
+	# Apply stronger gravity to help stick to surfaces when grounded.
 	if ground_ray.is_colliding() and not Input.is_action_just_pressed("jump"):
-		gravity_multiplier = 2.0  # Example: 2x gravity when grounded (not jumping)
+		gravity_multiplier = 2.0
 	
-	# Always apply gravity (with possible multiplier)
 	if not is_on_floor():
 		velocity += gravity_direction * gravity * gravity_multiplier * delta
 
-# Corrected _handle_movement
 func _handle_movement(delta):
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	
+	# Use the camera's basis for movement direction.
 	var raycast_forward = -direction_ray.global_transform.basis.z.normalized()
 	var raycast_right = direction_ray.global_transform.basis.x.normalized()
 	
 	if is_on_planet:
-		# 1. Store the vertical velocity and remove it from the main velocity.
-		var vertical_velocity = velocity.project(self.up_direction) # up_direction is -gravity_direction
+		# 1. Isolate vertical velocity (along the gravity vector).
+		var vertical_velocity = velocity.project(self.up_direction)
 		var horizontal_velocity = velocity - vertical_velocity
 
-		# 2. Calculate the desired horizontal movement.
+		# 2. Project movement input onto the plane perpendicular to gravity.
 		raycast_forward = _safe_project(raycast_forward, gravity_direction)
 		raycast_right = _safe_project(raycast_right, gravity_direction)
 		var move_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
 		
-		# 3. Lerp ONLY the horizontal velocity towards the target.
+		# 3. Accelerate horizontal velocity based on input.
 		horizontal_velocity = horizontal_velocity.lerp(move_dir * speed, acceleration * delta)
 
-		# 4. Handle the jump. It modifies the vertical velocity.
+		# 4. Apply jump impulse to vertical velocity.
 		if Input.is_action_just_pressed("jump"):
 			if is_on_floor() or ground_ray.is_colliding():
 				vertical_velocity = self.up_direction * jump_force
 
-		# 5. Recombine the horizontal and vertical components.
+		# 5. Recombine velocities.
 		velocity = horizontal_velocity + vertical_velocity
 	else:
-		# Your free-space logic should also be checked for similar issues.
+		# Handle free-space movement.
 		var move_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
 		velocity += move_dir * acceleration * delta
 		if input_dir != Vector2.ZERO:
@@ -203,57 +188,39 @@ func _handle_movement(delta):
 		if Input.is_action_just_pressed("jump") and is_on_floor():
 			velocity += -transform.basis.y * jump_force * 0.5
 
-# Dynamically aligns the character's orientation with the underlying surface normal.
-# Add these as exported variables to your script to adjust them in the editor
-
+# Smoothly aligns the player's orientation with the current gravity direction.
+# This uses a quaternion to find the shortest rotation from the current 'up'
+# to the target 'up', preserving the player's forward direction (yaw).
 func _align_with_surface(delta: float):
-	if not is_on_planet or not nearest_gravity_field or not is_instance_valid(nearest_gravity_field):
+	if not is_on_planet or not is_instance_valid(nearest_gravity_field):
 		return
 
 	var target_up = -gravity_direction.normalized()
+	var current_up = transform.basis.y
+	var rot = Quaternion(current_up, target_up)
 
-	var smoothed_up = transform.basis.y.slerp(target_up, gravity_smoothness * delta)
+	transform.basis = transform.basis.slerp(Basis(rot) * transform.basis, gravity_smoothness * delta)
 
-	var horizontal_rot = Basis(target_up, mouse_rotation.x)
-	var tilt_rot = Basis(Vector3.RIGHT, camera_pivot.rotation.x)
-	var desired_look_basis = (horizontal_rot * tilt_rot).orthonormalized()
-
-	var final_target_basis = Basis()
-
-	final_target_basis.y = smoothed_up
-
-	final_target_basis.z = desired_look_basis.z
-	
-	# Re-align the basis to ensure it's a valid and orthogonal rotation,
-	# preserving the new 'up' and 'forward' vectors.
-	final_target_basis.x = final_target_basis.y.cross(final_target_basis.z).normalized()
-	final_target_basis.z = final_target_basis.x.cross(final_target_basis.y).normalized()
-
-	transform.basis = transform.basis.slerp(final_target_basis, 50 * delta)
-
-# Projects a vector onto a plane defined by a normal, handling potential edge cases.
+# Projects a vector onto a plane defined by a normal.
 func _safe_project(vector: Vector3, normal: Vector3) -> Vector3:
 	var projected = vector - vector.project(normal)
-	# If the projected vector is near-zero (i.e., view is parallel to the normal),
-	# compute a perpendicular vector to prevent returning a zero vector.
+	# If the input vector is parallel to the normal, the projection is a zero vector.
+	# To prevent this, we calculate an arbitrary perpendicular vector as a fallback.
 	return projected.normalized() if projected.length() > 0.001 else Vector3(normal.y, normal.z, normal.x).cross(normal).normalized()
 
 #
 # Debugging Utilities
 #
 
-# Manages the periodic printing of debug information.
 func _update_debug_print(delta):
 	debug_timer += delta
 	if debug_timer >= DEBUG_PRINT_INTERVAL:
 		debug_timer = 0.0
 		_print_input_debug()
 
-# Outputs a formatted string containing the character's state for debugging.
 func _print_input_debug():
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	
-	# Construct a formatted string with relevant debugging data.
 	var debug_str := "--- Player Debug Information ---\n"
 	debug_str += "[Input]\n"
 	debug_str += "  Forward: %+.2f\n" % input_dir.y
