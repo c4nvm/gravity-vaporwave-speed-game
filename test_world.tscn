@@ -6,22 +6,26 @@
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
 [ext_resource type="PackedScene" uid="uid://d26gy3iv8nnql" path="res://Pre-Prefab/island.tscn" id="5_lf0gk"]
 [ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="6_cnaw2"]
-[ext_resource type="PackedScene" uid="uid://cfecyh04lhac6" path="res://models/column.glb" id="7_uu1iw"]
-[ext_resource type="PackedScene" uid="uid://dq2akkhly00lx" path="res://models/alexander.glb" id="8_4tg7h"]
-[ext_resource type="PackedScene" uid="uid://cemekbnvnhg55" path="res://models/tree.glb" id="9_4tg7h"]
+[ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_uu1iw"]
+[ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
+[ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
-energy_multiplier = 0.2
 
 [sub_resource type="Sky" id="Sky_lf0gk"]
 sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
 
 [sub_resource type="Environment" id="Environment_cnaw2"]
 background_mode = 2
+background_energy_multiplier = 0.25
 sky = SubResource("Sky_lf0gk")
 tonemap_mode = 2
-glow_enabled = true
+sdfgi_bounce_feedback = 1.99
+fog_mode = 1
+fog_density = 1.0
+volumetric_fog_gi_inject = 1.65
+volumetric_fog_temporal_reprojection_amount = 0.99
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf0gk"]
 metallic = 1.0
@@ -58,6 +62,7 @@ environment = SubResource("Environment_cnaw2")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world"]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
+shadow_blur = 6.0
 
 [node name="Planet3D" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(15, 0, 0, 0, 15, 0, 0, 0, 15, 0, -2, 0)
@@ -130,6 +135,30 @@ gravity_space_override = 3
 transform = Transform3D(1.96, 0, 0, 0, 1.96, 0, 0, 0, 1.96, 0.232056, 2.34808, -0.0598755)
 shape = SubResource("BoxShape3D_cnaw2")
 
+[node name="column3" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+transform = Transform3D(0.117564, -0.279088, 0.953042, 0.901843, 0.431797, 0.015199, -0.415763, 0.857707, 0.302457, -5.68317, 5.10539, 11.3181)
+
+[node name="tree" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.3897, 1.09691, -5.20032)
+
+[node name="column" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+transform = Transform3D(0.811074, 0, 0.584943, 0, 1, 0, -0.584943, 0, 0.811074, -94.4788, 2.36367, 8.9653)
+
+[node name="column2" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+transform = Transform3D(1.17258, 0.116558, -0.226885, -0.114435, 1.19433, 0.0221424, 0.227963, 0, 1.17815, -91.485, 2.25868, 9.2569)
+
+[node name="tree2" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+transform = Transform3D(0.99519, -0.0510524, 0.083611, 0, 0.853478, 0.521129, -0.097965, -0.518622, 0.849373, -45.7824, 5.976, -5.40705)
+
+[node name="tree3" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+transform = Transform3D(0.768094, -0.30516, -0.562948, 0, 0.879142, -0.47656, 0.640338, 0.366043, 0.675263, -5.13228, 8.90876, 8.16576)
+
+[node name="tree4" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+transform = Transform3D(0.869588, 0.311474, 0.383145, 0.0750937, 0.6835, -0.726078, -0.488034, 0.66016, 0.570974, 7.85858, 5.70236, 8.33262)
+
+[node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_4tg7h")]
+transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0.0426454, -0.922198, -0.249157, -0.295756, -85.487, 2.17939, -2.4436)
+
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/CanvasLayer"]
@@ -164,29 +193,5 @@ metadata/_edit_use_anchors_ = true
 modulate = Color(0, 1, 0, 1)
 layout_mode = 2
 texture = ExtResource("6_cnaw2")
-
-[node name="column" parent="." instance=ExtResource("7_uu1iw")]
-transform = Transform3D(0.500313, -0.000481025, 0.865844, 0.00103723, 0.999999, -4.37845e-05, -0.865844, 0.000919988, 0.500314, -90.3254, 2.40425, 8.10258)
-
-[node name="column2" parent="." instance=ExtResource("7_uu1iw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.6741, 2.40425, 10.1422)
-
-[node name="alexander" parent="." instance=ExtResource("8_4tg7h")]
-transform = Transform3D(-0.0991439, 0.482963, 0.87001, 0.345916, 0.836516, -0.42495, -0.933013, 0.258819, -0.25, -85.9503, 2.28901, -4.36474)
-
-[node name="tree" parent="." instance=ExtResource("9_4tg7h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.3897, 1.09691, -5.20032)
-
-[node name="tree2" parent="." instance=ExtResource("9_4tg7h")]
-transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -47.3538, 4.58096, 7.44642)
-
-[node name="tree3" parent="." instance=ExtResource("9_4tg7h")]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, -1.97736, 9.67536, -4.46454)
-
-[node name="tree4" parent="." instance=ExtResource("9_4tg7h")]
-transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0.504978, 9.06532, 10.2227)
-
-[node name="column3" parent="." instance=ExtResource("7_uu1iw")]
-transform = Transform3D(0.117564, -0.279088, 0.953042, 0.901843, 0.431798, 0.0151992, -0.415763, 0.857707, 0.302457, -5.68317, 5.10539, 11.3181)
 
 [editable path="SubViewport/test world/Planet3D2"]

@@ -15,6 +15,7 @@ speed = 15.0
 target_position = Vector3(0, 0, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+cast_shadow = 0
 mesh = SubResource("CapsuleMesh_xv06v")
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="MeshInstance3D"]
