@@ -21,7 +21,7 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var fall_lerp_weight := 5.0
 
 @export_group("Camera")
-@export var mouse_sensitivity := 0.002
+@export var mouse_sensitivity := 1.2
 @export var max_look_angle := 89.0 # Vertical look limit, in degrees.
 @export var gravity_smoothness: float = 5.0 # How quickly the player aligns to a new gravity vector.
 
@@ -66,11 +66,11 @@ func _ready():
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		# Horizontal rotation (yaw) is applied to the entire CharacterBody.
-		rotate(transform.basis.y, -event.relative.x * mouse_sensitivity)
+		rotate(transform.basis.y, -event.relative.x * (mouse_sensitivity/1000))
 
 		# Vertical rotation (pitch) is applied only to the camera pivot,
 		# and is clamped to prevent looking straight up or down.
-		mouse_pitch = clamp(mouse_pitch - event.relative.y * mouse_sensitivity, -max_look_angle, max_look_angle)
+		mouse_pitch = clamp(mouse_pitch - event.relative.y * (mouse_sensitivity/1000), -max_look_angle, max_look_angle)
 		camera_pivot.rotation.x = mouse_pitch
 
 func _physics_process(delta):
@@ -199,7 +199,7 @@ func _align_with_surface(delta: float):
 	var current_up = transform.basis.y
 	var rot = Quaternion(current_up, target_up)
 
-	transform.basis = transform.basis.slerp(Basis(rot) * transform.basis, gravity_smoothness * delta)
+	transform.basis = transform.basis.slerp(Basis(rot) * transform.basis, gravity_smoothness * delta).orthonormalized()
 
 # Projects a vector onto a plane defined by a normal.
 func _safe_project(vector: Vector3, normal: Vector3) -> Vector3:

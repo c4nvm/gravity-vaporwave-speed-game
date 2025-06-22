@@ -1,6 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cp74r48rxpi4c"]
+[gd_scene load_steps=5 format=3 uid="uid://cp74r48rxpi4c"]
+
+[ext_resource type="Material" uid="uid://maab2ylaxscv" path="res://Shaders/toon_shaded_objects.tres" id="1_j81u8"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_rorap"]
+material = ExtResource("1_j81u8")
 radius = 1.0
 height = 2.0
 
