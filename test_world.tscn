@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=18 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
 [ext_resource type="PackedScene" uid="uid://d26gy3iv8nnql" path="res://Pre-Prefab/island.tscn" id="5_lf0gk"]
 [ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="6_cnaw2"]
+[ext_resource type="PackedScene" uid="uid://cfecyh04lhac6" path="res://models/column.glb" id="7_uu1iw"]
+[ext_resource type="PackedScene" uid="uid://dq2akkhly00lx" path="res://models/alexander.glb" id="8_4tg7h"]
+[ext_resource type="PackedScene" uid="uid://cemekbnvnhg55" path="res://models/tree.glb" id="9_4tg7h"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -161,5 +164,29 @@ metadata/_edit_use_anchors_ = true
 modulate = Color(0, 1, 0, 1)
 layout_mode = 2
 texture = ExtResource("6_cnaw2")
+
+[node name="column" parent="." instance=ExtResource("7_uu1iw")]
+transform = Transform3D(0.500313, -0.000481025, 0.865844, 0.00103723, 0.999999, -4.37845e-05, -0.865844, 0.000919988, 0.500314, -90.3254, 2.40425, 8.10258)
+
+[node name="column2" parent="." instance=ExtResource("7_uu1iw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.6741, 2.40425, 10.1422)
+
+[node name="alexander" parent="." instance=ExtResource("8_4tg7h")]
+transform = Transform3D(-0.0991439, 0.482963, 0.87001, 0.345916, 0.836516, -0.42495, -0.933013, 0.258819, -0.25, -85.9503, 2.28901, -4.36474)
+
+[node name="tree" parent="." instance=ExtResource("9_4tg7h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.3897, 1.09691, -5.20032)
+
+[node name="tree2" parent="." instance=ExtResource("9_4tg7h")]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -47.3538, 4.58096, 7.44642)
+
+[node name="tree3" parent="." instance=ExtResource("9_4tg7h")]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, -1.97736, 9.67536, -4.46454)
+
+[node name="tree4" parent="." instance=ExtResource("9_4tg7h")]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0.504978, 9.06532, 10.2227)
+
+[node name="column3" parent="." instance=ExtResource("7_uu1iw")]
+transform = Transform3D(0.117564, -0.279088, 0.953042, 0.901843, 0.431798, 0.0151992, -0.415763, 0.857707, 0.302457, -5.68317, 5.10539, 11.3181)
 
 [editable path="SubViewport/test world/Planet3D2"]
