@@ -1,8 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://cn8ke01qfidw7"]
+[gd_scene load_steps=12 format=3 uid="uid://cn8ke01qfidw7"]
 
 [ext_resource type="Script" uid="uid://cc6qtmjlln3o0" path="res://basic_player.gd" id="1_4ivg5"]
 [ext_resource type="Shader" uid="uid://de2vc7d4gh74w" path="res://Shaders/Outline.gdshader" id="2_ffn7p"]
 [ext_resource type="Shader" uid="uid://lknhyb2p5dot" path="res://Shaders/toon.gdshader" id="3_skmdc"]
+[ext_resource type="Script" uid="uid://dxmod745s7722" path="res://addons/grappling_hook_3d/src/hook_controller.gd" id="4_g6ire"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ffn7p"]
 render_priority = 0
@@ -456,6 +457,22 @@ current = true
 fov = 90.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CameraPivot/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.331837)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.243185)
 mesh = SubResource("QuadMesh_skmdc")
 surface_material_override/0 = SubResource("ShaderMaterial_g6ire")
+
+[node name="GrappleCast" type="RayCast3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.707575)
+target_position = Vector3(0, 0, -25)
+debug_shape_custom_color = Color(0, 0.627451, 0, 1)
+
+[node name="HookRopeStart" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.412216, 0, -0.5)
+
+[node name="HookController" type="Node" parent="." node_paths=PackedStringArray("hook_raycast", "player_body", "hook_source")]
+script = ExtResource("4_g6ire")
+hook_raycast = NodePath("../CameraPivot/Camera3D/GrappleCast")
+player_body = NodePath("..")
+pull_speed = 50.0
+rope_tension = 1.0
+hook_source = NodePath("../HookRopeStart")

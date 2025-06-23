@@ -18,14 +18,34 @@ sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
 
 [sub_resource type="Environment" id="Environment_cnaw2"]
 background_mode = 2
-background_energy_multiplier = 0.25
+background_energy_multiplier = 0.1
 sky = SubResource("Sky_lf0gk")
-tonemap_mode = 2
+tonemap_mode = 3
+tonemap_exposure = 0.83
+tonemap_white = 2.35
+ssao_enabled = true
+ssao_ao_channel_affect = 0.85
+ssil_enabled = true
 sdfgi_bounce_feedback = 1.99
+glow_enabled = true
+glow_levels/2 = 1.97
+glow_levels/3 = 7.9
+glow_levels/5 = 4.85
+glow_levels/6 = 5.95
+glow_bloom = 0.25
 fog_mode = 1
 fog_density = 1.0
-volumetric_fog_gi_inject = 1.65
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(0.811765, 0.678431, 1, 1)
+volumetric_fog_emission = Color(1, 0.701961, 0.741176, 1)
+volumetric_fog_anisotropy = 0.9
+volumetric_fog_length = 78.87
+volumetric_fog_detail_spread = 0.5
 volumetric_fog_temporal_reprojection_amount = 0.99
+adjustment_enabled = true
+adjustment_contrast = 1.1
+adjustment_saturation = 1.1
 
 [sub_resource type="BoxMesh" id="BoxMesh_dsnr4"]
 size = Vector3(1, 50, 10)
@@ -54,11 +74,6 @@ render_target_update_mode = 4
 [node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/test world"]
 environment = SubResource("Environment_cnaw2")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world"]
-transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
-shadow_enabled = true
-shadow_blur = 6.0
-
 [node name="Planet3D" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(15, 0, 0, 0, 15, 0, 0, 0, 15, 0, -2, 0)
 
@@ -79,26 +94,26 @@ transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, -47, -2, 0)
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
 bounce_force = 35.0
 
-[node name="StaticBody3D" type="StaticBody3D" parent="SubViewport/test world"]
+[node name="Flat" type="StaticBody3D" parent="SubViewport/test world"]
 transform = Transform3D(-0.707107, -0.707107, 0, 0.707107, -0.707107, 0, 0, 0, 1, 37, 27, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/test world/StaticBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/test world/Flat"]
 mesh = SubResource("BoxMesh_dsnr4")
 
-[node name="Area3D" type="Area3D" parent="SubViewport/test world/StaticBody3D/MeshInstance3D" groups=["gravity_fields"]]
+[node name="Area3D" type="Area3D" parent="SubViewport/test world/Flat/MeshInstance3D" groups=["gravity_fields"]]
 transform = Transform3D(0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0, 1, 0, 0, 0)
 gravity_space_override = 3
 gravity_point_center = Vector3(0.707, -0.707, 0)
 gravity_direction = Vector3(0.707, -0.707, 0)
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="SubViewport/test world/StaticBody3D/MeshInstance3D/Area3D"]
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="SubViewport/test world/Flat/MeshInstance3D/Area3D"]
 transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 2, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_lf0gk")
 
-[node name="RayCast3D" type="RayCast3D" parent="SubViewport/test world/StaticBody3D/MeshInstance3D"]
+[node name="RayCast3D" type="RayCast3D" parent="SubViewport/test world/Flat/MeshInstance3D"]
 target_position = Vector3(35, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/Flat"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_dsnr4")
 
@@ -150,27 +165,45 @@ transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0
 [node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.3987, 4.17434, 2.54632)
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world"]
+transform = Transform3D(-0.866024, -0.433016, 0.250001, 0, 0.499998, 0.866026, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+light_energy = 0.5
+light_volumetric_fog_energy = 0.1
+light_specular = 0.2
+shadow_enabled = true
+shadow_blur = 6.0
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="SubViewport/test world"]
+transform = Transform3D(-0.866025, 0.433013, 0.25, -0.365926, -0.208158, -0.907066, -0.340731, -0.877023, 0.338722, 0, 0, 0)
+light_color = Color(1, 0.729412, 1, 1)
+light_energy = 0.25
+light_volumetric_fog_energy = 0.1
+light_angular_distance = 37.5
+light_specular = 0.2
+shadow_enabled = true
+shadow_blur = 6.0
+
+[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="SubViewport/test world"]
+transform = Transform3D(-0.0570116, 0.524328, -0.849606, 0.0351053, 0.851517, 0.523151, 0.997756, 0, -0.0669531, 0, 0, 0)
+light_color = Color(0.809299, 1, 0.999537, 1)
+light_energy = 0.0
+light_volumetric_fog_energy = 0.1
+light_angular_distance = 6.0
+light_specular = 0.2
+
+[node name="DirectionalLight3D4" type="DirectionalLight3D" parent="SubViewport/test world"]
+transform = Transform3D(0.23017, 0.381387, 0.895302, 0.0259109, -0.92208, 0.386132, 0.972806, -0.0656781, -0.222118, 0, 0, 0)
+light_color = Color(1, 0.894118, 0.415686, 1)
+light_energy = 0.452
+light_volumetric_fog_energy = 0.1
+light_angular_distance = 6.0
+light_specular = 0.2
+
+[node name="OmniLight3D" type="OmniLight3D" parent="SubViewport/test world"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -91.3923, 5.40836, 0)
+omni_range = 12.6279
+
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/CanvasLayer"]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="SubViewport" type="SubViewport" parent="SubViewport/CanvasLayer/SubViewportContainer"]
-handle_input_locally = false
-render_target_update_mode = 4
-
-[node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.992243, 0, 0.124312, 0, 1, 0, -0.124312, 0, -0.992243, -6.47356, 5.52022, -111.484)
-
-[node name="Label" type="Label" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-offset_left = 2.0
-offset_top = 439.0
-offset_right = 401.0
-offset_bottom = 508.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 50
-text = "pov: you are god"
 
 [node name="CenterContainer" type="CenterContainer" parent="SubViewport/CanvasLayer"]
 anchors_preset = 15

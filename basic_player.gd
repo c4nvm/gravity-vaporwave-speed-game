@@ -47,9 +47,7 @@ var mouse_pitch := 0.0
 var debug_timer := 0.0
 const DEBUG_PRINT_INTERVAL := 0.2
 
-var just_jumped := false
-var jump_cooldown := 0.2
-var jump_timer := 0.0
+var hook_gravity_override: bool = false
 
 #endregion
 
@@ -60,8 +58,12 @@ var jump_timer := 0.0
 func _ready():
 	_cache_gravity_fields()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	# Convert angle to radians for internal calculations.
 	max_look_angle = deg_to_rad(max_look_angle)
+	
+	# Connect hook controller signals if it exists
+	var hook_controller = get_node_or_null("HookController")
+	if hook_controller:
+		hook_controller.gravity_override_changed.connect(_on_hook_gravity_override_changed)
 
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -142,9 +144,9 @@ func _update_gravity():
 func _apply_gravity(delta):
 	var gravity_multiplier = 1.0
 	
-	# Apply stronger gravity to help stick to surfaces when grounded.
-	if ground_ray.is_colliding() and not Input.is_action_just_pressed("jump"):
-		gravity_multiplier = 2.0
+	# Only apply stronger gravity if we're grounded AND not using the hook
+	if ground_ray.is_colliding() and not Input.is_action_just_pressed("jump") and not hook_gravity_override:
+		gravity_multiplier = 3.0
 	
 	if not is_on_floor():
 		velocity += gravity_direction * gravity * gravity_multiplier * delta
@@ -207,6 +209,9 @@ func _safe_project(vector: Vector3, normal: Vector3) -> Vector3:
 	# If the input vector is parallel to the normal, the projection is a zero vector.
 	# To prevent this, we calculate an arbitrary perpendicular vector as a fallback.
 	return projected.normalized() if projected.length() > 0.001 else Vector3(normal.y, normal.z, normal.x).cross(normal).normalized()
+
+func _on_hook_gravity_override_changed(should_override: bool):
+	hook_gravity_override = should_override
 
 #
 # Debugging Utilities
