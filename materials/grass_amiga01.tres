@@ -1,3 +1,6 @@
-[gd_resource type="StandardMaterial3D" format=3 uid="uid://bayqicg78nsh3"]
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bayqicg78nsh3"]
+
+[ext_resource type="Texture2D" uid="uid://lmhbyl6fjaui" path="res://materials/grass_amiga01.png" id="1_uhyrn"]
 
 [resource]
+albedo_texture = ExtResource("1_uhyrn")
