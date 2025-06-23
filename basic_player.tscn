@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cn8ke01qfidw7"]
+[gd_scene load_steps=13 format=3 uid="uid://cn8ke01qfidw7"]
 
 [ext_resource type="Script" uid="uid://cc6qtmjlln3o0" path="res://basic_player.gd" id="1_4ivg5"]
 [ext_resource type="Shader" uid="uid://de2vc7d4gh74w" path="res://Shaders/Outline.gdshader" id="2_ffn7p"]
@@ -36,6 +36,8 @@ shader_parameter/Tiling_Offset = 0.0
 material = SubResource("ShaderMaterial_ffn7p")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4ivg5"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_g6ire"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_skmdc"]
 flip_faces = true
@@ -442,17 +444,21 @@ mesh = SubResource("CapsuleMesh_xv06v")
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="MeshInstance3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="StandingCollision" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_4ivg5")
+
+[node name="SlidingCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("SphereShape3D_g6ire")
 
 [node name="GroundRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 target_position = Vector3(0, -0.15, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 current = true
 fov = 90.0
 
@@ -473,6 +479,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.412216, 0, -0.5)
 script = ExtResource("4_g6ire")
 hook_raycast = NodePath("../CameraPivot/Camera3D/GrappleCast")
 player_body = NodePath("..")
-pull_speed = 50.0
 rope_tension = 1.0
 hook_source = NodePath("../HookRopeStart")
+
+[node name="CrouchCameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)

@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cp74r48rxpi4c"]
+[gd_scene load_steps=6 format=3 uid="uid://cp74r48rxpi4c"]
 
 [ext_resource type="Material" uid="uid://maab2ylaxscv" path="res://Shaders/toon_shaded_objects.tres" id="1_j81u8"]
+[ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="2_c66fx"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_rorap"]
 material = ExtResource("1_j81u8")
@@ -11,7 +12,7 @@ height = 2.0
 radius = 1.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_rorap"]
-radius = 3.0
+radius = 2.0
 
 [node name="Planet3D" type="StaticBody3D"]
 
@@ -26,6 +27,7 @@ gravity_space_override = 3
 gravity_point = true
 gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
+script = ExtResource("2_c66fx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("SphereShape3D_rorap")
