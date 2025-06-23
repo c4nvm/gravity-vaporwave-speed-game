@@ -44,8 +44,8 @@ volumetric_fog_length = 78.87
 volumetric_fog_detail_spread = 0.5
 volumetric_fog_temporal_reprojection_amount = 0.99
 adjustment_enabled = true
-adjustment_contrast = 1.1
-adjustment_saturation = 1.1
+adjustment_contrast = 0.9
+adjustment_saturation = 1.35
 
 [sub_resource type="BoxMesh" id="BoxMesh_dsnr4"]
 size = Vector3(1, 50, 10)
@@ -77,7 +77,8 @@ environment = SubResource("Environment_cnaw2")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world/WorldEnvironment"]
 transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
 light_color = Color(0.81234, 0.73811, 0.693527, 1)
-light_energy = 1.808
+light_energy = 0.5
+light_indirect_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
 
