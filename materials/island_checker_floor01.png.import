@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://k56twu3qdmcc"
-path.s3tc="res://.godot/imported/tile01.png-bd203811679ab36624a047e83858762a.s3tc.ctex"
+uid="uid://c1153fcipxthq"
+path.s3tc="res://.godot/imported/island_checker_floor01.png-e373b673171d5cd24cf86bf03ca05783.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://materials/tile01.png"
-dest_files=["res://.godot/imported/tile01.png-bd203811679ab36624a047e83858762a.s3tc.ctex"]
+source_file="res://materials/island_checker_floor01.png"
+dest_files=["res://.godot/imported/island_checker_floor01.png-e373b673171d5cd24cf86bf03ca05783.s3tc.ctex"]
 
 [params]
 

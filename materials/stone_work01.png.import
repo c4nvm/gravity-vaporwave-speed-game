@@ -2,26 +2,27 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c1153fcipxthq"
-path="res://.godot/imported/island_checker floor.png-19305ec5c0a8ca5cd53c03d6990ba9db.ctex"
+uid="uid://i2mjoy8t5jgk"
+path.s3tc="res://.godot/imported/stone_work01.png-3811687903f611850067da353e0d45d1.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://materials/island_checker floor.png"
-dest_files=["res://.godot/imported/island_checker floor.png-19305ec5c0a8ca5cd53c03d6990ba9db.ctex"]
+source_file="res://materials/stone_work01.png"
+dest_files=["res://.godot/imported/stone_work01.png-3811687903f611850067da353e0d45d1.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
