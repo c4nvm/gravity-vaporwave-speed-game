@@ -35,6 +35,16 @@ player=""
 planets=""
 gravity_fields=""
 
+[importer_defaults]
+
+texture={
+&"compress/mode": 2,
+&"mipmaps/generate": true
+}
+3d_texture={
+&"compress/mode": 2
+}
+
 [input]
 
 move_forward={
