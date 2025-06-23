@@ -18,7 +18,7 @@ sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
 
 [sub_resource type="Environment" id="Environment_cnaw2"]
 background_mode = 2
-background_energy_multiplier = 0.1
+background_energy_multiplier = 0.5
 sky = SubResource("Sky_lf0gk")
 tonemap_mode = 3
 tonemap_exposure = 0.83
@@ -73,6 +73,13 @@ render_target_update_mode = 4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/test world"]
 environment = SubResource("Environment_cnaw2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world/WorldEnvironment"]
+transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
+light_color = Color(0.81234, 0.73811, 0.693527, 1)
+light_energy = 1.808
+light_bake_mode = 1
+shadow_enabled = true
 
 [node name="Planet3D" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
 transform = Transform3D(15, 0, 0, 0, 15, 0, 0, 0, 15, 0, -2, 0)
@@ -164,44 +171,6 @@ transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0
 
 [node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.3987, 4.17434, 2.54632)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world"]
-transform = Transform3D(-0.866024, -0.433016, 0.250001, 0, 0.499998, 0.866026, -0.500003, 0.749999, -0.43301, 0, 0, 0)
-light_energy = 0.5
-light_volumetric_fog_energy = 0.1
-light_specular = 0.2
-shadow_enabled = true
-shadow_blur = 6.0
-
-[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="SubViewport/test world"]
-transform = Transform3D(-0.866025, 0.433013, 0.25, -0.365926, -0.208158, -0.907066, -0.340731, -0.877023, 0.338722, 0, 0, 0)
-light_color = Color(1, 0.729412, 1, 1)
-light_energy = 0.25
-light_volumetric_fog_energy = 0.1
-light_angular_distance = 37.5
-light_specular = 0.2
-shadow_enabled = true
-shadow_blur = 6.0
-
-[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="SubViewport/test world"]
-transform = Transform3D(-0.0570116, 0.524328, -0.849606, 0.0351053, 0.851517, 0.523151, 0.997756, 0, -0.0669531, 0, 0, 0)
-light_color = Color(0.809299, 1, 0.999537, 1)
-light_energy = 0.0
-light_volumetric_fog_energy = 0.1
-light_angular_distance = 6.0
-light_specular = 0.2
-
-[node name="DirectionalLight3D4" type="DirectionalLight3D" parent="SubViewport/test world"]
-transform = Transform3D(0.23017, 0.381387, 0.895302, 0.0259109, -0.92208, 0.386132, 0.972806, -0.0656781, -0.222118, 0, 0, 0)
-light_color = Color(1, 0.894118, 0.415686, 1)
-light_energy = 0.452
-light_volumetric_fog_energy = 0.1
-light_angular_distance = 6.0
-light_specular = 0.2
-
-[node name="OmniLight3D" type="OmniLight3D" parent="SubViewport/test world"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -91.3923, 5.40836, 0)
-omni_range = 12.6279
 
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
