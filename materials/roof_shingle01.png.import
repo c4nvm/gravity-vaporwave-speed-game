@@ -2,26 +2,27 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsw2w0a7icvcj"
-path="res://.godot/imported/column_column.png-6a27fcb67724b4e9df2722b9e5d50262.ctex"
+uid="uid://l8lv0a0sqj45"
+path.s3tc="res://.godot/imported/roof_shingle01.png-d458265cbd63cef150b67bbc8db8ccf8.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://materials/models/column_column.png"
-dest_files=["res://.godot/imported/column_column.png-6a27fcb67724b4e9df2722b9e5d50262.ctex"]
+source_file="res://materials/roof_shingle01.png"
+dest_files=["res://.godot/imported/roof_shingle01.png-d458265cbd63cef150b67bbc8db8ccf8.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

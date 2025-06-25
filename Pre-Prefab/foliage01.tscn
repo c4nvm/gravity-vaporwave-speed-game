@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmssyvh1rsuue"]
+
+[ext_resource type="PackedScene" uid="uid://rn2t0xjmuuaf" path="res://models/foliage01.glb" id="1_1gv5p"]
+
+[node name="Foliage01" type="Node3D"]
+
+[node name="foliage01" parent="." instance=ExtResource("1_1gv5p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0129989, 1.19209e-07, -0.0604017)

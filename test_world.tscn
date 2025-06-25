@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=19 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_uu1iw"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
+[ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -158,7 +159,7 @@ transform = Transform3D(0.117564, -0.279088, 0.953042, 0.901843, 0.431797, 0.015
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.3897, 1.09691, -5.20032)
 
 [node name="column" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
-transform = Transform3D(0.811074, 0, 0.584943, 0, 1, 0, -0.584943, 0, 0.811074, -94.4788, 2.36367, 8.9653)
+transform = Transform3D(0.810591, -0.0171618, 0.58536, 0.00817679, 0.999805, 0.0179896, -0.585554, -0.00979587, 0.810574, -94.4788, 2.36367, 8.9653)
 
 [node name="column2" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
 transform = Transform3D(1.17258, 0.116558, -0.226885, -0.114435, 1.19433, 0.0221424, 0.227963, 0, 1.17815, -91.485, 2.25868, 9.2569)
@@ -203,3 +204,9 @@ render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.6623, 4.262, 19.6736)
+
+[node name="Foliage01" parent="." instance=ExtResource("11_5457m")]
+transform = Transform3D(0.988151, -0.0129468, -0.152937, 0.00573833, 0.998856, -0.0474817, 0.153377, 0.0460414, 0.987095, -90.9745, 4.34573, 8.39316)
+
+[node name="Foliage02" parent="." instance=ExtResource("11_5457m")]
+transform = Transform3D(0.413697, 0, 0.280811, 0, 0.5, 0, -0.280811, 0, 0.413697, -94.5262, 5.08239, 8.03091)
