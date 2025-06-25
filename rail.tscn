@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://c3ccbegxpnbw"]
+
+[sub_resource type="Curve3D" id="Curve3D_3oyug"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_6f37g"]
+radial_segments = 6
+rings = 2
+
+[node name="Rail" type="Path3D" groups=["grind_rails"]]
+curve = SubResource("Curve3D_3oyug")
+
+[node name="RailMesh" type="PathFollow3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RailMesh"]
+mesh = SubResource("CylinderMesh_6f37g")

@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://cfbs2uihp1eol"]
+[gd_scene load_steps=14 format=3 uid="uid://cfbs2uihp1eol"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_wmna3"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="3_ipw6r"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="4_kkg2a"]
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_80vtj"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_p3td8"]
+[ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="8_pqskb"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="9_klw1l"]
 [ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="10_om41v"]
 
@@ -47,6 +48,9 @@ adjustment_contrast = 0.9
 adjustment_saturation = 1.35
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_x1iep"]
+size = Vector3(9.14075, 21.0352, 48.0029)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ff24s"]
 size = Vector3(5, 20, 45.4455)
 
 [node name="SubViewportContainer" type="SubViewportContainer"]
@@ -89,7 +93,7 @@ gravity_space_override = 3
 script = ExtResource("4_kkg2a")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/CSGBox3D/Area3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -0.0969238)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.173889, 9.48242, 1.18178)
 shape = SubResource("BoxShape3D_x1iep")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="SubViewport/test world"]
@@ -105,7 +109,7 @@ script = ExtResource("4_kkg2a")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/CSGBox3D2/Area3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 2.07607)
-shape = SubResource("BoxShape3D_x1iep")
+shape = SubResource("BoxShape3D_ff24s")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="SubViewport/test world"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 2.50813, 1.42956, -27.7039)
@@ -208,3 +212,13 @@ render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 transform = Transform3D(-0.589464, 0, -0.807794, 0, 1, 0, 0.807794, 0, -0.589464, -26.475, 4.262, -41.5188)
+
+[node name="Label" type="Label" parent="SubViewport/CanvasLayer"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_right = 40.0
+offset_bottom = 11.5
+grow_vertical = 2
+script = ExtResource("8_pqskb")

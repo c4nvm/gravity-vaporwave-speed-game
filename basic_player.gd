@@ -1,5 +1,4 @@
-# PlayerController.gd
-# Governs player behavior including movement, camera control, and gravity interaction
+# Complete player controller with movement, gravity, sliding, step climbing, instant vault-boosting, and ledge climbing
 extends CharacterBody3D
 
 #region Configuration
@@ -24,9 +23,25 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var slide_min_speed := 5.0
 @export var slide_friction := 0.1
 @export var slide_downhill_accel := 1.2
-@export var slide_cooldown := 0.5
-@export var crouch_camera_offset := Vector3(0, -0.9, 0)  # How much to lower camera when crouching
-@export var crouch_transition_speed := 5.0  # How fast camera moves to crouch position
+@export var slide_cooldown := 0.1
+@export var crouch_camera_offset := Vector3(0, -0.9, 0)
+@export var crouch_transition_speed := 5.0
+
+@export_group("Vaulting")
+@export var vault_enabled := true
+@export var vault_min_height_from_feet := 0.8
+@export var vault_max_height_from_feet := 1.8
+@export var vault_forward_check_distance := 0.5
+@export var vault_boost_vertical_force := 10.0  # Reduced from 12
+@export var vault_boost_horizontal_force := 6.0  # Reduced from 8
+@export var vault_cooldown := 0.3  # Reduced from 0.5
+@export var vault_min_downward_speed := 2.0  # Added for falling vaults
+
+@export_group("Ledge Climb")
+@export var ledge_climb_enabled := true
+@export var ledge_climb_duration := 0.5
+@export var ledge_climb_cooldown := 0.5
+@export var ledge_climb_min_upward_speed := -1.0
 
 @export_group("Free Space Movement")
 @export var free_space_max_speed := 20.0
@@ -44,6 +59,12 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var transition_curve : Curve
 var transition_timer := 0.0
 var transition_start_velocity := Vector3.ZERO
+
+@export_group("Stair Climbing")
+@export var max_step_up := 0.5
+@export var max_step_down := 0.5
+@export var step_up_debug := false
+@export var step_down_debug := false
 #endregion
 
 #region Nodes
@@ -53,6 +74,9 @@ var transition_start_velocity := Vector3.ZERO
 @onready var ground_ray: RayCast3D = $GroundRay
 @onready var crouch_camera_pivot: Node3D = $CrouchCameraPivot
 @onready var standing_camera_pivot: Node3D = $CameraPivot
+@onready var player_collider: CollisionShape3D = $StandingCollision
+@onready var ledge_detector_ray: RayCast3D = $LedgeDetectorRay
+
 var current_camera_pivot: Node3D
 #endregion
 
@@ -74,143 +98,123 @@ var free_space_roll := 10.0
 var free_space_camera_offset := Vector3.ZERO
 var is_free_space_mode := false
 var is_transitioning := false
-var gravity_field_transition_timer := 0.0
+var gravity_field_transition_timer := 0.1
 const GRAVITY_FIELD_TRANSITION_COOLDOWN := 0.1
 var last_gravity_field = null
 var previous_velocity := Vector3.ZERO
 var current_camera_offset := Vector3.ZERO
 var target_camera_offset := Vector3.ZERO
+var is_grounded := true
+var was_grounded := true
+var wish_dir := Vector3.ZERO
+const vertical := Vector3(0, 1, 0)
+const horizontal := Vector3(1, 0, 1)
+
+var vault_cooldown_timer := 0.0
+var is_climbing := false
+var ledge_climb_cooldown_timer := 0.0
 #endregion
 
-#region Lifecycle Methods
 func _ready():
-	"""Initialize player controller and setup input"""
 	_cache_gravity_fields()
 	_enter_planetary_mode()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	max_look_angle = deg_to_rad(max_look_angle)
-	
-	# Set initial camera pivot
 	current_camera_pivot = standing_camera_pivot
 	camera.reparent(current_camera_pivot)
 	camera.position = Vector3.ZERO
 	current_camera_offset = Vector3.ZERO
 	target_camera_offset = Vector3.ZERO
-	
 	var hook_controller = get_node_or_null("HookController")
 	if hook_controller:
 		hook_controller.gravity_override_changed.connect(_on_hook_gravity_override_changed)
 
 func _input(event):
-	"""Handle mouse input for camera rotation"""
+	if is_climbing: return
+
 	if is_free_space_mode:
-		_handle_free_space_input(event)
+		if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			free_space_rotation.x -= event.relative.y * free_space_mouse_sensitivity
+			free_space_rotation.y -= event.relative.x * free_space_mouse_sensitivity
+			free_space_rotation.x = clamp(free_space_rotation.x, -PI/2, PI/2)
+
+			if Input.is_action_pressed("roll_left"):
+				free_space_roll += free_space_roll_speed * get_process_delta_time()
+			if Input.is_action_pressed("roll_right"):
+				free_space_roll -= free_space_roll_speed * get_process_delta_time()
 	else:
-		_handle_planetary_input(event)
+		if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			rotate(transform.basis.y, -event.relative.x * (mouse_sensitivity/1000))
+			mouse_pitch = clamp(mouse_pitch - event.relative.y * (mouse_sensitivity/1000), -max_look_angle, max_look_angle)
+			current_camera_pivot.rotation.x = mouse_pitch
 
 func _process(delta):
-	"""Handle smooth camera transitions"""
-	# Smoothly interpolate camera position
 	current_camera_offset = current_camera_offset.lerp(
-		target_camera_offset, 
+		target_camera_offset,
 		crouch_transition_speed * delta
 	)
-	
-	# Apply the offset to the camera
 	camera.position = current_camera_offset
 
 func _physics_process(delta):
-	"""Main physics processing loop"""
+	if is_climbing:
+		return
+
+	_pre_physics_process()
 	_update_transition(delta)
 	previous_velocity = velocity
-	
 	_update_nearest_gravity_field()
 	
+	if vault_cooldown_timer > 0:
+		vault_cooldown_timer -= delta
+	if ledge_climb_cooldown_timer > 0:
+		ledge_climb_cooldown_timer -= delta
+
 	if should_switch_modes() and not is_transitioning:
 		_switch_movement_mode(nearest_gravity_field == null)
-	
+
 	if is_free_space_mode:
 		_handle_free_space_movement(delta)
 	else:
 		_handle_planetary_movement(delta)
-	
+
+	wish_dir = Vector3(velocity.x, 0, velocity.z).normalized()
+
+	if not is_free_space_mode:
+		_stair_step_up()
+
 	move_and_slide()
+
+	_handle_vaulting()
+	_handle_ledge_climb()
+
+	if not is_free_space_mode:
+		_stair_step_down()
+
 	_update_debug_print(delta)
-#endregion
 
-#region Input Handling
-func _handle_free_space_input(event):
-	"""Handle free space movement input"""
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		free_space_rotation.x -= event.relative.y * free_space_mouse_sensitivity
-		free_space_rotation.y -= event.relative.x * free_space_mouse_sensitivity
-		free_space_rotation.x = clamp(free_space_rotation.x, -PI/2, PI/2)
-		
-		if Input.is_action_pressed("roll_left"):
-			free_space_roll += free_space_roll_speed * get_process_delta_time()
-		if Input.is_action_pressed("roll_right"):
-			free_space_roll -= free_space_roll_speed * get_process_delta_time()
+func _pre_physics_process():
+	if player_collider:
+		player_collider.global_rotation = Vector3.ZERO
 
-func _handle_planetary_input(event):
-	"""Handle planetary movement input"""
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate(transform.basis.y, -event.relative.x * (mouse_sensitivity/1000))
-		mouse_pitch = clamp(mouse_pitch - event.relative.y * (mouse_sensitivity/1000), -max_look_angle, max_look_angle)
-		current_camera_pivot.rotation.x = mouse_pitch
-#endregion
-
-#region Movement Modes
-func _handle_planetary_movement(delta):
-	"""Handle movement when under planetary gravity with transition preparation"""
-	if not Input.is_action_pressed("slide"):
-		_end_slide()
-	
-	_update_gravity()
-	_apply_gravity(delta)
-	
-	# Store pre-movement velocity for transition
-	var pre_movement_velocity = velocity
-	
-	_handle_movement(delta)
-	_align_with_surface(delta)
-	
-	# If we detect we're about to leave gravity, blend the velocity
-	if is_on_planet and not direction_ray.is_colliding() and not ground_ray.is_colliding():
-		var blend_factor = clamp(
-			1.0 - global_position.distance_to(nearest_gravity_field.global_position) / nearest_gravity_field.gravity_radius,
-			0.0,
-			1.0
-		)
-		velocity = velocity.lerp(pre_movement_velocity, blend_factor)
-	
-	if slide_enabled:
-		_handle_slide(delta)
+	was_grounded = is_grounded
+	is_grounded = is_on_floor()
 
 func _handle_free_space_movement(delta):
-	"""Handle movement in free space (zero gravity)"""
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	var vertical_input := Input.get_action_strength("jump") - Input.get_action_strength("slide")
 	
 	var move_dir = Vector3(input_dir.x, vertical_input, -input_dir.y).normalized()
 	var target_velocity = move_dir * free_space_max_speed
 	
-	# Only apply normal movement if not being pulled by hook
 	var hook_controller = get_node_or_null("HookController")
 	var is_hook_pulling = hook_controller and hook_controller.is_hook_active() and hook_controller.current_state == HookController.HookState.ATTACHED
 	
 	if is_hook_pulling:
-		# Get hook pull direction and strength from hook controller
 		var hook_pull = hook_controller.get_hook_pull_vector(delta)
-		
-		# Apply hook pull directly to velocity
 		velocity += hook_pull
-		
-		# Still allow some limited movement while being pulled
 		free_space_velocity = free_space_velocity.lerp(target_velocity * 0.3, free_space_acceleration * delta)
 	else:
-		# Normal free space movement
 		free_space_velocity = free_space_velocity.lerp(target_velocity, free_space_acceleration * delta)
-		
 		if move_dir.length_squared() < 0.1:
 			free_space_velocity = free_space_velocity.lerp(Vector3.ZERO, free_space_deceleration * delta)
 	
@@ -221,134 +225,40 @@ func _handle_free_space_movement(delta):
 	target_basis = target_basis.rotated(Vector3.UP, free_space_rotation.y)
 	target_basis = target_basis.rotated(Vector3.BACK, free_space_roll)
 	
-	transform.basis = transform.basis.slerp(target_basis, free_space_rotation_speed * delta)
+	transform.basis = transform.basis.slerp(target_basis, free_space_rotation_speed * delta).orthonormalized()
 	free_space_roll *= free_space_roll_decay
 	
 	_update_free_space_camera(input_dir, vertical_input, delta)
 	
-	# Combine hook pull (if any) with player input
 	if is_hook_pulling:
 		velocity += transform.basis * free_space_velocity
 	else:
 		velocity = transform.basis * free_space_velocity
 
-func _switch_movement_mode(free_space: bool):
-	"""Transition between planetary and free space movement modes with smoothing"""
-	if is_free_space_mode == free_space:
-		return
-		
-	is_transitioning = true
-	transition_timer = 0.0
-	transition_start_velocity = velocity
-	
-	# Start transition
-	await get_tree().create_timer(transition_duration).timeout
-	is_free_space_mode = free_space
-	
-	if free_space:
-		_enter_free_space_mode()
-	else:
-		_enter_planetary_mode()
-	
-	is_transitioning = false
+func _handle_planetary_movement(delta):
+	if not Input.is_action_pressed("slide"):
+		_end_slide()
 
-func _update_transition(delta):
-	"""Handle smooth transition between modes"""
-	if not is_transitioning:
-		return
-		
-	transition_timer += delta
-	var t = min(transition_timer / transition_duration, 1.0)
-	var weight = transition_curve.sample(t) if transition_curve else t
-	
-	if is_free_space_mode:
-		# Transitioning to free space - blend velocity
-		var target_velocity = transform.basis * free_space_velocity
-		velocity = transition_start_velocity.lerp(target_velocity, weight)
-	else:
-		# Transitioning to planetary - blend velocity while maintaining up direction
-		var up_component = velocity.project(up_direction)
-		var horizontal_velocity = velocity - up_component
-		velocity = transition_start_velocity.lerp(horizontal_velocity + up_component, weight)
-#endregion
+	_update_gravity()
+	_apply_gravity(delta)
 
-#region Gravity Handling
-func _cache_gravity_fields():
-	"""Find and cache all gravity fields in the scene"""
-	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
-	if gravity_fields.size() > 0:
-		nearest_gravity_field = gravity_fields[0]
-		is_on_planet = true
-		floor_max_angle = deg_to_rad(MAX_SLOPE_ANGLE)
+	var pre_movement_velocity = velocity
 
-func _update_nearest_gravity_field():
-	"""Determine the nearest/strongest gravity field affecting the player"""
-	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
-	if gravity_fields.is_empty():
-		is_on_planet = false
-		nearest_gravity_field = null
-		last_gravity_field = null  # Clear last field when no fields exist
-		return
-	
-	gravity_field_transition_timer -= get_process_delta_time()
-	var candidate_fields = _get_valid_gravity_fields()
-	
-	if candidate_fields.is_empty():
-		is_on_planet = false
-		nearest_gravity_field = null
-		return
-	
-	candidate_fields.sort_custom(_sort_gravity_fields)
-	var best_candidate = candidate_fields[0].field
-	
-	if _should_switch_gravity_field(best_candidate):
-		last_gravity_field = nearest_gravity_field
-		nearest_gravity_field = best_candidate
-		gravity_field_transition_timer = GRAVITY_FIELD_TRANSITION_COOLDOWN
-		_update_gravity()
-	
-	# Clear last gravity field if we're not actually transitioning
-	if nearest_gravity_field == last_gravity_field:
-		last_gravity_field = null
-	
-	is_on_planet = nearest_gravity_field != null
+	_handle_movement(delta)
+	_align_with_surface(delta)
 
-func _update_gravity():
-	"""Update gravity direction based on nearest gravity field"""
-	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
-		gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized() if nearest_gravity_field.gravity_point else nearest_gravity_field.gravity_direction
-		self.up_direction = -gravity_direction
+	if is_on_planet and not direction_ray.is_colliding() and not ground_ray.is_colliding():
+		var blend_factor = clamp(
+			1.0 - global_position.distance_to(nearest_gravity_field.global_position) / nearest_gravity_field.gravity_radius,
+			0.0,
+			1.0
+		)
+		velocity = velocity.lerp(pre_movement_velocity, blend_factor)
 
-func _apply_gravity(delta):
-	"""Apply gravity force to player"""
-	if is_free_space_mode or nearest_gravity_field == null:
-		return
-	
-	if nearest_gravity_field.is_directional and not nearest_gravity_field.is_body_inside(self):
-		_update_nearest_gravity_field()
-		return
-	
-	var gravity_multiplier = 1
-	if is_sliding: 
-		gravity_multiplier = 1
-	elif not _is_going_uphill():
-		gravity_multiplier = 1
-	elif ground_ray.is_colliding():
-		gravity_multiplier = 1
-	elif not Input.is_action_just_pressed("jump"):
-		gravity_multiplier = 1
-	elif not hook_gravity_override:
-		gravity_multiplier = 0.0
-	else: 
-		gravity_multiplier = 3.0
-	
-	if not is_on_floor():
-		velocity += gravity_direction * gravity * gravity_multiplier * delta
-#endregion
+	if slide_enabled:
+		_handle_slide(delta)
 
-#region Planetary Movement
 func _handle_movement(delta):
-	"""Handle standard planetary movement"""
 	if is_sliding:
 		return
 	
@@ -380,7 +290,6 @@ func _handle_movement(delta):
 			velocity += -transform.basis.y * jump_force * 0.5
 
 func _align_with_surface(delta: float):
-	"""Align player with planetary surface"""
 	if not is_on_planet or not is_instance_valid(nearest_gravity_field):
 		return
 
@@ -391,58 +300,43 @@ func _align_with_surface(delta: float):
 	transform.basis = transform.basis.slerp(Basis(rot) * transform.basis, gravity_smoothness * delta).orthonormalized()
 
 func _safe_project(vector: Vector3, normal: Vector3) -> Vector3:
-	"""Safely project vector onto plane defined by normal"""
 	var projected = vector - vector.project(normal)
 	return projected.normalized() if projected.length() > 0.001 else Vector3(normal.y, normal.z, normal.x).cross(normal).normalized()
-#endregion
 
-#region Slide Mechanics
 func _start_slide():
-	"""Begin sliding movement"""
-	if not slide_enabled or is_sliding or velocity.length() < slide_enter_speed:
+	if not $SlideRay.is_colliding():
 		return
 	
 	is_sliding = true
 	slide_cooldown_timer = 0.0
 	$StandingCollision.disabled = true
-	$SlidingCollision.disabled = false
-	
-	# Set target camera offset for crouch position
+	$SlidingCollision.disabled = true
 	target_camera_offset = crouch_camera_offset
 
 func _end_slide(force_reset: bool = false):
-	"""End sliding movement"""
 	if not is_sliding and not force_reset:
 		return
 	
 	is_sliding = false
 	$StandingCollision.disabled = false
 	$SlidingCollision.disabled = true
-	
-	# Reset camera offset to standing position
 	target_camera_offset = Vector3.ZERO
 
 func _handle_slide(delta):
-	"""Handle sliding physics and state"""
 	if slide_cooldown_timer < slide_cooldown:
 		slide_cooldown_timer += delta
 	
-	if is_sliding and not Input.is_action_pressed("slide") and is_on_floor() and velocity.length() < slide_min_speed:
+	if is_sliding and not Input.is_action_pressed("slide"):
 		_end_slide()
 	
-	if (Input.is_action_just_pressed("slide") and is_on_floor() 
+	if (Input.is_action_just_pressed("slide") and $SlideRay.is_colliding()
 		and velocity.length() >= slide_enter_speed and slide_cooldown_timer >= slide_cooldown):
 		_start_slide()
 	
 	if is_sliding:
 		_apply_slide_physics(delta)
 
-func _is_going_uphill() -> bool:
-	"""Check if player is sliding uphill"""
-	return is_on_floor() and is_sliding and -get_floor_normal().slide(gravity_direction).normalized().dot(velocity.normalized()) > 0.1
-
 func _apply_slide_physics(delta):
-	"""Apply physics during sliding"""
 	var slope_normal = get_floor_normal()
 	if slope_normal != Vector3.ZERO and gravity_direction != Vector3.ZERO:
 		var slope_dir = -slope_normal.slide(gravity_direction)
@@ -452,48 +346,14 @@ func _apply_slide_physics(delta):
 			var horizontal_vel = velocity.slide(gravity_direction)
 			var vertical_vel = velocity.project(gravity_direction)
 			
-			if slope_dir.dot(horizontal_vel.normalized()) > 0.1: # Moving uphill
+			if slope_dir.dot(horizontal_vel.normalized()) > 0.1:
 				horizontal_vel = horizontal_vel.lerp(Vector3.ZERO, slide_friction * delta)
 			else:
 				horizontal_vel += slope_dir * slide_downhill_accel * delta
 			
 			velocity = horizontal_vel + vertical_vel
-#endregion
-
-#region Helper Functions
-func should_switch_modes() -> bool:
-	"""Determine if we should switch between movement modes"""
-	return (nearest_gravity_field == null) != is_free_space_mode
-
-func _enter_free_space_mode():
-	"""Initialize free space mode with momentum preservation"""
-	# Preserve the exact velocity from planetary mode, just convert to world space
-	free_space_velocity = previous_velocity
-	
-	# Convert the velocity direction to be relative to the player's new orientation
-	var speed = previous_velocity.length()
-	if speed > 0:
-		var local_dir = transform.basis.inverse() * previous_velocity.normalized()
-		free_space_velocity = local_dir * speed
-	
-	# Smooth rotation transition
-	free_space_rotation = Vector3(camera_pivot.rotation.x, rotation.y, 0)
-	free_space_roll = 0
-	free_space_camera_offset = Vector3.ZERO
-	is_sliding = false
-	camera_pivot.rotation.z = 0.0
-
-func _enter_planetary_mode():
-	"""Initialize planetary mode"""
-	camera.position = Vector3.ZERO
-	free_space_camera_offset = Vector3.ZERO
-	mouse_pitch = camera_pivot.rotation.x
-	free_space_rotation = Vector3.ZERO
-	free_space_roll = 0.0
-	free_space_velocity = Vector3.ZERO
 
 func _update_free_space_camera(input_dir: Vector2, vertical_input: float, delta: float):
-	"""Update camera position in free space mode"""
 	var camera_target_position = Vector3.ZERO
 	if abs(vertical_input) > 0.1:
 		camera_target_position.y = vertical_input * 0.5
@@ -505,8 +365,99 @@ func _update_free_space_camera(input_dir: Vector2, vertical_input: float, delta:
 	free_space_camera_offset = free_space_camera_offset.lerp(camera_target_position, free_space_camera_lerp_speed * delta)
 	camera.position = free_space_camera_offset
 
+func _switch_movement_mode(free_space: bool):
+	if is_free_space_mode == free_space:
+		return
+		
+	is_transitioning = true
+	transition_timer = 0.0
+	transition_start_velocity = velocity
+	
+	await get_tree().create_timer(transition_duration).timeout
+	is_free_space_mode = free_space
+	
+	if free_space:
+		_enter_free_space_mode()
+	else:
+		_enter_planetary_mode()
+	
+	is_transitioning = false
+
+func _enter_free_space_mode():
+	free_space_velocity = previous_velocity
+	var speed = previous_velocity.length()
+	if speed > 0:
+		var local_dir = transform.basis.inverse() * previous_velocity.normalized()
+		free_space_velocity = local_dir * speed
+	
+	free_space_rotation = Vector3(camera_pivot.rotation.x, rotation.y, 0)
+	free_space_roll = 0
+	free_space_camera_offset = Vector3.ZERO
+	is_sliding = false
+	camera_pivot.rotation.z = 0.0
+
+func _enter_planetary_mode():
+	camera.position = Vector3.ZERO
+	free_space_camera_offset = Vector3.ZERO
+	mouse_pitch = camera_pivot.rotation.x
+	free_space_rotation = Vector3.ZERO
+	free_space_roll = 0.0
+	free_space_velocity = Vector3.ZERO
+
+func _update_transition(delta):
+	if not is_transitioning:
+		return
+		
+	transition_timer += delta
+	var t = min(transition_timer / transition_duration, 1.0)
+	var weight = transition_curve.sample(t) if transition_curve else t
+	
+	if is_free_space_mode:
+		var target_velocity = transform.basis * free_space_velocity
+		velocity = transition_start_velocity.lerp(target_velocity, weight)
+	else:
+		var up_component = velocity.project(up_direction)
+		var horizontal_velocity = velocity - up_component
+		velocity = transition_start_velocity.lerp(horizontal_velocity + up_component, weight)
+
+func _cache_gravity_fields():
+	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
+	if gravity_fields.size() > 0:
+		nearest_gravity_field = gravity_fields[0]
+		is_on_planet = true
+		floor_max_angle = deg_to_rad(MAX_SLOPE_ANGLE)
+
+func _update_nearest_gravity_field():
+	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
+	if gravity_fields.is_empty():
+		is_on_planet = false
+		nearest_gravity_field = null
+		last_gravity_field = null
+		return
+	
+	gravity_field_transition_timer -= get_process_delta_time()
+	var candidate_fields = _get_valid_gravity_fields()
+	
+	if candidate_fields.is_empty():
+		is_on_planet = false
+		nearest_gravity_field = null
+		return
+	
+	candidate_fields.sort_custom(_sort_gravity_fields)
+	var best_candidate = candidate_fields[0].field
+	
+	if _should_switch_gravity_field(best_candidate):
+		last_gravity_field = nearest_gravity_field
+		nearest_gravity_field = best_candidate
+		gravity_field_transition_timer = GRAVITY_FIELD_TRANSITION_COOLDOWN
+		_update_gravity()
+	
+	if nearest_gravity_field == last_gravity_field:
+		last_gravity_field = null
+	
+	is_on_planet = nearest_gravity_field != null
+
 func _get_valid_gravity_fields() -> Array:
-	"""Get array of valid gravity fields affecting player"""
 	var candidate_fields := []
 	var current_priority = nearest_gravity_field.priority if nearest_gravity_field else -1
 	
@@ -528,7 +479,6 @@ func _get_valid_gravity_fields() -> Array:
 	return candidate_fields
 
 func _sort_gravity_fields(a, b) -> bool:
-	"""Custom sort function for gravity fields"""
 	if a.priority != b.priority:
 		return a.priority > b.priority
 		
@@ -544,49 +494,255 @@ func _sort_gravity_fields(a, b) -> bool:
 		return a.strength > b.strength if a.field.is_directional else a.distance < b.distance
 
 func _should_switch_gravity_field(new_field) -> bool:
-	"""Determine if we should switch to a new gravity field"""
-	# If we're not currently in any field, accept any valid new field
 	if nearest_gravity_field == null:
 		return true
 		
-	# If the new field has higher priority, always switch
 	if new_field.priority > nearest_gravity_field.priority:
 		return true
 		
-	return (gravity_field_transition_timer <= 0 and 
-			(new_field != nearest_gravity_field or 
-			 not nearest_gravity_field.is_body_inside(self)))
+	return (gravity_field_transition_timer <= 0 and
+			(new_field != nearest_gravity_field or
+				not nearest_gravity_field.is_body_inside(self)))
+
+func _update_gravity():
+	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
+		gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized() if nearest_gravity_field.gravity_point else nearest_gravity_field.gravity_direction
+		self.up_direction = -gravity_direction
+
+func _apply_gravity(delta):
+	if is_free_space_mode or nearest_gravity_field == null:
+		return
+	
+	if nearest_gravity_field.is_directional and not nearest_gravity_field.is_body_inside(self):
+		_update_nearest_gravity_field()
+		return
+	
+	var gravity_multiplier = 1
+	if is_sliding:
+		gravity_multiplier = 1
+	elif not _is_going_uphill():
+		gravity_multiplier = 1
+	elif ground_ray.is_colliding():
+		gravity_multiplier = 1
+	elif not Input.is_action_just_pressed("jump"):
+		gravity_multiplier = 1
+	elif not hook_gravity_override:
+		gravity_multiplier = 0.0
+	else:
+		gravity_multiplier = 3.0
+	
+	if not is_on_floor():
+		velocity += gravity_direction * gravity * gravity_multiplier * delta
+
+func _is_going_uphill() -> bool:
+	return is_on_floor() and is_sliding and -get_floor_normal().slide(gravity_direction).normalized().dot(velocity.normalized()) > 0.1
+
+func should_switch_modes() -> bool:
+	return (nearest_gravity_field == null) != is_free_space_mode
 
 func _on_hook_gravity_override_changed(should_override: bool):
-	"""Handle hook gravity override changes"""
 	hook_gravity_override = should_override
 
 func _update_debug_print(delta):
-	"""Update debug information display"""
 	debug_timer += delta
 	if debug_timer >= DEBUG_PRINT_INTERVAL:
 		debug_timer = 0.0
-		_print_input_debug()
 
-func _print_input_debug():
-	"""Print debug information to console"""
-	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+func _stair_step_down():
+	if is_free_space_mode or not is_grounded:
+		return
+
+	if velocity.y <= 0 and was_grounded:
+		var body_test_result = PhysicsTestMotionResult3D.new()
+		var body_test_params = PhysicsTestMotionParameters3D.new()
+		body_test_params.from = self.global_transform
+		body_test_params.motion = Vector3(0, -max_step_down, 0)
+		if PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result):
+			position.y += body_test_result.get_travel().y
+			apply_floor_snap()
+			is_grounded = true
+
+func _stair_step_up():
+	if is_free_space_mode or wish_dir == Vector3.ZERO or velocity.y > 0:
+		return
+
+	var body_test_params = PhysicsTestMotionParameters3D.new()
+	var body_test_result = PhysicsTestMotionResult3D.new()
+	var test_transform = global_transform
+	var distance = wish_dir * 0.1
+	body_test_params.from = self.global_transform
+	body_test_params.motion = distance
+	if !PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result):
+		return
+	var remainder = body_test_result.get_remainder()
+	test_transform = test_transform.translated(body_test_result.get_travel())
+	var step_up = max_step_up * vertical
+	body_test_params.from = test_transform
+	body_test_params.motion = step_up
+	PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result)
+	test_transform = test_transform.translated(body_test_result.get_travel())
+	body_test_params.from = test_transform
+	body_test_params.motion = remainder
+	PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result)
+	test_transform = test_transform.translated(body_test_result.get_travel())
+	if body_test_result.get_collision_count() != 0:
+		remainder = body_test_result.get_remainder().length()
+		var wall_normal = body_test_result.get_collision_normal()
+		var dot_div_mag = wish_dir.dot(wall_normal) / (wall_normal * wall_normal).length()
+		var projected_vector = (wish_dir - dot_div_mag * wall_normal).normalized()
+		body_test_params.from = test_transform
+		body_test_params.motion = remainder * projected_vector
+		PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result)
+		test_transform = test_transform.translated(body_test_result.get_travel())
+	body_test_params.from = test_transform
+	body_test_params.motion = max_step_up * -vertical
+	if !PhysicsServer3D.body_test_motion(self.get_rid(), body_test_params, body_test_result):
+		return
+	test_transform = test_transform.translated(body_test_result.get_travel())
+	var surface_normal = body_test_result.get_collision_normal()
+	if (snappedf(surface_normal.angle_to(vertical), 0.001) > deg_to_rad(MAX_SLOPE_ANGLE)):
+		return
+	var global_pos = global_position
+	var step_up_dist = test_transform.origin.y - global_pos.y
+	velocity.y = 0
+	global_pos.y = test_transform.origin.y
+	global_position = global_pos
+
+func _handle_vaulting():
+	if not vault_enabled or is_on_floor() or vault_cooldown_timer > 0:
+		return
+
+	# Allow vaulting when either moving forward OR falling fast enough
+	var forward_velocity_component = velocity.dot(-transform.basis.z)
+	var downward_velocity = velocity.dot(gravity_direction)
+	if forward_velocity_component < 1.0 and downward_velocity < vault_min_downward_speed:
+		return
+
+	for i in range(get_slide_collision_count()):
+		var collision = get_slide_collision(i)
+		if collision:
+			var angle_with_gravity = collision.get_normal().angle_to(-gravity_direction)
+			if rad_to_deg(angle_with_gravity) > 80:
+				if _check_and_perform_vault(collision):
+					break
+
+func _check_and_perform_vault(collision: KinematicCollision3D) -> bool:
+	var world_space = get_world_3d().direct_space_state
+	var wall_normal = collision.get_normal()
+	var player_center = global_position
+	var player_height = player_collider.shape.height
 	
-	var debug_str := "--- Player Debug Information ---\n"
-	debug_str += "[Input]\n"
-	debug_str += "  Forward: %+.2f\n" % input_dir.y
-	debug_str += "  Strafe: %+.2f\n" % input_dir.x
-	debug_str += "\n[State]\n"
-	debug_str += "  Is Grounded: %s\n" % str(is_on_floor())
-	debug_str += "  Velocity: %s (Magnitude: %.2f)\n" % [str(velocity.normalized()), velocity.length()]
+	# First check if we're falling onto a ledge from above
+	var downward_velocity = velocity.dot(gravity_direction)
+	if downward_velocity > vault_min_downward_speed:
+		var down_ray_start = global_position
+		var down_ray_end = down_ray_start + gravity_direction * (vault_max_height_from_feet + 0.5)
+		var down_query = PhysicsRayQueryParameters3D.create(down_ray_start, down_ray_end)
+		down_query.exclude = [self.get_rid()]
+		var floor_hit = world_space.intersect_ray(down_query)
+		if floor_hit and (floor_hit.position.y > global_position.y - vault_max_height_from_feet):
+			_perform_vault(wall_normal)
+			return true
+
+	# Original ledge check for forward vaulting
+	var ray_start_vertical_offset = -gravity_direction * (vault_max_height_from_feet - (player_height / 2.0))
+	var ray_start_horizontal_offset = -wall_normal * vault_forward_check_distance
+	var ray_start = player_center + ray_start_vertical_offset + ray_start_horizontal_offset
+	var ray_length = (vault_max_height_from_feet - vault_min_height_from_feet) + 0.2
+	var ray_end = ray_start + gravity_direction * ray_length
+	var query_params = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+	query_params.exclude = [self.get_rid()]
+	query_params.hit_from_inside = true
+	var ledge_result = world_space.intersect_ray(query_params)
+	if not ledge_result: return false
 	
-	if is_on_planet and nearest_gravity_field and is_instance_valid(nearest_gravity_field):
-		debug_str += "  Current Gravity Field: %s\n" % nearest_gravity_field.name
-		debug_str += "  Gravity Direction: %s\n" % str(gravity_direction.normalized())
+	var landing_spot = ledge_result.position
+	var clearance_check_start = landing_spot - gravity_direction * 0.05
+	var clearance_check_end = clearance_check_start + -gravity_direction * (player_height + 0.1)
+	var clearance_query = PhysicsRayQueryParameters3D.create(clearance_check_start, clearance_check_end)
+	clearance_query.exclude = [self.get_rid()]
+	if world_space.intersect_ray(clearance_query): return false
+
+	_perform_vault(wall_normal)
+	return true
+
+func _perform_vault(wall_normal: Vector3):
+	# Preserve more natural momentum
+	var vertical_vel = velocity.project(gravity_direction)
+	var horizontal_vel = velocity - vertical_vel
 	
-	debug_str += "  Forward Direction: %s\n" % str(-global_transform.basis.z.normalized())
-	debug_str += "  Total Gravity Fields: %d\n" % gravity_fields.size()
-	debug_str += "--------------------------------\n"
+	# Only remove velocity going INTO the wall, keep parallel motion
+	var into_wall_vel = horizontal_vel.project(wall_normal)
+	var preserved_vel = horizontal_vel - into_wall_vel * 0.8  # Only partially cancel wall-ward velocity
 	
-	print(debug_str)
-#endregion
+	# Apply boosts while maintaining more natural movement
+	var upward_boost = -gravity_direction * vault_boost_vertical_force
+	var outward_boost = wall_normal * vault_boost_horizontal_force * 0.5  # Reduced outward force
+	
+	velocity = preserved_vel * 1.2 + upward_boost + outward_boost  # Slight speed boost
+	
+	vault_cooldown_timer = vault_cooldown
+
+func _handle_ledge_climb():
+	if not ledge_climb_enabled or is_on_floor() or is_climbing or ledge_climb_cooldown_timer > 0: 
+		return
+	if velocity.dot(-gravity_direction) < ledge_climb_min_upward_speed: 
+		return
+		
+	if ledge_detector_ray.is_colliding():
+		var point = ledge_detector_ray.get_collision_point()
+		var normal = ledge_detector_ray.get_collision_normal()
+		_check_and_perform_climb(point, normal)
+
+func _check_and_perform_climb(wall_point: Vector3, wall_normal: Vector3):
+	var world_space = get_world_3d().direct_space_state
+	var player_height = player_collider.shape.height
+	
+	var ray_start = wall_point - wall_normal * 0.1 + (-gravity_direction * 0.3)
+	var ray_end = ray_start + gravity_direction * 0.5
+	var query_params = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+	query_params.exclude = [self.get_rid()]
+	query_params.hit_from_inside = true
+	var ledge_result = world_space.intersect_ray(query_params)
+	if not ledge_result: 
+		return
+
+	var landing_spot = ledge_result.position
+	var landing_normal = ledge_result.normal
+
+	if landing_normal.dot(-gravity_direction) < cos(deg_to_rad(MAX_SLOPE_ANGLE)): 
+		return
+		
+	var ceiling_check_start = landing_spot - gravity_direction * 0.05
+	var ceiling_check_end = ceiling_check_start + -gravity_direction * (player_height + 0.1)
+	var ceiling_query = PhysicsRayQueryParameters3D.create(ceiling_check_start, ceiling_check_end)
+	ceiling_query.exclude = [self.get_rid()]
+	if world_space.intersect_ray(ceiling_query): 
+		return
+
+	_perform_climb(landing_spot, wall_normal)
+
+func _perform_climb(landing_position: Vector3, wall_normal: Vector3):
+	if is_climbing: 
+		return
+
+	is_climbing = true
+	velocity = Vector3.ZERO
+	var player_height = player_collider.shape.height
+	var player_radius = player_collider.shape.radius if player_collider.shape is CapsuleShape3D else 0.5
+	
+	var hang_pos = landing_position + wall_normal * player_radius + gravity_direction * (player_height / 2.0 - 0.2)
+	var final_pos = landing_position + (-gravity_direction * (player_height / 2.0 + 0.05))
+
+	var tween = create_tween()
+	tween.set_parallel(false)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(self, "global_position", hang_pos, ledge_climb_duration * 0.4).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "global_position", final_pos, ledge_climb_duration * 0.6).set_ease(Tween.EASE_IN_OUT)
+	
+	await tween.finished
+
+	is_climbing = false
+	ledge_climb_cooldown_timer = ledge_climb_cooldown
+	is_grounded = true
+	was_grounded = true

@@ -429,19 +429,45 @@ shader_parameter/grazing_fresnel_power = 5.0
 shader_parameter/grazing_angle_mask_power = 1.0
 shader_parameter/grazing_angle_modulation_factor = 50.0
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Chase Beck" type="CharacterBody3D"]
 floor_max_angle = 0.698132
 script = ExtResource("1_4ivg5")
 speed = 15.0
+jump_force = null
+gravity = null
+acceleration = null
+deceleration = null
+terminal_velocity = null
+fall_lerp_weight = null
+mouse_sensitivity = null
+max_look_angle = null
+gravity_smoothness = null
+slide_enabled = null
+slide_enter_speed = null
+slide_min_speed = null
+slide_friction = null
+slide_downhill_accel = null
+slide_cooldown = null
+crouch_camera_offset = null
 crouch_transition_speed = 10.0
-metadata/_custom_type_script = "uid://cbmve0x5cmfgg"
+free_space_max_speed = null
+free_space_acceleration = null
+free_space_deceleration = null
+free_space_rotation_speed = null
+free_space_momentum_gain = null
+free_space_mouse_sensitivity = null
+free_space_camera_lerp_speed = null
+free_space_roll_speed = null
+free_space_roll_decay = null
+transition_duration = null
+max_step_height = null
+step_boost_multiplier = null
+step_ray_length = null
 
 [node name="DirectionRay" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 target_position = Vector3(0, 0, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 visible = false
 cast_shadow = 0
 mesh = SubResource("CapsuleMesh_xv06v")
@@ -449,22 +475,21 @@ mesh = SubResource("CapsuleMesh_xv06v")
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="MeshInstance3D"]
 
 [node name="StandingCollision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_4ivg5")
 
 [node name="SlidingCollision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("SphereShape3D_g6ire")
 
 [node name="GroundRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 target_position = Vector3(0, -0.15, 0)
 
 [node name="SlideRay" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 target_position = Vector3(0, -1.5, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 current = true
@@ -481,7 +506,7 @@ target_position = Vector3(0, 0, -25)
 debug_shape_custom_color = Color(0, 0.627451, 0, 1)
 
 [node name="HookRopeStart" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.412216, 1, -0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.412216, 0, -0.5)
 
 [node name="HookController" type="Node" parent="." node_paths=PackedStringArray("hook_raycast", "player_body", "hook_source")]
 script = ExtResource("4_g6ire")
@@ -491,8 +516,16 @@ rope_tension = 1.0
 hook_source = NodePath("../HookRopeStart")
 
 [node name="CrouchCameraPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
 
-[node name="LedgeDetectorRay" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-target_position = Vector3(0, 0.6, -0.6)
+[node name="StepRayFront" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+target_position = Vector3(0, 0, -0.75)
+
+[node name="StepRayMid" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, 0)
+target_position = Vector3(0, 0, -0.75)
+
+[node name="StepRayTop" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+target_position = Vector3(0, 0, -0.75)

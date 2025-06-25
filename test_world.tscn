@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=20 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -60,7 +60,10 @@ points = PackedVector3Array(5, 25, 2.5, -0.5, 25, 2.5, 5, -25, 2.5, 5, 25, -2.5,
 points = PackedVector3Array(0.5, 25, 2.5, -0.5, 25, 2.5, 0.5, -25, 2.5, 0.5, 25, -2.5, -0.5, 25, -2.5, -0.5, -25, 2.5, 0.5, -25, -2.5, -0.5, -25, -2.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cnaw2"]
-size = Vector3(3.03151, 2.43126, 3.66815)
+size = Vector3(3.58363, 2.43126, 3.66815)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5457m"]
+size = Vector3(19.6182, 19.1631, 24.1017)
 
 [node name="SubViewportContainer" type="SubViewportContainer"]
 offset_right = 1920.0
@@ -149,7 +152,7 @@ gravity_space_override = 3
 script = ExtResource("4_ud3vi")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/island/Area3D"]
-transform = Transform3D(1.95989, 0, 2.91323e-13, 0, 1.95989, 0, -2.91323e-13, 0, 1.95989, -0.113197, 2.56334, -0.275953)
+transform = Transform3D(1.95988, 0, 2.98428e-13, 0, 1.95988, 0, -2.98428e-13, 0, 1.95988, 0.427846, 2.56334, -0.275953)
 shape = SubResource("BoxShape3D_cnaw2")
 
 [node name="column3" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
@@ -179,6 +182,27 @@ transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0
 [node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.3987, 4.17434, 2.54632)
 
+[node name="Foliage01" parent="SubViewport/test world" instance=ExtResource("11_5457m")]
+transform = Transform3D(0.988151, -0.0129468, -0.152937, 0.00573833, 0.998856, -0.0474817, 0.153377, 0.0460414, 0.987095, -90.9745, 4.34573, 8.39316)
+
+[node name="Foliage02" parent="SubViewport/test world" instance=ExtResource("11_5457m")]
+transform = Transform3D(0.413697, 0, 0.280811, 0, 0.5, 0, -0.280811, 0, 0.413697, -94.5262, 5.08239, 8.03091)
+
+[node name="Gravity" type="Area3D" parent="SubViewport/test world" groups=["gravity_fields"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 0)
+priority = -1
+gravity_space_override = 3
+script = ExtResource("4_ud3vi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/Gravity"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.215332, 1.64983, 1.79645)
+shape = SubResource("BoxShape3D_5457m")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="SubViewport/test world"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -94.7717, 3.73889, -5.34272)
+use_collision = true
+size = Vector3(3.32715, 2.97318, 2.22949)
+
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
 [node name="CenterContainer" type="CenterContainer" parent="SubViewport/CanvasLayer"]
@@ -203,10 +227,4 @@ handle_input_locally = false
 render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.6623, 4.262, 19.6736)
-
-[node name="Foliage01" parent="." instance=ExtResource("11_5457m")]
-transform = Transform3D(0.988151, -0.0129468, -0.152937, 0.00573833, 0.998856, -0.0474817, 0.153377, 0.0460414, 0.987095, -90.9745, 4.34573, 8.39316)
-
-[node name="Foliage02" parent="." instance=ExtResource("11_5457m")]
-transform = Transform3D(0.413697, 0, 0.280811, 0, 0.5, 0, -0.280811, 0, 0.413697, -94.5262, 5.08239, 8.03091)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -90.6623, 18.1375, 0.417273)
