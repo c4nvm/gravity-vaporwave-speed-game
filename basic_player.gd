@@ -78,6 +78,8 @@ var gravity_field_transition_timer := 0.0
 const GRAVITY_FIELD_TRANSITION_COOLDOWN := 0.1
 var last_gravity_field = null
 var previous_velocity := Vector3.ZERO
+var current_camera_offset := Vector3.ZERO
+var target_camera_offset := Vector3.ZERO
 #endregion
 
 #region Lifecycle Methods
@@ -92,6 +94,8 @@ func _ready():
 	current_camera_pivot = standing_camera_pivot
 	camera.reparent(current_camera_pivot)
 	camera.position = Vector3.ZERO
+	current_camera_offset = Vector3.ZERO
+	target_camera_offset = Vector3.ZERO
 	
 	var hook_controller = get_node_or_null("HookController")
 	if hook_controller:
@@ -103,6 +107,17 @@ func _input(event):
 		_handle_free_space_input(event)
 	else:
 		_handle_planetary_input(event)
+
+func _process(delta):
+	"""Handle smooth camera transitions"""
+	# Smoothly interpolate camera position
+	current_camera_offset = current_camera_offset.lerp(
+		target_camera_offset, 
+		crouch_transition_speed * delta
+	)
+	
+	# Apply the offset to the camera
+	camera.position = current_camera_offset
 
 func _physics_process(delta):
 	"""Main physics processing loop"""
@@ -392,11 +407,8 @@ func _start_slide():
 	$StandingCollision.disabled = true
 	$SlidingCollision.disabled = false
 	
-	# Switch to crouch camera pivot and reset its rotation
-	current_camera_pivot = crouch_camera_pivot
-	camera.reparent(current_camera_pivot)
-	camera.position = Vector3.ZERO
-	current_camera_pivot.rotation = Vector3(mouse_pitch, 0, 0)  # Reset rotation, keeping only pitch
+	# Set target camera offset for crouch position
+	target_camera_offset = crouch_camera_offset
 
 func _end_slide(force_reset: bool = false):
 	"""End sliding movement"""
@@ -407,11 +419,8 @@ func _end_slide(force_reset: bool = false):
 	$StandingCollision.disabled = false
 	$SlidingCollision.disabled = true
 	
-	# Switch back to standing camera pivot and reset its rotation
-	current_camera_pivot = standing_camera_pivot
-	camera.reparent(current_camera_pivot)
-	camera.position = Vector3.ZERO
-	current_camera_pivot.rotation = Vector3(mouse_pitch, 0, 0)  # Reset rotation, keeping only pitch
+	# Reset camera offset to standing position
+	target_camera_offset = Vector3.ZERO
 
 func _handle_slide(delta):
 	"""Handle sliding physics and state"""
