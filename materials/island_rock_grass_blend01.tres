@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://n4yakju3yhm6"]
+
+[ext_resource type="Texture2D" uid="uid://bpk2q2pkydiwm" path="res://materials/island_rock_grass_blend01.png" id="1_gl1yo"]
+
+[resource]
+albedo_texture = ExtResource("1_gl1yo")
