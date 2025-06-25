@@ -310,7 +310,7 @@ func _start_slide():
 	is_sliding = true
 	slide_cooldown_timer = 0.0
 	$StandingCollision.disabled = true
-	$SlidingCollision.disabled = true
+	$SlidingCollision.disabled = false
 	target_camera_offset = crouch_camera_offset
 
 func _end_slide(force_reset: bool = false):
