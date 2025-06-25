@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=21 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -228,3 +229,6 @@ render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -90.6623, 18.1375, 0.417273)
+
+[node name="computer01" parent="." instance=ExtResource("12_ivea3")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.73716, -4.80525)
