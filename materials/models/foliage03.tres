@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dtkrjw26gd2v5"]
 
-[ext_resource type="Texture2D" uid="uid://dtefodirc782h" path="res://materials/models/foliage01.png" id="1_ofbjr"]
+[ext_resource type="Texture2D" uid="uid://d0tm1ck7327tu" path="res://materials/models/foliage03.png" id="1_ofbjr"]
 
 [resource]
 transparency = 1

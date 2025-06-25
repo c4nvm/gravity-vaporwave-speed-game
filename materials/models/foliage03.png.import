@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6j0a37kciqwx"
-path.s3tc="res://.godot/imported/alexander_alexander.png-aca28e6afbecf2ddc40bb4925d5e60fd.s3tc.ctex"
+uid="uid://d0tm1ck7327tu"
+path.s3tc="res://.godot/imported/foliage03.png-f8b5e586fcda778d2de6fa2bbcde6341.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "984bbeea97337a6995e4a45c21328c19"
-}
 
 [deps]
 
-source_file="res://models/alexander_alexander.png"
-dest_files=["res://.godot/imported/alexander_alexander.png-aca28e6afbecf2ddc40bb4925d5e60fd.s3tc.ctex"]
+source_file="res://materials/models/foliage03.png"
+dest_files=["res://.godot/imported/foliage03.png-f8b5e586fcda778d2de6fa2bbcde6341.s3tc.ctex"]
 
 [params]
 

@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"@MATERIAL:0": {
+"Face": {
 "use_external/enabled": true,
-"use_external/path": "uid://bo5i4jrqq48nh"
+"use_external/path": "uid://cmh5u8ms6fyl7"
 }
 }
 }

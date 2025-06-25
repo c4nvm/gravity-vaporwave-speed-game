@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmuboan61en1v"
-path.s3tc="res://.godot/imported/column_column.png-b2dc0e9b6c90d927701a121a1668fada.s3tc.ctex"
+uid="uid://pvmenbpnxcad"
+path.s3tc="res://.godot/imported/foliage02.png-e6a5ab6ff3822bbb1a02ec072f09aae7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "dc18b058c06944b80d2a1878b95fb886"
-}
 
 [deps]
 
-source_file="res://models/column_column.png"
-dest_files=["res://.godot/imported/column_column.png-b2dc0e9b6c90d927701a121a1668fada.s3tc.ctex"]
+source_file="res://materials/models/foliage02.png"
+dest_files=["res://.godot/imported/foliage02.png-e6a5ab6ff3822bbb1a02ec072f09aae7.s3tc.ctex"]
 
 [params]
 

@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"@MATERIAL:0": {
+"treepalm": {
 "use_external/enabled": true,
-"use_external/path": "uid://xgx1yq1t6mif"
+"use_external/path": "uid://bt6gh8hs6207y"
 }
 }
 }
