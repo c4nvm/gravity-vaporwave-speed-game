@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3xdv5akvunm2"]
+
+[ext_resource type="PackedScene" uid="uid://csm41sxkv1ats" path="res://models/keyboard01.glb" id="1_jhodv"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="keyboard01" parent="." instance=ExtResource("1_jhodv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0354774, 0, -0.0555472)

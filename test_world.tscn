@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=23 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
 [ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
 [ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="12_jvck6"]
+[ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -242,4 +243,7 @@ grow_vertical = 2
 script = ExtResource("12_jvck6")
 
 [node name="computer01" parent="." instance=ExtResource("12_ivea3")]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.73716, -4.80525)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.36628, -5.43346)
+
+[node name="Node3D" parent="." instance=ExtResource("14_07jwy")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -94.0881, 5.30509, -4.68482)
