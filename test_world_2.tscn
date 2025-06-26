@@ -53,7 +53,7 @@ size = Vector3(9.14075, 21.0352, 48.0029)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ff24s"]
 size = Vector3(5, 20, 45.4455)
 
-[node name="SubViewportContainer" type="SubViewportContainer"]
+[node name="SubViewportContainer2" type="SubViewportContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

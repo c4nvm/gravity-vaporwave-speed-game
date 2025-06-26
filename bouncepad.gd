@@ -24,4 +24,4 @@ func _on_body_entered(body: Node3D):
 		var bounce_direction = direction_ray.global_transform.basis.y.normalized()
 		
 		# Apply bounce force
-		body.velocity = bounce_direction * bounce_force
+		body.velocity += bounce_direction * bounce_force

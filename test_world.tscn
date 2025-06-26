@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=22 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
 [ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
+[ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="12_jvck6"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -55,7 +56,7 @@ adjustment_saturation = 1.35
 size = Vector3(1, 50, 10)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_lf0gk"]
-points = PackedVector3Array(5, 25, 2.5, -0.5, 25, 2.5, 5, -25, 2.5, 5, 25, -2.5, -0.5, 25, -2.5, -0.5, -25, 2.5, 5, -25, -2.5, -0.5, -25, -2.5)
+points = PackedVector3Array(10, 25, 2.5, -0.5, 25, 2.5, 10, -25, 2.5, 10, 25, -2.5, -0.5, 25, -2.5, -0.5, -25, 2.5, 10, -25, -2.5, -0.5, -25, -2.5)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_dsnr4"]
 points = PackedVector3Array(0.5, 25, 2.5, -0.5, 25, 2.5, 0.5, -25, 2.5, 0.5, 25, -2.5, -0.5, 25, -2.5, -0.5, -25, 2.5, 0.5, -25, -2.5, -0.5, -25, -2.5)
@@ -124,7 +125,7 @@ gravity_direction = Vector3(0.707, -0.707, 0)
 script = ExtResource("4_ud3vi")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="SubViewport/test world/Flat/MeshInstance3D/Area3D"]
-transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 2, 0, 0, 0)
+transform = Transform3D(0.704602, -0.704602, 0, 0.704602, 0.704602, 0, 0, 0, 1.99292, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_lf0gk")
 
 [node name="RayCast3D" type="RayCast3D" parent="SubViewport/test world/Flat/MeshInstance3D"]
@@ -229,6 +230,16 @@ render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -90.6623, 18.1375, 0.417273)
+
+[node name="Label" type="Label" parent="SubViewport/CanvasLayer"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_right = 40.0
+offset_bottom = 11.5
+grow_vertical = 2
+script = ExtResource("12_jvck6")
 
 [node name="computer01" parent="." instance=ExtResource("12_ivea3")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.73716, -4.80525)

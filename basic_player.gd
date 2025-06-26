@@ -9,6 +9,8 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var gravity := 30.0
 @export var acceleration := 15.0
 @export var deceleration := 20.0
+@export var air_acceleration := 2.0 # How quickly you can change direction in the air. Lower is less control.
+@export var air_deceleration := 0.4 # How quickly you slow down in the air. Lower is less friction.
 @export var terminal_velocity := 50.0
 @export var fall_lerp_weight := 5.0
 
@@ -27,15 +29,20 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var crouch_camera_offset := Vector3(0, -0.9, 0)
 @export var crouch_transition_speed := 5.0
 
+@export_group("Advanced Movement")
+@export var slide_hop_boost := 1.2 # Multiplier for speed boost when jumping out of a slide.
+@export var slide_hop_jump_multiplier := 0.7 # Multiplier for jump force when slide hopping.
+@export var high_speed_decel_multiplier := 0.2 # How much to reduce deceleration when moving faster than base speed. Lower is less friction.
+
 @export_group("Vaulting")
 @export var vault_enabled := true
 @export var vault_min_height_from_feet := 0.8
 @export var vault_max_height_from_feet := 1.8
 @export var vault_forward_check_distance := 0.5
-@export var vault_boost_vertical_force := 10.0  # Reduced from 12
-@export var vault_boost_horizontal_force := 6.0  # Reduced from 8
-@export var vault_cooldown := 0.3  # Reduced from 0.5
-@export var vault_min_downward_speed := 2.0  # Added for falling vaults
+@export var vault_boost_vertical_force := 10.0
+@export var vault_boost_horizontal_force := 6.0
+@export var vault_cooldown := 0.3
+@export var vault_min_downward_speed := 2.0
 
 @export_group("Ledge Climb")
 @export var ledge_climb_enabled := true
@@ -258,29 +265,56 @@ func _handle_planetary_movement(delta):
 	if slide_enabled:
 		_handle_slide(delta)
 
+# MODIFIED: This function now handles air control separately from ground control.
 func _handle_movement(delta):
 	if is_sliding:
 		return
-	
+
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	var raycast_forward = -direction_ray.global_transform.basis.z.normalized()
 	var raycast_right = direction_ray.global_transform.basis.x.normalized()
-	
+
 	if is_on_planet:
 		var vertical_velocity = velocity.project(self.up_direction)
 		var horizontal_velocity = velocity - vertical_velocity
 
+		# Project wish direction onto plane defined by gravity
 		raycast_forward = _safe_project(raycast_forward, gravity_direction)
 		raycast_right = _safe_project(raycast_right, gravity_direction)
-		var move_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
+		var wish_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
 		
-		horizontal_velocity = horizontal_velocity.lerp(move_dir * speed, acceleration * delta)
+		var target_h_velocity = wish_dir * speed
+
+		var current_accel: float
+		var current_decel: float
+
+		# Select acceleration/deceleration values based on whether we are on the ground or in the air
+		if is_on_floor():
+			current_accel = acceleration
+			current_decel = deceleration
+			
+			# Apply high-speed friction reduction only when on the ground and not providing input
+			var current_h_speed = horizontal_velocity.length()
+			if current_h_speed > speed and input_dir == Vector2.ZERO:
+				current_decel *= high_speed_decel_multiplier
+		else: # In the air
+			current_accel = air_acceleration
+			current_decel = air_deceleration
+
+		# Apply acceleration or deceleration
+		if input_dir.length() > 0.01:
+			# Player is providing input, accelerate towards target velocity
+			horizontal_velocity = horizontal_velocity.lerp(target_h_velocity, current_accel * delta)
+		else:
+			# Player is not providing input, decelerate to a stop
+			horizontal_velocity = horizontal_velocity.lerp(Vector3.ZERO, current_decel * delta)
 
 		if Input.is_action_just_pressed("jump") and (is_on_floor() or ground_ray.is_colliding()):
 			vertical_velocity = self.up_direction * jump_force
 
 		velocity = horizontal_velocity + vertical_velocity
 	else:
+		# This logic is for the old free-space mode, kept as is
 		var move_dir = (raycast_forward * input_dir.y + raycast_right * input_dir.x).normalized()
 		velocity += move_dir * acceleration * delta
 		if input_dir == Vector2.ZERO:
@@ -317,6 +351,7 @@ func _end_slide(force_reset: bool = false):
 	if not is_sliding and not force_reset:
 		return
 	
+	was_sliding = is_sliding # Keep track that we were just sliding
 	is_sliding = false
 	$StandingCollision.disabled = false
 	$SlidingCollision.disabled = true
@@ -326,6 +361,11 @@ func _handle_slide(delta):
 	if slide_cooldown_timer < slide_cooldown:
 		slide_cooldown_timer += delta
 	
+	# Check for jump to initiate a slide hop
+	if is_sliding and Input.is_action_just_pressed("jump") and (is_on_floor() or ground_ray.is_colliding()):
+		_perform_slide_hop()
+		return # We've jumped, no more slide logic this frame.
+
 	if is_sliding and not Input.is_action_pressed("slide"):
 		_end_slide()
 	
@@ -335,6 +375,23 @@ func _handle_slide(delta):
 	
 	if is_sliding:
 		_apply_slide_physics(delta)
+
+# MODIFIED: Logic for performing a slide hop
+func _perform_slide_hop():
+	var horizontal_velocity = velocity - velocity.project(self.up_direction)
+	
+	# Apply speed boost
+	horizontal_velocity *= slide_hop_boost
+	
+	# Apply vertical jump force (modified by multiplier)
+	var vertical_velocity = self.up_direction * (jump_force * slide_hop_jump_multiplier)
+	
+	# Combine and set the new velocity
+	velocity = horizontal_velocity + vertical_velocity
+	
+	# Exit the sliding state
+	_end_slide()
+
 
 func _apply_slide_physics(delta):
 	var slope_normal = get_floor_normal()
@@ -673,20 +730,20 @@ func _perform_vault(wall_normal: Vector3):
 	
 	# Only remove velocity going INTO the wall, keep parallel motion
 	var into_wall_vel = horizontal_vel.project(wall_normal)
-	var preserved_vel = horizontal_vel - into_wall_vel * 0.8  # Only partially cancel wall-ward velocity
+	var preserved_vel = horizontal_vel - into_wall_vel * 0.8 # Only partially cancel wall-ward velocity
 	
 	# Apply boosts while maintaining more natural movement
 	var upward_boost = -gravity_direction * vault_boost_vertical_force
-	var outward_boost = wall_normal * vault_boost_horizontal_force * 0.5  # Reduced outward force
+	var outward_boost = wall_normal * vault_boost_horizontal_force * 0.5 # Reduced outward force
 	
-	velocity = preserved_vel * 1.2 + upward_boost + outward_boost  # Slight speed boost
+	velocity = preserved_vel * 1.2 + upward_boost + outward_boost # Slight speed boost
 	
 	vault_cooldown_timer = vault_cooldown
 
 func _handle_ledge_climb():
-	if not ledge_climb_enabled or is_on_floor() or is_climbing or ledge_climb_cooldown_timer > 0: 
+	if not ledge_climb_enabled or is_on_floor() or is_climbing or ledge_climb_cooldown_timer > 0:	
 		return
-	if velocity.dot(-gravity_direction) < ledge_climb_min_upward_speed: 
+	if velocity.dot(-gravity_direction) < ledge_climb_min_upward_speed:	
 		return
 		
 	if ledge_detector_ray.is_colliding():
@@ -704,26 +761,26 @@ func _check_and_perform_climb(wall_point: Vector3, wall_normal: Vector3):
 	query_params.exclude = [self.get_rid()]
 	query_params.hit_from_inside = true
 	var ledge_result = world_space.intersect_ray(query_params)
-	if not ledge_result: 
+	if not ledge_result:	
 		return
 
 	var landing_spot = ledge_result.position
 	var landing_normal = ledge_result.normal
 
-	if landing_normal.dot(-gravity_direction) < cos(deg_to_rad(MAX_SLOPE_ANGLE)): 
+	if landing_normal.dot(-gravity_direction) < cos(deg_to_rad(MAX_SLOPE_ANGLE)):	
 		return
 		
 	var ceiling_check_start = landing_spot - gravity_direction * 0.05
 	var ceiling_check_end = ceiling_check_start + -gravity_direction * (player_height + 0.1)
 	var ceiling_query = PhysicsRayQueryParameters3D.create(ceiling_check_start, ceiling_check_end)
 	ceiling_query.exclude = [self.get_rid()]
-	if world_space.intersect_ray(ceiling_query): 
+	if world_space.intersect_ray(ceiling_query):	
 		return
 
 	_perform_climb(landing_spot, wall_normal)
 
 func _perform_climb(landing_position: Vector3, wall_normal: Vector3):
-	if is_climbing: 
+	if is_climbing:	
 		return
 
 	is_climbing = true
