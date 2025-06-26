@@ -433,8 +433,9 @@ shader_parameter/grazing_angle_modulation_factor = 50.0
 floor_max_angle = 0.698132
 script = ExtResource("1_4ivg5")
 speed = 15.0
+air_deceleration = 0.2
 crouch_transition_speed = 10.0
-metadata/_custom_type_script = "uid://cbmve0x5cmfgg"
+slide_hop_jump_multiplier = 0.9
 
 [node name="DirectionRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
