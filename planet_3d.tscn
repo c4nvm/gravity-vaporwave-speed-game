@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cp74r48rxpi4c"]
 
 [ext_resource type="Material" uid="uid://maab2ylaxscv" path="res://Shaders/toon_shaded_objects.tres" id="1_j81u8"]
-[ext_resource type="Material" path="res://materials/island_checker_floor01.tres" id="2_1rd8e"]
+[ext_resource type="Material" uid="uid://2lgs4o1fog41" path="res://Materials/island_checker_floor01.tres" id="2_1rd8e"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="2_c66fx"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_rorap"]

@@ -1,7 +1,7 @@
 [gd_scene load_steps=23 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
-[ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="1_gy3sr"]
+[ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="1_gy3sr"]
 [ext_resource type="PackedScene" uid="uid://cp74r48rxpi4c" path="res://planet_3d.tscn" id="2_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="4_ud3vi"]
@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
-[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="12_ivea3"]
 [ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="12_jvck6"]
 [ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
 
@@ -182,9 +182,6 @@ transform = Transform3D(0.869588, 0.311474, 0.383145, 0.0750937, 0.6835, -0.7260
 [node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_4tg7h")]
 transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0.0426454, -0.922198, -0.249157, -0.295756, -85.487, 2.17939, -2.4436)
 
-[node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.3987, 4.17434, 2.54632)
-
 [node name="Foliage01" parent="SubViewport/test world" instance=ExtResource("11_5457m")]
 transform = Transform3D(0.988151, -0.0129468, -0.152937, 0.00573833, 0.998856, -0.0474817, 0.153377, 0.0460414, 0.987095, -90.9745, 4.34573, 8.39316)
 
@@ -205,6 +202,15 @@ shape = SubResource("BoxShape3D_5457m")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -94.7717, 3.73889, -5.34272)
 use_collision = true
 size = Vector3(3.32715, 2.97318, 2.22949)
+
+[node name="Player" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 3, 0)
+
+[node name="computer01" parent="SubViewport/test world" instance=ExtResource("12_ivea3")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.36628, -5.43346)
+
+[node name="Node3D" parent="SubViewport/test world" instance=ExtResource("14_07jwy")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -94.0881, 5.30509, -4.68482)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 
@@ -241,9 +247,3 @@ offset_right = 40.0
 offset_bottom = 11.5
 grow_vertical = 2
 script = ExtResource("12_jvck6")
-
-[node name="computer01" parent="." instance=ExtResource("12_ivea3")]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.36628, -5.43346)
-
-[node name="Node3D" parent="." instance=ExtResource("14_07jwy")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -94.0881, 5.30509, -4.68482)

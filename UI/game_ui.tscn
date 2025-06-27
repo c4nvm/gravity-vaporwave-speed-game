@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://ddxhm3hiqd52l"]
+
+[ext_resource type="Script" path="res://UI/game_ui.gd" id="1_kfjql"]
+[ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="1_mp46i"]
+
+[node name="GameUI" type="CanvasLayer"]
+script = ExtResource("1_kfjql")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CenterContainer"]
+modulate = Color(0, 1, 0, 1)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_mp46i")
+expand_mode = 2
+stretch_mode = 3
+
+[node name="DebugLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0

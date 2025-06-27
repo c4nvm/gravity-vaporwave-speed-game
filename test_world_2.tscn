@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_80vtj"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_p3td8"]
 [ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="8_pqskb"]
-[ext_resource type="PackedScene" uid="uid://cn8ke01qfidw7" path="res://basic_player.tscn" id="9_klw1l"]
+[ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="9_klw1l"]
 [ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="10_om41v"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
@@ -79,9 +79,6 @@ light_energy = 0.5
 light_indirect_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
-
-[node name="BasicPlayer" parent="SubViewport/test world" instance=ExtResource("9_klw1l")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="SubViewport/test world"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -27.7039)
@@ -186,6 +183,10 @@ transform = Transform3D(0.895332, 1.06324, 0, -1.06324, 0.895332, 0, 0, 0, 1.39,
 
 [node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_p3td8")]
 transform = Transform3D(-1.04442, -0.0320395, 0.0656697, 0.0211566, 0.891927, 0.324761, -0.10598, 0.493801, -0.582338, 0.213531, 0.853135, -24.1394)
+
+[node name="Player" parent="SubViewport/test world" instance=ExtResource("9_klw1l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+slide_hop_jump_multiplier = 0.8
 
 [node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
 

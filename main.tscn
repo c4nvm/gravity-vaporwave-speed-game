@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3 uid="uid://bf3i1xqahrwk2"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Script" path="res://fade_screen.gd" id="2_0xm2m"]
+[ext_resource type="Script" path="res://level_viewport.gd" id="2_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/game_ui.tscn" id="3_h2yge"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_ig7tw")
+
+[node name="LevelViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="LevelViewport" type="SubViewport" parent="LevelViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+script = ExtResource("2_1bvp3")
+
+[node name="FadeLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="FadeRect" type="ColorRect" parent="FadeLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("2_0xm2m")
+
+[node name="GameUI" parent="." instance=ExtResource("3_h2yge")]
+
+[node name="MenuContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
