@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=30 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="1_gy3sr"]
@@ -11,9 +11,16 @@
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
-[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="12_ivea3"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
 [ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="12_jvck6"]
 [ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
+[ext_resource type="PackedScene" uid="uid://bcc2j8msg2nc4" path="res://Prefab/rocks/rock01.tscn" id="15_f2a6c"]
+[ext_resource type="PackedScene" uid="uid://vjdd48amu0wf" path="res://Prefab/rocks/rock02.tscn" id="16_07e4k"]
+[ext_resource type="PackedScene" uid="uid://4oyq6ic3hdqw" path="res://Prefab/rocks/rock03.tscn" id="17_4r1q4"]
+[ext_resource type="PackedScene" uid="uid://jcuu1bdcjxpq" path="res://Prefab/rocks/rock04.tscn" id="18_ofhn6"]
+[ext_resource type="PackedScene" uid="uid://daad5redscisq" path="res://Prefab/rocks/rock05.tscn" id="19_8wsjh"]
+[ext_resource type="PackedScene" uid="uid://eyeppb0m08dd" path="res://Prefab/rocks/rock06.tscn" id="20_4r1q4"]
+[ext_resource type="PackedScene" uid="uid://ddupwq5ww55wv" path="res://Prefab/rocks/rock07.tscn" id="21_ofhn6"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -247,3 +254,30 @@ offset_right = 40.0
 offset_bottom = 11.5
 grow_vertical = 2
 script = ExtResource("12_jvck6")
+
+[node name="Rock01" parent="." instance=ExtResource("15_f2a6c")]
+transform = Transform3D(4.82963, 0, -1.2941, 0, 5, 0, 1.2941, 0, 4.82963, -89.3239, 2.8679, -5.94233)
+
+[node name="Node3D" parent="." instance=ExtResource("16_07e4k")]
+transform = Transform3D(5.8983, 1.74039, 3.34381, -1.32652, 6.77042, -1.18396, -3.52851, 0.363958, 6.03466, -92.1446, 2.88429, -7.09759)
+
+[node name="Rock03" parent="." instance=ExtResource("17_4r1q4")]
+transform = Transform3D(3.53553, 0, 3.53553, 0, 5, 0, -3.53553, 0, 3.53553, -90.1367, 3.63946, 5.22144)
+
+[node name="Rock04" parent="." instance=ExtResource("18_ofhn6")]
+transform = Transform3D(2.23739, 0, -4.47147, 0, 5, 0, 4.47147, 0, 2.23739, -88.7293, 2.49896, 3.62288)
+
+[node name="Rock05" parent="." instance=ExtResource("19_8wsjh")]
+transform = Transform3D(-4.33013, 0, -2.5, 0, 5, 0, 2.5, 0, -4.33013, -93.0202, 2.38641, 9.4849)
+
+[node name="Rock06" parent="." instance=ExtResource("18_ofhn6")]
+transform = Transform3D(-1.81173, 0, -6.76148, 0, 7, 0, 6.76148, 0, -1.81173, -89.7211, 2.48514, 3.48331)
+
+[node name="Rock07" parent="." instance=ExtResource("19_8wsjh")]
+transform = Transform3D(0.942135, 0, -4.91044, 0, 5, 0, 4.91044, 0, 0.942135, -91.0956, 2.50651, 3.60521)
+
+[node name="Rock08" parent="." instance=ExtResource("20_4r1q4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86.5549, 2.9137, -3.73248)
+
+[node name="Rock09" parent="." instance=ExtResource("21_ofhn6")]
+transform = Transform3D(0.368287, 0, 0.929712, 0, 1, 0, -0.929712, 0, 0.368287, -84.5186, 2.908, -0.550139)
