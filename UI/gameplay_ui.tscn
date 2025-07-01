@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://ddxhm3hiqd52l"]
+[gd_scene load_steps=5 format=3 uid="uid://ddxhm3hiqd52l"]
 
 [ext_resource type="Script" uid="uid://vf5sa767t4n6" path="res://UI/gameplay_ui.gd" id="1_pclro"]
 [ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="2_i7ma2"]
 [ext_resource type="FontFile" uid="uid://bpni7l64yc8o2" path="res://Fonts/W95FA.otf" id="3_i7ma2"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_i7ma2"]
+viewport_path = NodePath("CompassViewport")
 
 [node name="GameUI" type="CanvasLayer"]
 script = ExtResource("1_pclro")
@@ -59,3 +62,12 @@ theme_override_fonts/font = ExtResource("3_i7ma2")
 theme_override_font_sizes/font_size = 90
 text = "Best: --:--:---"
 horizontal_alignment = 2
+
+[node name="CompassViewport" type="SubViewport" parent="."]
+own_world_3d = true
+
+[node name="CompassSprite" type="Sprite2D" parent="."]
+z_index = -8
+position = Vector2(143, 938)
+scale = Vector2(0.424219, 0.424219)
+texture = SubResource("ViewportTexture_i7ma2")

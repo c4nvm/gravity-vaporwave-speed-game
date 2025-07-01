@@ -12,6 +12,28 @@ var current_level_path: String = ""
 var gameplay_ui: CanvasLayer = null
 var player_node: CharacterBody3D = null
 var pause_menu_instance: Control = null
+var compasses: Array[Node3D] = []
+
+# --- GAME LOOP ---
+func _process(_delta: float) -> void:
+	# Exit early if there's no player or no compasses to update.
+	if not is_instance_valid(player_node) or compasses.is_empty():
+		return
+		
+	# Get the required data from the player node.
+	# Make sure 'gravity_direction' and 'camera_pivot' are accessible properties on your player script.
+	var current_gravity_dir: Vector3 = player_node.get("gravity_direction")
+	var camera_pivot: Node3D = player_node.get("camera_pivot")
+	
+	if not is_instance_valid(camera_pivot):
+		return
+
+	var camera_basis: Basis = camera_pivot.global_transform.basis
+	
+	# Update each registered compass with the player's data.
+	for compass in compasses:
+		if is_instance_valid(compass):
+			compass.update_compass(current_gravity_dir, camera_basis)
 
 # --- MOUSE MANAGEMENT ---
 func update_mouse_mode(capture: bool = false) -> void:
@@ -62,6 +84,9 @@ func _cleanup_before_scene_change() -> void:
 	if is_instance_valid(pause_menu_instance):
 		pause_menu_instance.queue_free()
 	pause_menu_instance = null
+	
+	# Clear the compasses list on scene change
+	compasses.clear()
 
 # --- APPLICATION CONTROL ---
 func quit_game() -> void:
@@ -82,6 +107,14 @@ func register_player(p_node: CharacterBody3D) -> void:
 func register_pause_menu(menu_instance: Control) -> void:
 	pause_menu_instance = menu_instance
 	pause_menu_instance.hide() # Start hidden
+
+func register_compass(compass: Node3D) -> void:
+	if not compass in compasses:
+		compasses.append(compass)
+
+func unregister_compass(compass: Node3D) -> void:
+	if compass in compasses:
+		compasses.erase(compass)
 
 # --- TIME SAVING & LOADING ---
 const SAVE_DIR = "user://best_times/"

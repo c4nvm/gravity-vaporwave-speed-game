@@ -1,0 +1,102 @@
+[gd_scene load_steps=14 format=3 uid="uid://cr07cwmbc7djr"]
+
+[ext_resource type="Script" uid="uid://bf4e2d7h68yfx" path="res://compass.gd" id="1_4k05d"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wy6vv"]
+transparency = 1
+cull_mode = 1
+depth_draw_mode = 2
+albedo_color = Color(0, 0, 0, 1)
+metallic_specular = 0.0
+roughness = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_4k05d"]
+material = SubResource("StandardMaterial3D_wy6vv")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2gf7n"]
+albedo_color = Color(0, 1, 0, 1)
+emission_enabled = true
+emission = Color(0, 1, 0, 1)
+emission_energy_multiplier = 16.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_leea2"]
+material = SubResource("StandardMaterial3D_2gf7n")
+top_radius = 0.01
+bottom_radius = 0.01
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3nwcl"]
+albedo_color = Color(1, 0, 0, 1)
+emission_enabled = true
+emission = Color(1, 0, 0, 1)
+emission_energy_multiplier = 16.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bnahb"]
+material = SubResource("StandardMaterial3D_3nwcl")
+top_radius = 0.01
+bottom_radius = 0.01
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4k05d"]
+albedo_color = Color(0, 0, 1, 1)
+emission_enabled = true
+emission = Color(0, 0, 1, 1)
+emission_energy_multiplier = 39.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_2gf7n"]
+material = SubResource("StandardMaterial3D_4k05d")
+top_radius = 0.01
+bottom_radius = 0.01
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_leea2"]
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 16.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wy6vv"]
+material = SubResource("StandardMaterial3D_leea2")
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bnahb"]
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 16.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_4k05d"]
+material = SubResource("StandardMaterial3D_bnahb")
+top_radius = 0.0
+bottom_radius = 0.06
+height = 0.1
+
+[node name="Compass" type="Node3D"]
+script = ExtResource("1_4k05d")
+
+[node name="Sphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_4k05d")
+
+[node name="YAxis" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_leea2")
+
+[node name="XAxis" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_bnahb")
+
+[node name="ZAxis" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.91069e-15, -4.37114e-08, -1, -1, -4.37114e-08, 0, -4.37114e-08, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_2gf7n")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+
+[node name="Arrow" type="Node3D" parent="."]
+
+[node name="ArrowBody" type="MeshInstance3D" parent="Arrow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.204401, 0)
+mesh = SubResource("CylinderMesh_wy6vv")
+
+[node name="Head" type="MeshInstance3D" parent="Arrow/ArrowBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21967, 0)
+mesh = SubResource("CylinderMesh_4k05d")
