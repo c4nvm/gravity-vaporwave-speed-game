@@ -1,173 +1,129 @@
-# GameManager.gd
 extends Node
 
-## Game Manager (Autoload Singleton)
-## Handles scene transitions, pause state, and global game data management.
-## NOTE: This node's 'Process Mode' must be set to 'Always' in Project Settings -> Autoload.
+# Signal emitted when a new level is loaded, with both path and ID
+signal level_loaded(level_path: String, level_id: String)
 
-signal level_loaded(level_path: String)
-
-@export var main_menu_scene: PackedScene = preload("res://Menus/main_menu.tscn")
-@export var level_select_scene: PackedScene = preload("res://Menus/level_select.tscn")
-
+# --- GLOBAL STATE ---
+var is_mouse_captured: bool = false
+var current_level_id: String = ""
 var current_level_path: String = ""
-var current_level_name: String = ""
 
-# Node references
-var gameplay_ui: CanvasLayer
-var pause_menu: Control
-var player_node: Node
+# --- NODE REFERENCES ---
+var gameplay_ui: CanvasLayer = null
+var player_node: CharacterBody3D = null
+var pause_menu_instance: Control = null
 
-# State variables
-var is_mouse_captured: bool = true
-var game_is_paused: bool = false
+# --- MOUSE MANAGEMENT ---
+func update_mouse_mode(capture: bool = false) -> void:
+	is_mouse_captured = capture
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if capture else Input.MOUSE_MODE_VISIBLE)
 
-
-func _unhandled_input(event: InputEvent) -> void:
-	# Only allow pausing if we are in a level
-	if not current_level_path.is_empty() and event.is_action_pressed("ui_cancel"):
-		toggle_pause_menu()
-
-#region Registration
-func register_gameplay_ui(ui_node: CanvasLayer) -> void:
-	gameplay_ui = ui_node
-
-func register_pause_menu(menu: Control) -> void:
-	pause_menu = menu
-
-func register_player(p_node: Node) -> void:
-	player_node = p_node
-#endregion
-
-#region Scene Management
-func goto_main_menu() -> void:
-	if not main_menu_scene:
-		push_error("Main Menu scene not set in GameManager!")
+# --- PAUSE MANAGEMENT ---
+func toggle_pause_menu() -> void:
+	if not is_instance_valid(pause_menu_instance):
+		push_error("No pause menu registered!")
 		return
-	
-	unpause_game(false) # Ensure game is unpaused when changing scenes
-	current_level_path = ""
-	current_level_name = ""
-	get_tree().change_scene_to_packed(main_menu_scene)
+
+	var new_paused_state = not get_tree().paused
+	get_tree().paused = new_paused_state
+	pause_menu_instance.visible = new_paused_state
+	update_mouse_mode(not new_paused_state)
+
+# --- SCENE MANAGEMENT ---
+func goto_main_menu() -> void:
+	_cleanup_before_scene_change()
+	get_tree().change_scene_to_file("res://Menus/main_menu.tscn")
+	update_mouse_mode(false)
 
 func goto_level_select() -> void:
-	if not level_select_scene:
-		push_error("Level Select scene not set in GameManager!")
-		return
-
-	unpause_game(false)
-	get_tree().change_scene_to_packed(level_select_scene)
+	_cleanup_before_scene_change()
+	get_tree().change_scene_to_file("res://Menus/level_select.tscn")
+	update_mouse_mode(false)
 
 func load_level(level_path: String) -> void:
-	if level_path.is_empty() or not ResourceLoader.exists(level_path):
-		push_error("Failed to load level: %s" % level_path)
-		return
-		
-	unpause_game(true)
+	# This is the single source of truth for the level ID.
 	current_level_path = level_path
-	current_level_name = level_path.get_file().get_basename()
+	current_level_id = level_path.get_file().get_basename()
 	
-	# Clear old references
-	pause_menu = null
-	player_node = null
-	
+	update_mouse_mode(true)
 	get_tree().change_scene_to_file(level_path)
-	level_loaded.emit(level_path)
+	level_loaded.emit(level_path, current_level_id)
 
-func reload_current_level() -> void:
-	if not current_level_path.is_empty():
-		load_level(current_level_path)
-	else:
-		push_warning("No current level to reload.")
-		goto_main_menu()
+func _cleanup_before_scene_change() -> void:
+	get_tree().paused = false
+	
+	# Clear level-specific data
+	current_level_id = ""
+	current_level_path = ""
+	
+	# Clear node references
+	gameplay_ui = null
+	player_node = null
+	if is_instance_valid(pause_menu_instance):
+		pause_menu_instance.queue_free()
+	pause_menu_instance = null
 
+# --- APPLICATION CONTROL ---
 func quit_game() -> void:
-	get_tree().quit()
-#endregion
-
-#region Pause System
-func toggle_pause_menu() -> void:
-	game_is_paused = not game_is_paused
-	get_tree().paused = game_is_paused
-	
-	if game_is_paused:
-		is_mouse_captured = false
-		if is_instance_valid(gameplay_ui):
-			gameplay_ui.hide()
-		if is_instance_valid(pause_menu):
-			pause_menu.show()
-			pause_menu.resume_button.grab_focus()
+	# Handle web platform differently if needed
+	if OS.get_name() == "HTML5":
+		# This is a placeholder and might not work in all browsers due to security restrictions.
+		JavaScriptBridge.eval("window.close()", true)
 	else:
-		is_mouse_captured = true
-		if is_instance_valid(gameplay_ui):
-			gameplay_ui.show()
-		if is_instance_valid(pause_menu):
-			pause_menu.hide()
-			
-	update_mouse_mode()
+		get_tree().quit()
 
-func unpause_game(capture_mouse: bool) -> void:
-	# Helper function to ensure game is unpaused before scene changes
-	if get_tree().paused:
-		get_tree().paused = false
-	game_is_paused = false
-	is_mouse_captured = capture_mouse
-	update_mouse_mode()
+# --- NODE REGISTRATION ---
+func register_gameplay_ui(ui_instance: CanvasLayer) -> void:
+	gameplay_ui = ui_instance
 
-func update_mouse_mode() -> void:
-	if is_mouse_captured:
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	else:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-#endregion
+func register_player(p_node: CharacterBody3D) -> void:
+	player_node = p_node
 
-#region Data Persistence
-func save_best_time(level_name: String, time: float) -> void:
-	if level_name.is_empty(): return
+func register_pause_menu(menu_instance: Control) -> void:
+	pause_menu_instance = menu_instance
+	pause_menu_instance.hide() # Start hidden
 
-	var save_path = "user://%s_save.json" % level_name
-	var file = FileAccess.open(save_path, FileAccess.WRITE)
-	if file:
-		var save_data = {"best_time": time}
-		file.store_string(JSON.stringify(save_data))
-		file.close() # CRITICAL FIX: This line ensures the data is written to disk.
+# --- TIME SAVING & LOADING ---
+const SAVE_DIR = "user://best_times/"
 
-func load_best_time(level_name: String) -> float:
-	if level_name.is_empty(): return 0.0
-
-	var save_path = "user://%s_save.json" % level_name
-	if not FileAccess.file_exists(save_path):
-		return 0.0
-	
-	var file = FileAccess.open(save_path, FileAccess.READ)
-	if not file: return 0.0
-	
-	var content = file.get_as_text()
-	file.close() # CRITICAL FIX: This ensures the file handle is released properly.
-	var data = JSON.parse_string(content)
-	
-	# Check for corrupted or empty JSON data to prevent crash
-	if not data or not data.has("best_time"):
-		return 0.0
-		
-	return data["best_time"]
-
-func delete_all_saved_times() -> void:
-	var dir = DirAccess.open("user://")
-	if not dir:
-		push_error("Could not open user directory.")
+func save_best_time(time: float) -> void:
+	if current_level_id.is_empty():
+		push_error("Cannot save time - empty level ID!")
 		return
-		
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if file_name.ends_with("_save.json"):
-			var error = dir.remove(file_name)
-			if error != OK:
-				push_error("Failed to delete file: %s" % file_name)
-		file_name = dir.get_next()
-	
-	# After deleting, refresh the current level's UI if it's visible
-	if is_instance_valid(gameplay_ui) and not current_level_name.is_empty():
-		gameplay_ui.display_best_time()
-#endregion
+
+	var dir = DirAccess.open("user://")
+	if dir == null:
+		push_error("Failed to access user data directory!")
+		return
+
+	if not dir.dir_exists("best_times"):
+		var err = dir.make_dir("best_times")
+		if err != OK:
+			push_error("Failed to create best_times directory!")
+			return
+
+	var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
+	var file = FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		push_error("Failed to save time for %s. Error: %s" % [current_level_id, FileAccess.get_open_error()])
+		return
+
+	file.store_float(time)
+	file.close()
+
+func load_best_time(level_id_to_load: String) -> float:
+	if level_id_to_load.is_empty():
+		return 0.0
+
+	var file_path = SAVE_DIR.path_join(level_id_to_load + ".dat")
+	if not FileAccess.file_exists(file_path):
+		return 0.0
+
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		push_error("Failed to load time for %s. Error: %s" % [level_id_to_load, FileAccess.get_open_error()])
+		return 0.0
+
+	var time = file.get_float()
+	file.close()
+	return time

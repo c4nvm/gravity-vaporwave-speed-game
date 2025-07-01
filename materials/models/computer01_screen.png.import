@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhj3atopp2su4"
-path.s3tc="res://.godot/imported/computer01_screen.png-548566438d371abdea52d3a6a33bfed9.s3tc.ctex"
+path.s3tc="res://.godot/imported/computer01_screen.png-cfc3e169183377fe3d42a6ee83c29c60.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://materials/models/computer01_screen.png"
-dest_files=["res://.godot/imported/computer01_screen.png-548566438d371abdea52d3a6a33bfed9.s3tc.ctex"]
+source_file="res://Materials/models/computer01_screen.png"
+dest_files=["res://.godot/imported/computer01_screen.png-cfc3e169183377fe3d42a6ee83c29c60.s3tc.ctex"]
 
 [params]
 

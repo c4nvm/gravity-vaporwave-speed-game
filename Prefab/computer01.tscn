@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://pe2ypgkl4sx0"]
 
-[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="1_ed5qh"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="1_ed5qh"]
 
 [node name="Node3D" type="Node3D"]
 

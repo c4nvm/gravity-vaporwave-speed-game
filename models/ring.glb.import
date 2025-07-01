@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cmv35myqtg1a"
-path="res://.godot/imported/ring.glb-92245d40d4d3f68f1d40c2e61c91d089.scn"
+path="res://.godot/imported/ring.glb-26ac43d74527a30dcde06236f951335f.scn"
 
 [deps]
 
-source_file="res://models/ring.glb"
-dest_files=["res://.godot/imported/ring.glb-92245d40d4d3f68f1d40c2e61c91d089.scn"]
+source_file="res://Models/ring.glb"
+dest_files=["res://.godot/imported/ring.glb-26ac43d74527a30dcde06236f951335f.scn"]
 
 [params]
 

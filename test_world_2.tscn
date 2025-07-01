@@ -1,16 +1,15 @@
-[gd_scene load_steps=17 format=3 uid="uid://cfbs2uihp1eol"]
+[gd_scene load_steps=16 format=3 uid="uid://cfbs2uihp1eol"]
 
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_pqskb"]
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_wmna3"]
-[ext_resource type="PackedScene" uid="uid://ditgafjixyddp" path="res://Menus/pause_menu.tscn" id="3_2wy2r"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="3_ipw6r"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="4_kkg2a"]
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_80vtj"]
 [ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="7_ff24s"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_p3td8"]
-[ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="9_klw1l"]
 [ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="9_wmna3"]
 [ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="10_2wy2r"]
+[ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="10_wmna3"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_wmna3")
@@ -58,9 +57,6 @@ size = Vector3(5, 20, 45.4455)
 
 [node name="test world" type="Node3D"]
 script = ExtResource("1_pqskb")
-player_scene = ExtResource("9_klw1l")
-pause_menu_scene = ExtResource("3_2wy2r")
-level_name = "Test World 2"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_cnaw2")
@@ -184,3 +180,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0139138, -0.95, -4.15538)
 
 [node name="Endpoint" parent="." instance=ExtResource("10_2wy2r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0178822, 8.57896, -95.8715)
+
+[node name="SpeedrunTimer" type="Node" parent="."]
+script = ExtResource("10_wmna3")
+metadata/_custom_type_script = "uid://cs01dd4m5fjb7"

@@ -1,61 +1,60 @@
-# GameplayUI.gd
 extends CanvasLayer
 
-## Gameplay UI
-## Displays timer, best times, and other in-game info.
-
 @onready var timer_label: Label = %TimerLabel
-@onready var best_time_label: Label = %BestTimeLabel
+@onready var record_time_label: Label = %BestTimeLabel
 @onready var debug_label: Label = %DebugLabel
 
-var current_level: String = ""
+var current_level_id: String = ""
+var current_record: float = 0.0
 
 func _ready() -> void:
 	GameManager.register_gameplay_ui(self)
-	GameManager.level_loaded.connect(_on_level_loaded)
-	set_timer_visibility(Color.LIGHT_BLUE)
+	
+	# Set default text values
+	record_time_label.text = "Record: --:--:---"
+	timer_label.text = "00:00:000"
 
-func _on_level_loaded(level_path: String) -> void:
-	# Store the basename of the level file (e.g., "level_1")
-	current_level = level_path.get_file().get_basename()
-	display_best_time()
+	# Directly get the level ID from the GameManager when the UI is ready.
+	current_level_id = GameManager.current_level_id
+	
+	# Call the function to load and display the record.
+	load_record_time()
+
+func load_record_time() -> void:
+	# This guard is still good practice.
+	if current_level_id.is_empty():
+		return
+	
+	current_record = GameManager.load_best_time(current_level_id)
+	
+	if current_record > 0.0:
+		record_time_label.text = "Record: " + format_time(current_record)
+	else:
+		# This now shows if there is genuinely no record saved.
+		record_time_label.text = "Record: No record"
 
 func update_timer(time_in_seconds: float) -> void:
-	if timer_label:
-		timer_label.text = format_time(time_in_seconds)
-
-func update_debug(debug_string: String) -> void:
-	if debug_label:
-		debug_label.text = debug_string
-
-func set_timer_visibility(color: Color) -> void:
-	if timer_label:
-		timer_label.add_theme_color_override("font_color", color)
-
-func display_best_time() -> void:
-	if not best_time_label or current_level.is_empty():
-		return
-
-	var best_time: float = GameManager.load_best_time(current_level)
-	if best_time > 0.0:
-		best_time_label.text = "Best: " + format_time(best_time)
-	else:
-		best_time_label.text = "Best: --:--:---"
+	timer_label.text = format_time(time_in_seconds)
 
 func show_final_time(final_time: float) -> void:
-	if not timer_label or not best_time_label:
-		return
-	
 	timer_label.text = "Time: " + format_time(final_time)
-	
-	var best_time: float = GameManager.load_best_time(current_level)
-	
-	# If there's no best time or the new time is better, save it.
-	if best_time <= 0.0 or final_time < best_time:
-		GameManager.save_best_time(current_level, final_time)
-		best_time_label.text = "New Best: " + format_time(final_time)
+
+	# Check against the current record to see if a new one was set.
+	if current_record <= 0.0 or final_time < current_record:
+		GameManager.save_best_time(final_time)
+		
+		current_record = final_time
+		record_time_label.text = "New Record: " + format_time(final_time)
+		set_timer_visibility(Color.GOLD)
 	else:
-		best_time_label.text = "Best: " + format_time(best_time)
+		record_time_label.text = "Record: " + format_time(current_record)
+		set_timer_visibility(Color.WHITE)
+
+func set_timer_visibility(color: Color) -> void:
+	timer_label.add_theme_color_override("font_color", color)
+
+func update_debug(debug_string: String) -> void:
+	debug_label.text = debug_string
 
 func format_time(seconds: float) -> String:
 	var minutes := int(seconds / 60)

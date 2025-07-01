@@ -41,7 +41,7 @@ mouse_filter = 1
 theme_override_colors/font_color = Color(0.270222, 0.270222, 0.270222, 1)
 theme_override_fonts/font = ExtResource("3_i7ma2")
 theme_override_font_sizes/font_size = 90
-text = "Timer"
+text = "--:--:---"
 horizontal_alignment = 2
 
 [node name="BestTimeLabel" type="Label" parent="."]
@@ -57,5 +57,5 @@ mouse_filter = 1
 theme_override_colors/font_color = Color(1, 0.811765, 0, 1)
 theme_override_fonts/font = ExtResource("3_i7ma2")
 theme_override_font_sizes/font_size = 90
-text = "Timer"
+text = "Best: --:--:---"
 horizontal_alignment = 2
