@@ -44,7 +44,7 @@ func _on_endpoint_body_entered(body: Node3D) -> void:
 		if speedrun_timer:
 			speedrun_timer.player_finished_level()
 		
-		endpoint.monitoring = false
+		endpoint.set_deferred("monitoring", false)
 		GameManager.update_mouse_mode(false)
 		
 		await get_tree().create_timer(3.0).timeout
