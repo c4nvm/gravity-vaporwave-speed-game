@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=33 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_07jwy"]
@@ -12,12 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
-[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="12_ivea3"]
 [ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="13_jvck6"]
 [ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
 [ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="15_kfu6g"]
 [ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="16_6mf5r"]
-[ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="17_dpn1f"]
 [ext_resource type="PackedScene" uid="uid://bcc2j8msg2nc4" path="res://Prefab/rocks/rock01.tscn" id="18_s72lq"]
 [ext_resource type="PackedScene" uid="uid://vjdd48amu0wf" path="res://Prefab/rocks/rock02.tscn" id="19_5cwf5"]
 [ext_resource type="PackedScene" uid="uid://4oyq6ic3hdqw" path="res://Prefab/rocks/rock03.tscn" id="20_jtp4g"]
@@ -225,27 +224,6 @@ transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -97.54
 [node name="RayCast3D" type="RayCast3D" parent="StartPosition"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 target_position = Vector3(0, 0, -1)
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
-handle_input_locally = false
-render_target_update_mode = 4
-
-[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -90.6623, 18.1375, 0.417273)
-
-[node name="Label" type="Label" parent="SubViewportContainer"]
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -11.5
-offset_right = 40.0
-offset_bottom = 11.5
-grow_vertical = 2
-script = ExtResource("17_dpn1f")
 
 [node name="Rock01" parent="." instance=ExtResource("18_s72lq")]
 transform = Transform3D(4.82963, 0, -1.2941, 0, 5, 0, 1.2941, 0, 4.82963, -89.3239, 2.8679, -5.94233)

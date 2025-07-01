@@ -23,7 +23,7 @@ func _ready() -> void:
 	# so it can function while the game tree is paused.
 	var pause_instance = pause_menu_scene.instantiate()
 	pause_instance.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(pause_instance)
+	add_sibling(pause_instance)
 
 	# Wait a frame for the GameManager to be ready
 	await get_tree().process_frame
