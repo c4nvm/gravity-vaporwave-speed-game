@@ -1,0 +1,61 @@
+[gd_scene load_steps=4 format=3 uid="uid://ddxhm3hiqd52l"]
+
+[ext_resource type="Script" uid="uid://vf5sa767t4n6" path="res://UI/gameplay_ui.gd" id="1_pclro"]
+[ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="2_i7ma2"]
+[ext_resource type="FontFile" uid="uid://bpni7l64yc8o2" path="res://Fonts/W95FA.otf" id="3_i7ma2"]
+
+[node name="GameUI" type="CanvasLayer"]
+script = ExtResource("1_pclro")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CenterContainer"]
+modulate = Color(0, 1, 0, 1)
+layout_mode = 2
+texture = ExtResource("2_i7ma2")
+expand_mode = 2
+stretch_mode = 3
+
+[node name="DebugLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_right = 40.0
+offset_bottom = 23.0
+mouse_filter = 1
+theme_override_fonts/font = ExtResource("3_i7ma2")
+theme_override_font_sizes/font_size = 30
+text = "hello"
+
+[node name="TimerLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.270222, 0.270222, 0.270222, 1)
+theme_override_fonts/font = ExtResource("3_i7ma2")
+theme_override_font_sizes/font_size = 90
+text = "Timer"
+horizontal_alignment = 2
+
+[node name="BestTimeLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 81.0
+offset_bottom = 81.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(1, 0.811765, 0, 1)
+theme_override_fonts/font = ExtResource("3_i7ma2")
+theme_override_font_sizes/font_size = 90
+text = "Timer"
+horizontal_alignment = 2

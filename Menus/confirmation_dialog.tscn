@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bf7dwntp1n63l"]
+
+[ext_resource type="Script" uid="uid://cjjke4cbtip8n" path="res://Menus/confirmation_dialog.gd" id="1_5w75a"]
+
+[node name="ConfirmationDialog" type="ConfirmationDialog"]
+size = Vector2i(400, 200)
+script = ExtResource("1_5w75a")

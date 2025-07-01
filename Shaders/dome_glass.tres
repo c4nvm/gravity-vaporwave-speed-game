@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://ckmdoe3y7l0i3"]
+
+[ext_resource type="Shader" uid="uid://bto4ae5uchhnu" path="res://shaders/glass.gdshader" id="1_4po2w"]
+[ext_resource type="Texture2D" uid="uid://ulyq88ng6qwr" path="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_diffuse.jpg" id="2_7g2r4"]
+[ext_resource type="Texture2D" uid="uid://ci87tn3aoujs7" path="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_normal.jpg" id="3_5lv11"]
+[ext_resource type="Texture2D" uid="uid://cerd5rou02yf6" path="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_roughness.jpg" id="4_rbdww"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_4po2w")
+shader_parameter/albedo = Color(1, 1, 1, 0.462745)
+shader_parameter/albedo_texture = ExtResource("2_7g2r4")
+shader_parameter/roughness = 0.743
+shader_parameter/roughness_texture = ExtResource("4_rbdww")
+shader_parameter/normal_strength = 16.0
+shader_parameter/normal_map = ExtResource("3_5lv11")
+shader_parameter/edge_color = Color(0, 0, 0, 1)

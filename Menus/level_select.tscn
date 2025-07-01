@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dybao3wbuli24"]
+[gd_scene load_steps=2 format=3 uid="uid://dufffdfhqklki"]
 
-[ext_resource type="Script" path="res://Menus/level_select.gd" id="1_ceq2k"]
+[ext_resource type="Script" uid="uid://6iwg5hsgougb" path="res://Menus/level_select.gd" id="1_ceq2k"]
 
 [node name="LevelSelect" type="Control"]
 layout_mode = 3
@@ -11,30 +11,35 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ceq2k")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -49.0
-offset_top = -50.5
-offset_right = 49.0
-offset_bottom = 50.5
+[node name="LevelButtonsContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 162.0
+offset_right = 348.0
+offset_bottom = 212.0
+
+[node name="Test World 1" type="Button" parent="LevelButtonsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Test World 1"
+
+[node name="Test World 2" type="Button" parent="LevelButtonsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Test World 2"
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 2
+anchor_left = 0.0567708
+anchor_top = 0.8875
+anchor_right = 0.096875
+anchor_bottom = 0.933796
+offset_left = 16.0
+offset_top = 9.5
+offset_right = -16.0
+offset_bottom = -9.5
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Test World 1" type="Button" parent="VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Test Level 1"
-
-[node name="Test World 2" type="Button" parent="VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Test Level 2"
-
-[node name="Back" type="Button" parent="VBoxContainer"]
-layout_mode = 2
+theme_override_font_sizes/font_size = 30
 text = "Back"
+metadata/_edit_use_anchors_ = true

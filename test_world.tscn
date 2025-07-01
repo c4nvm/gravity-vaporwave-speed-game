@@ -1,19 +1,22 @@
-[gd_scene load_steps=23 format=3 uid="uid://djealuhqfpp8l"]
+[gd_scene load_steps=26 format=3 uid="uid://djealuhqfpp8l"]
 
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_1lwx6"]
+[ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_07jwy"]
 [ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="1_gy3sr"]
 [ext_resource type="PackedScene" uid="uid://cp74r48rxpi4c" path="res://planet_3d.tscn" id="2_1lwx6"]
+[ext_resource type="PackedScene" uid="uid://ditgafjixyddp" path="res://Menus/pause_menu.tscn" id="3_6mf5r"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="4_dsnr4"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="4_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://d26gy3iv8nnql" path="res://Pre-Prefab/island.tscn" id="5_lf0gk"]
-[ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="6_cnaw2"]
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_uu1iw"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
 [ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="12_ivea3"]
-[ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="12_jvck6"]
+[ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="13_jvck6"]
 [ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
+[ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="15_kfu6g"]
+[ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="16_6mf5r"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_1lwx6")
@@ -68,22 +71,16 @@ size = Vector3(3.58363, 2.43126, 3.66815)
 [sub_resource type="BoxShape3D" id="BoxShape3D_5457m"]
 size = Vector3(19.6182, 19.1631, 24.1017)
 
-[node name="SubViewportContainer" type="SubViewportContainer"]
-offset_right = 1920.0
-offset_bottom = 1080.0
-stretch = true
+[node name="test world" type="Node3D"]
+script = ExtResource("1_07jwy")
+player_scene = ExtResource("1_gy3sr")
+pause_menu_scene = ExtResource("3_6mf5r")
+level_name = "Test Level 1"
 
-[node name="SubViewport" type="SubViewport" parent="."]
-handle_input_locally = false
-size = Vector2i(1920, 1080)
-render_target_update_mode = 4
-
-[node name="test world" type="Node3D" parent="SubViewport"]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/test world"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_cnaw2")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world/WorldEnvironment"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
 light_color = Color(0.81234, 0.73811, 0.693527, 1)
 light_energy = 0.5
@@ -91,33 +88,33 @@ light_indirect_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
 
-[node name="Planet3D" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
+[node name="Planet3D" parent="." instance=ExtResource("2_1lwx6")]
 transform = Transform3D(15, 0, 0, 0, 15, 0, 0, 0, 15, 0, -2, 0)
 
-[node name="Bouncepad" parent="SubViewport/test world/Planet3D" instance=ExtResource("4_dsnr4")]
+[node name="Bouncepad" parent="Planet3D" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(0.758533, -0.651635, 0, 0.651635, 0.758533, 0, 0, 0, 1, -10.1854, 9, 0)
 top_level = true
 bounce_force = 35.0
 
-[node name="Bouncepad2" parent="SubViewport/test world/Planet3D" instance=ExtResource("4_dsnr4")]
+[node name="Bouncepad2" parent="Planet3D" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(0.787301, 0.616569, 0, -0.616569, 0.787301, 0, 0, 0, 1, 9.10145, 9.93842, 0)
 top_level = true
 bounce_force = 35.0
 
-[node name="Planet3D2" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
+[node name="Planet3D2" parent="." instance=ExtResource("2_1lwx6")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, -47, -2, 0)
 
-[node name="Bouncepad" parent="SubViewport/test world/Planet3D2" instance=ExtResource("4_dsnr4")]
+[node name="Bouncepad" parent="Planet3D2" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
 bounce_force = 35.0
 
-[node name="Flat" type="StaticBody3D" parent="SubViewport/test world"]
+[node name="Flat" type="StaticBody3D" parent="."]
 transform = Transform3D(-0.707107, -0.707107, 0, 0.707107, -0.707107, 0, 0, 0, 1, 37, 27, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/test world/Flat"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Flat"]
 mesh = SubResource("BoxMesh_dsnr4")
 
-[node name="Area3D" type="Area3D" parent="SubViewport/test world/Flat/MeshInstance3D" groups=["gravity_fields"]]
+[node name="Area3D" type="Area3D" parent="Flat/MeshInstance3D" groups=["gravity_fields"]]
 transform = Transform3D(0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0, 1, 0, 0, 0)
 priority = 1
 gravity_space_override = 3
@@ -125,125 +122,98 @@ gravity_point_center = Vector3(0.707, -0.707, 0)
 gravity_direction = Vector3(0.707, -0.707, 0)
 script = ExtResource("4_ud3vi")
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="SubViewport/test world/Flat/MeshInstance3D/Area3D"]
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="Flat/MeshInstance3D/Area3D"]
 transform = Transform3D(0.704602, -0.704602, 0, 0.704602, 0.704602, 0, 0, 0, 1.99292, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_lf0gk")
 
-[node name="RayCast3D" type="RayCast3D" parent="SubViewport/test world/Flat/MeshInstance3D"]
+[node name="RayCast3D" type="RayCast3D" parent="Flat/MeshInstance3D"]
 target_position = Vector3(35, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/Flat"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Flat"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_dsnr4")
 
-[node name="Planet3D3" parent="SubViewport/test world" instance=ExtResource("2_1lwx6")]
+[node name="Planet3D3" parent="." instance=ExtResource("2_1lwx6")]
 transform = Transform3D(0.552711, -0.00205079, -5.30126, -3.99801, 3.49999, -0.418187, 3.48128, 4.01982, 0.361404, -27.4288, 34, -21)
 
-[node name="Bouncepad" parent="SubViewport/test world/Planet3D3" instance=ExtResource("4_dsnr4")]
+[node name="Bouncepad" parent="Planet3D3" instance=ExtResource("4_dsnr4")]
 transform = Transform3D(-4.37114e-09, 0.1, 0, -0.1, -4.37114e-09, 0, 0, 0, 0.1, 1, 0, 0)
 bounce_force = 35.0
 
-[node name="Bouncepad" parent="SubViewport/test world" instance=ExtResource("4_dsnr4")]
+[node name="Bouncepad" parent="." instance=ExtResource("4_dsnr4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.5669, 2.63798, 1.56872)
 
-[node name="island" parent="SubViewport/test world" instance=ExtResource("5_lf0gk")]
+[node name="island" parent="." instance=ExtResource("5_lf0gk")]
 transform = Transform3D(-8.56743e-08, 0, -1.96, 0, 1.96, 0, 1.96, 0, -8.56743e-08, -91.8646, 1.08065, 0)
 
-[node name="Area3D" type="Area3D" parent="SubViewport/test world/island" groups=["gravity_fields"]]
+[node name="Area3D" type="Area3D" parent="island" groups=["gravity_fields"]]
 transform = Transform3D(1.96, 0, 0, 0, 1.96, 0, 0, 0, 1.96, 0, 0, 0)
 gravity_space_override = 3
 script = ExtResource("4_ud3vi")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/island/Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="island/Area3D"]
 transform = Transform3D(1.95988, 0, 2.98428e-13, 0, 1.95988, 0, -2.98428e-13, 0, 1.95988, 0.427846, 2.56334, -0.275953)
 shape = SubResource("BoxShape3D_cnaw2")
 
-[node name="column3" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+[node name="column3" parent="." instance=ExtResource("6_uu1iw")]
 transform = Transform3D(0.117564, -0.279088, 0.953042, 0.901843, 0.431797, 0.015199, -0.415763, 0.857707, 0.302457, -5.68317, 5.10539, 11.3181)
 
-[node name="tree" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+[node name="tree" parent="." instance=ExtResource("9_ud3vi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.3897, 1.09691, -5.20032)
 
-[node name="column" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+[node name="column" parent="." instance=ExtResource("6_uu1iw")]
 transform = Transform3D(0.810591, -0.0171618, 0.58536, 0.00817679, 0.999805, 0.0179896, -0.585554, -0.00979587, 0.810574, -94.4788, 2.36367, 8.9653)
 
-[node name="column2" parent="SubViewport/test world" instance=ExtResource("6_uu1iw")]
+[node name="column2" parent="." instance=ExtResource("6_uu1iw")]
 transform = Transform3D(1.17258, 0.116558, -0.226885, -0.114435, 1.19433, 0.0221424, 0.227963, 0, 1.17815, -91.485, 2.25868, 9.2569)
 
-[node name="tree2" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+[node name="tree2" parent="." instance=ExtResource("9_ud3vi")]
 transform = Transform3D(0.99519, -0.0510524, 0.083611, 0, 0.853478, 0.521129, -0.097965, -0.518622, 0.849373, -45.7824, 5.976, -5.40705)
 
-[node name="tree3" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+[node name="tree3" parent="." instance=ExtResource("9_ud3vi")]
 transform = Transform3D(0.768094, -0.30516, -0.562948, 0, 0.879142, -0.47656, 0.640338, 0.366043, 0.675263, -5.13228, 8.90876, 8.16576)
 
-[node name="tree4" parent="SubViewport/test world" instance=ExtResource("9_ud3vi")]
+[node name="tree4" parent="." instance=ExtResource("9_ud3vi")]
 transform = Transform3D(0.869588, 0.311474, 0.383145, 0.0750937, 0.6835, -0.726078, -0.488034, 0.66016, 0.570974, 7.85858, 5.70236, 8.33262)
 
-[node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_4tg7h")]
+[node name="alexander" parent="." instance=ExtResource("8_4tg7h")]
 transform = Transform3D(-0.296878, -0.0339663, 0.954311, -0.247819, 0.967867, -0.0426454, -0.922198, -0.249157, -0.295756, -85.487, 2.17939, -2.4436)
 
-[node name="Foliage01" parent="SubViewport/test world" instance=ExtResource("11_5457m")]
+[node name="Foliage01" parent="." instance=ExtResource("11_5457m")]
 transform = Transform3D(0.988151, -0.0129468, -0.152937, 0.00573833, 0.998856, -0.0474817, 0.153377, 0.0460414, 0.987095, -90.9745, 4.34573, 8.39316)
 
-[node name="Foliage02" parent="SubViewport/test world" instance=ExtResource("11_5457m")]
+[node name="Foliage02" parent="." instance=ExtResource("11_5457m")]
 transform = Transform3D(0.413697, 0, 0.280811, 0, 0.5, 0, -0.280811, 0, 0.413697, -94.5262, 5.08239, 8.03091)
 
-[node name="Gravity" type="Area3D" parent="SubViewport/test world" groups=["gravity_fields"]]
+[node name="Gravity" type="Area3D" parent="." groups=["gravity_fields"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 0)
 priority = -1
 gravity_space_override = 3
 script = ExtResource("4_ud3vi")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/Gravity"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Gravity"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.215332, 1.64983, 1.79645)
 shape = SubResource("BoxShape3D_5457m")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -94.7717, 3.73889, -5.34272)
 use_collision = true
 size = Vector3(3.32715, 2.97318, 2.22949)
 
-[node name="Player" parent="SubViewport/test world" instance=ExtResource("1_gy3sr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 3, 0)
-
-[node name="computer01" parent="SubViewport/test world" instance=ExtResource("12_ivea3")]
+[node name="computer01" parent="." instance=ExtResource("12_ivea3")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -94.0962, 6.36628, -5.43346)
 
-[node name="Node3D" parent="SubViewport/test world" instance=ExtResource("14_07jwy")]
+[node name="Node3D" parent="." instance=ExtResource("14_07jwy")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -94.0881, 5.30509, -4.68482)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
+[node name="GameUI" parent="." instance=ExtResource("13_jvck6")]
 
-[node name="CenterContainer" type="CenterContainer" parent="SubViewport/CanvasLayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
+[node name="Endpoint" parent="." instance=ExtResource("16_6mf5r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.2404, 48.7994, 0)
 
-[node name="TextureRect" type="TextureRect" parent="SubViewport/CanvasLayer/CenterContainer"]
-modulate = Color(0, 1, 0, 1)
-layout_mode = 2
-texture = ExtResource("6_cnaw2")
+[node name="StartPosition" parent="." instance=ExtResource("15_kfu6g")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -97.5475, 2.56249, 3.00091)
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/CanvasLayer"]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="SubViewport" type="SubViewport" parent="SubViewport/CanvasLayer/SubViewportContainer"]
-handle_input_locally = false
-render_target_update_mode = 4
-
-[node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -90.6623, 18.1375, 0.417273)
-
-[node name="Label" type="Label" parent="SubViewport/CanvasLayer"]
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -11.5
-offset_right = 40.0
-offset_bottom = 11.5
-grow_vertical = 2
-script = ExtResource("12_jvck6")
+[node name="RayCast3D" type="RayCast3D" parent="StartPosition"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+target_position = Vector3(0, 0, -1)

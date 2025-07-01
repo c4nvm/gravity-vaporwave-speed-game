@@ -20,7 +20,7 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var acceleration := 15.0
 @export var deceleration := 20.0
 @export var air_acceleration := 2.0
-@export var air_deceleration := 0.4
+@export var air_deceleration := 0.1
 @export var terminal_velocity := 50.0
 @export var fall_lerp_weight := 5.0
 

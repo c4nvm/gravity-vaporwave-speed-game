@@ -9,4 +9,4 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	text = "Velocity = " + str(round((player.velocity.length_squared()/2)))
+	text = "Velocity = " + str(round(sqrt((player.velocity.length_squared()))))

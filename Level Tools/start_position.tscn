@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://n7f4gsm8j1d2"]
+
+[node name="StartPosition" type="Marker3D"]

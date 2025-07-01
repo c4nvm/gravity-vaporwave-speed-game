@@ -1,13 +1,16 @@
-[gd_scene load_steps=14 format=3 uid="uid://cfbs2uihp1eol"]
+[gd_scene load_steps=17 format=3 uid="uid://cfbs2uihp1eol"]
 
+[ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_pqskb"]
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="1_wmna3"]
+[ext_resource type="PackedScene" uid="uid://ditgafjixyddp" path="res://Menus/pause_menu.tscn" id="3_2wy2r"]
 [ext_resource type="PackedScene" uid="uid://dmq25rgcwlmhp" path="res://bouncepad.tscn" id="3_ipw6r"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="4_kkg2a"]
 [ext_resource type="PackedScene" uid="uid://dydw3digqcqp" path="res://Prefab/column.tscn" id="6_80vtj"]
+[ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="7_ff24s"]
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_p3td8"]
-[ext_resource type="Script" uid="uid://cqu04yx7mhsh2" path="res://debug.gd" id="8_pqskb"]
 [ext_resource type="PackedScene" uid="uid://bnqi03y2dl6e7" path="res://player.tscn" id="9_klw1l"]
-[ext_resource type="Texture2D" uid="uid://bbwdfmupjss0j" path="res://crosshair.png" id="10_om41v"]
+[ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="9_wmna3"]
+[ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="10_2wy2r"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_wmna3")
@@ -53,26 +56,16 @@ size = Vector3(9.14075, 21.0352, 48.0029)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ff24s"]
 size = Vector3(5, 20, 45.4455)
 
-[node name="SubViewportContainer2" type="SubViewportContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-stretch = true
-metadata/_edit_use_anchors_ = true
+[node name="test world" type="Node3D"]
+script = ExtResource("1_pqskb")
+player_scene = ExtResource("9_klw1l")
+pause_menu_scene = ExtResource("3_2wy2r")
+level_name = "Test World 2"
 
-[node name="SubViewport" type="SubViewport" parent="."]
-handle_input_locally = false
-size = Vector2i(1920, 1080)
-render_target_update_mode = 4
-
-[node name="test world" type="Node3D" parent="SubViewport"]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/test world"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_cnaw2")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/test world/WorldEnvironment"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
 light_color = Color(0.81234, 0.73811, 0.693527, 1)
 light_energy = 0.5
@@ -80,146 +73,114 @@ light_indirect_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
 
-[node name="CSGBox3D" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -27.7039)
 use_collision = true
 size = Vector3(5, 0.1, 49.4077)
 
-[node name="Area3D" type="Area3D" parent="SubViewport/test world/CSGBox3D" groups=["gravity_fields"]]
+[node name="Area3D" type="Area3D" parent="CSGBox3D" groups=["gravity_fields"]]
 gravity_space_override = 3
 script = ExtResource("4_kkg2a")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/CSGBox3D/Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D/Area3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.173889, 9.48242, 1.18178)
 shape = SubResource("BoxShape3D_x1iep")
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -1, -8.74228e-08, 0, 8.74228e-08, -1, 0, 9, -71.4077)
 use_collision = true
 size = Vector3(5, 0.1, 49.4077)
 
-[node name="Area3D" type="Area3D" parent="SubViewport/test world/CSGBox3D2" groups=["gravity_fields"]]
+[node name="Area3D" type="Area3D" parent="CSGBox3D2" groups=["gravity_fields"]]
 gravity_space_override = 3
 gravity_point_center = Vector3(0, 1, 0)
 gravity_direction = Vector3(0, 1, 0)
 script = ExtResource("4_kkg2a")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewport/test world/CSGBox3D2/Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D2/Area3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 2.07607)
 shape = SubResource("BoxShape3D_ff24s")
 
-[node name="CSGBox3D3" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 2.50813, 1.42956, -27.7039)
 use_collision = true
 size = Vector3(5, 0.1, 49.4077)
 
-[node name="CSGBox3D4" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -2.46624, 1.42956, -27.7039)
 use_collision = true
 size = Vector3(5, 0.1, 49.4077)
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D5" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1.37466, -3.1)
 use_collision = true
 size = Vector3(5, 0.1, 5.09268)
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D6" type="CSGBox3D" parent="."]
 transform = Transform3D(1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0, 1, 0.0337625, 3.82956, -23)
 use_collision = true
 size = Vector3(5, 0.1, 40)
 
-[node name="CSGBox3D7" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
 transform = Transform3D(1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0, 1, 2.03376, 3.82956, -47.4)
 use_collision = true
 size = Vector3(1, 0.1, 10)
 
-[node name="CSGBox3D8" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D8" type="CSGBox3D" parent="."]
 transform = Transform3D(1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0, 1, -1.91802, 3.82956, -46.9)
 use_collision = true
 size = Vector3(1, 0.1, 11)
 
-[node name="CSGBox3D9" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D9" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -52.3577)
 use_collision = true
 size = Vector3(5, 5, 0.1)
 
-[node name="Bouncepad" parent="SubViewport/test world" instance=ExtResource("3_ipw6r")]
+[node name="Bouncepad" parent="." instance=ExtResource("3_ipw6r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0383472, -0.9, -42.8164)
 
-[node name="CSGBox3D10" type="CSGBox3D" parent="SubViewport/test world"]
+[node name="CSGBox3D10" type="CSGBox3D" parent="."]
 transform = Transform3D(1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0, 1, 0.183762, 3.82956, -51.55)
 use_collision = true
 size = Vector3(4.7, 0.1, 1.7)
 
-[node name="column" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.743215, -0.669053, 0, 0.669053, 0.743215, 0, 0, 0, 1, 3.31083, 0.297234, -10.0239)
 
-[node name="column2" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column2" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.244986, -0.969527, 0, 0.483121, 0.122078, 0.867001, -0.840581, -0.212403, 0.498306, 0.604623, 2.8552, -10.0239)
 
-[node name="column3" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column3" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.546044, -0.257627, 0.79716, -0.0648262, 0.935695, 0.346804, -0.835245, -0.241047, 0.494229, 0.604623, -1.62014, -15.1634)
 
-[node name="column4" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column4" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.461185, 0.182389, 0.868356, -0.299457, 0.953221, -0.0411722, -0.835245, -0.241047, 0.494229, -0.54565, 1.91935, -15.6761)
 
-[node name="column5" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column5" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(-0.00120401, 0.899597, 0.436719, -0.549877, 0.364172, -0.751674, -0.835245, -0.241047, 0.494229, 0.256233, 0.818892, -15.6761)
 
-[node name="column6" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column6" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.402643, 0.344019, 0.848251, -0.374493, 0.907495, -0.190284, -0.835245, -0.241047, 0.494229, -2.62382, 1.54629, -22.9031)
 
-[node name="column7" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column7" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(-0.387209, 0.963921, -0.184255, -0.431984, -0.345268, -0.898446, -0.881183, -0.254305, 0.521412, -2.62382, 1.35393, -22.9031)
 
-[node name="column8" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column8" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(-0.288672, 0.957198, -0.0210059, 0.747152, 0.211498, -0.630105, -0.598693, -0.197588, -0.776226, 1.16025, 0.624941, -24.3831)
 
-[node name="column9" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column9" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.371011, -0.928628, 0, 0.764719, 0.305525, -0.567326, 0.526835, 0.210485, 0.823493, -0.917494, -0.515048, -29.8709)
 
-[node name="column10" parent="SubViewport/test world" instance=ExtResource("6_80vtj")]
+[node name="column10" parent="." instance=ExtResource("6_80vtj")]
 transform = Transform3D(0.895332, 1.06324, 0, -1.06324, 0.895332, 0, 0, 0, 1.39, -0.41683, -0.661243, -29.8709)
 
-[node name="alexander" parent="SubViewport/test world" instance=ExtResource("8_p3td8")]
+[node name="alexander" parent="." instance=ExtResource("8_p3td8")]
 transform = Transform3D(-1.04442, -0.0320395, 0.0656697, 0.0211566, 0.891927, 0.324761, -0.10598, 0.493801, -0.582338, 0.213531, 0.853135, -24.1394)
 
-[node name="Player" parent="SubViewport/test world" instance=ExtResource("9_klw1l")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
-slide_hop_jump_multiplier = 0.8
+[node name="GameUI" parent="." instance=ExtResource("7_ff24s")]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
+[node name="StartPosition" parent="." instance=ExtResource("9_wmna3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0139138, -0.95, -4.15538)
 
-[node name="CenterContainer" type="CenterContainer" parent="SubViewport/CanvasLayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="TextureRect" type="TextureRect" parent="SubViewport/CanvasLayer/CenterContainer"]
-modulate = Color(0, 1, 0, 1)
-layout_mode = 2
-texture = ExtResource("10_om41v")
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="SubViewport/CanvasLayer"]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="SubViewport" type="SubViewport" parent="SubViewport/CanvasLayer/SubViewportContainer"]
-handle_input_locally = false
-render_target_update_mode = 4
-
-[node name="Camera3D" type="Camera3D" parent="SubViewport/CanvasLayer/SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.589464, 0, -0.807794, 0, 1, 0, 0.807794, 0, -0.589464, -26.475, 4.262, -41.5188)
-
-[node name="Label" type="Label" parent="SubViewport/CanvasLayer"]
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -11.5
-offset_right = 40.0
-offset_bottom = 11.5
-grow_vertical = 2
-script = ExtResource("8_pqskb")
+[node name="Endpoint" parent="." instance=ExtResource("10_2wy2r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0178822, 8.57896, -95.8715)

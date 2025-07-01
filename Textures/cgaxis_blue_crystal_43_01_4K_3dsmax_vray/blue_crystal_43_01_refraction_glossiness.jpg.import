@@ -1,0 +1,35 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dvdg46lb5l6gb"
+path.s3tc="res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_refraction_glossiness.jpg"
+dest_files=["res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1
