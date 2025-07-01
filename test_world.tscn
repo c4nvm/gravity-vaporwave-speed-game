@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://c7a4n02ijxnar" path="res://Prefab/alexander.tscn" id="8_4tg7h"]
 [ext_resource type="PackedScene" uid="uid://8htdm57mtpcp" path="res://Prefab/tree.tscn" id="9_ud3vi"]
 [ext_resource type="PackedScene" uid="uid://dmssyvh1rsuue" path="res://Pre-Prefab/foliage01.tscn" id="11_5457m"]
-[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://Models/computer01.glb" id="12_ivea3"]
+[ext_resource type="PackedScene" uid="uid://xkn5mo4pwuke" path="res://models/computer01.glb" id="12_ivea3"]
 [ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="13_jvck6"]
 [ext_resource type="PackedScene" uid="uid://c3xdv5akvunm2" path="res://Prefab/keyboard01.tscn" id="14_07jwy"]
 [ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="15_kfu6g"]

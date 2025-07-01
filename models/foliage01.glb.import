@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://rn2t0xjmuuaf"
-path="res://.godot/imported/foliage01.glb-a1c505dbec9e4474ce01b9ec4307b1b1.scn"
+path="res://.godot/imported/foliage01.glb-2da97855bac6668bdc79879353e287f8.scn"
 
 [deps]
 
-source_file="res://Models/foliage01.glb"
-dest_files=["res://.godot/imported/foliage01.glb-a1c505dbec9e4474ce01b9ec4307b1b1.scn"]
+source_file="res://models/foliage01.glb"
+dest_files=["res://.godot/imported/foliage01.glb-2da97855bac6668bdc79879353e287f8.scn"]
 
 [params]
 

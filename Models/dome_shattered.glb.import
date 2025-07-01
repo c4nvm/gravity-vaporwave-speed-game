@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b8cf8deojhk8n"
-path="res://.godot/imported/dome_shattered.glb-306472f82b5b1c09957a0ca43ea6b7b5.scn"
+path="res://.godot/imported/dome_shattered.glb-b3e5484313e8be2f8eb72422df5a9e10.scn"
 
 [deps]
 
-source_file="res://Models/dome_shattered.glb"
-dest_files=["res://.godot/imported/dome_shattered.glb-306472f82b5b1c09957a0ca43ea6b7b5.scn"]
+source_file="res://models/dome_shattered.glb"
+dest_files=["res://.godot/imported/dome_shattered.glb-b3e5484313e8be2f8eb72422df5a9e10.scn"]
 
 [params]
 

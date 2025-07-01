@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dfs0jmmowgq3r"
-path="res://.godot/imported/rock06.glb-6d0af203ab7ac60695900c7a4a2fc372.scn"
+path="res://.godot/imported/rock06.glb-7c8bacd2d54bb90034f7bdc9ba436d80.scn"
 
 [deps]
 
-source_file="res://Models/rock06.glb"
-dest_files=["res://.godot/imported/rock06.glb-6d0af203ab7ac60695900c7a4a2fc372.scn"]
+source_file="res://models/rock06.glb"
+dest_files=["res://.godot/imported/rock06.glb-7c8bacd2d54bb90034f7bdc9ba436d80.scn"]
 
 [params]
 
@@ -32,6 +32,13 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={}
+_subresources={
+"materials": {
+"rock": {
+"use_external/enabled": true,
+"use_external/path": "uid://smyb115mssa0"
+}
+}
+}
 gltf/naming_version=1
 gltf/embedded_image_handling=1

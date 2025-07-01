@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://pvmenbpnxcad"
-path.s3tc="res://.godot/imported/foliage02.png-4647bc0a94cd0072a03b9df4241f00cd.s3tc.ctex"
+path.s3tc="res://.godot/imported/foliage02.png-e6a5ab6ff3822bbb1a02ec072f09aae7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Materials/models/foliage02.png"
-dest_files=["res://.godot/imported/foliage02.png-4647bc0a94cd0072a03b9df4241f00cd.s3tc.ctex"]
+source_file="res://materials/models/foliage02.png"
+dest_files=["res://.godot/imported/foliage02.png-e6a5ab6ff3822bbb1a02ec072f09aae7.s3tc.ctex"]
 
 [params]
 

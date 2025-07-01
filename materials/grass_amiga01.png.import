@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lmhbyl6fjaui"
-path.s3tc="res://.godot/imported/grass_amiga01.png-a7468282dff2cda11b1100a15f1006aa.s3tc.ctex"
+path.s3tc="res://.godot/imported/grass_amiga01.png-fd551cd2c937e76dd4116fb9aa2e7c52.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Materials/grass_amiga01.png"
-dest_files=["res://.godot/imported/grass_amiga01.png-a7468282dff2cda11b1100a15f1006aa.s3tc.ctex"]
+source_file="res://materials/grass_amiga01.png"
+dest_files=["res://.godot/imported/grass_amiga01.png-fd551cd2c937e76dd4116fb9aa2e7c52.s3tc.ctex"]
 
 [params]
 
