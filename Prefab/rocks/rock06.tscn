@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://eyeppb0m08dd"]
+
+[ext_resource type="PackedScene" uid="uid://b6qsrni0n607r" path="res://models/rock06.glb" id="1_u3ac2"]
+
+[node name="Rock06" type="Node3D"]
+
+[node name="rock06" parent="." instance=ExtResource("1_u3ac2")]
