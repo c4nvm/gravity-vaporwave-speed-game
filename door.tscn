@@ -1,0 +1,128 @@
+[gd_scene load_steps=9 format=3 uid="uid://b2838vlgparcy"]
+
+[ext_resource type="Script" uid="uid://b8ufh1roumtvh" path="res://door.gd" id="1_ba8gm"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_v6xrn"]
+size = Vector3(2, 3, 0.1)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ba8gm"]
+data = PackedVector3Array(-1, 1.5, 0.05, 1, 1.5, 0.05, -1, -1.5, 0.05, 1, 1.5, 0.05, 1, -1.5, 0.05, -1, -1.5, 0.05, 1, 1.5, -0.05, -1, 1.5, -0.05, 1, -1.5, -0.05, -1, 1.5, -0.05, -1, -1.5, -0.05, 1, -1.5, -0.05, 1, 1.5, 0.05, 1, 1.5, -0.05, 1, -1.5, 0.05, 1, 1.5, -0.05, 1, -1.5, -0.05, 1, -1.5, 0.05, -1, 1.5, -0.05, -1, 1.5, 0.05, -1, -1.5, -0.05, -1, 1.5, 0.05, -1, -1.5, 0.05, -1, -1.5, -0.05, 1, 1.5, 0.05, -1, 1.5, 0.05, 1, 1.5, -0.05, -1, 1.5, 0.05, -1, 1.5, -0.05, 1, 1.5, -0.05, -1, -1.5, 0.05, 1, -1.5, 0.05, -1, -1.5, -0.05, 1, -1.5, 0.05, 1, -1.5, -0.05, -1, -1.5, -0.05)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_v6xrn"]
+data = PackedVector3Array(-1, 1.5, 0.05, 1, 1.5, 0.05, -1, -1.5, 0.05, 1, 1.5, 0.05, 1, -1.5, 0.05, -1, -1.5, 0.05, 1, 1.5, -0.05, -1, 1.5, -0.05, 1, -1.5, -0.05, -1, 1.5, -0.05, -1, -1.5, -0.05, 1, -1.5, -0.05, 1, 1.5, 0.05, 1, 1.5, -0.05, 1, -1.5, 0.05, 1, 1.5, -0.05, 1, -1.5, -0.05, 1, -1.5, 0.05, -1, 1.5, -0.05, -1, 1.5, 0.05, -1, -1.5, -0.05, -1, 1.5, 0.05, -1, -1.5, 0.05, -1, -1.5, -0.05, 1, 1.5, 0.05, -1, 1.5, 0.05, 1, 1.5, -0.05, -1, 1.5, 0.05, -1, 1.5, -0.05, 1, 1.5, -0.05, -1, -1.5, 0.05, 1, -1.5, 0.05, -1, -1.5, -0.05, 1, -1.5, 0.05, 1, -1.5, -0.05, -1, -1.5, -0.05)
+
+[sub_resource type="Animation" id="Animation_0phs7"]
+resource_name = "open"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LeftSide:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(-1, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightSide:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(1, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ba8gm"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LeftSide:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightSide:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_v6xrn"]
+resource_name = "close"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LeftSide:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(-1, 0, 0), Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("RightSide:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(1, 0, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_50cdl"]
+_data = {
+&"RESET": SubResource("Animation_ba8gm"),
+&"close": SubResource("Animation_v6xrn"),
+&"open": SubResource("Animation_0phs7")
+}
+
+[node name="Door" type="Node3D"]
+script = ExtResource("1_ba8gm")
+
+[node name="LeftSide" type="AnimatableBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftSide"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.5, 0)
+mesh = SubResource("BoxMesh_v6xrn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftSide"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.5, 0)
+shape = SubResource("ConcavePolygonShape3D_ba8gm")
+
+[node name="RightSide" type="AnimatableBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightSide"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.5, 0)
+mesh = SubResource("BoxMesh_v6xrn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightSide"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.5, 0)
+shape = SubResource("ConcavePolygonShape3D_v6xrn")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_50cdl")
+}

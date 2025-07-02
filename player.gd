@@ -84,7 +84,6 @@ var transition_start_velocity := Vector3.ZERO
 @export var step_up_debug := false
 @export var step_down_debug := false
 
-#region Gravity Gun Configuration
 @export_group("Gravity Gun")
 @export var gravity_gun_enabled := true
 @export var gravity_gun_range := 15.0
@@ -96,7 +95,12 @@ var transition_start_velocity := Vector3.ZERO
 @export var knockback_force := 10.0
 @export var shoot_ray_length := 1000.0
 @export var shoot_position_offset := 0.1 # How far from the impact surface to place the object
-#endregion
+
+@export_group("Switch Interaction")
+@export var switch_activation_area_scene: PackedScene
+@export var switch_activation_duration := 0.5 # How long the area stays active
+@export var switch_activation_radius := 0.5 # Radius of the activation area
+
 #endregion
 
 #region Nodes
@@ -349,8 +353,8 @@ func _setup_gravity_gun():
 
 	if is_instance_valid(gravity_gun_ray):
 		gravity_gun_ray.target_position = Vector3(0, 0, -gravity_gun_range)
-		# (1 << 0) is layer 1, (1 << 2) is layer 3.
-		gravity_gun_ray.collision_mask = 4
+		# This ray is for PICKING UP objects. It only needs to see Layer 3 ("grabbable").
+		gravity_gun_ray.collision_mask = 1 << 2 # Layer 3
 	else:
 		push_warning("Gravity Gun: 'GravityGunRay' node not found.")
 
@@ -395,7 +399,7 @@ func _drop_object():
 
 	held_object.freeze = false
 	# Restore object to layer 3 and set its mask to see layers 1 and 3.
-	held_object.collision_layer = (1 << 2) # Set object's layer to 3
+	held_object.collision_layer = 1 << 2 # Set object's layer to 3
 	held_object.collision_mask = (1 << 0) | (1 << 2) # Collide with layers 1 & 3
 
 	# Give it a gentle push forward from player's momentum
@@ -403,6 +407,31 @@ func _drop_object():
 	held_object.angular_velocity = Vector3.ZERO
 
 	held_object = null
+
+func _create_switch_activation_area(collision_point: Vector3, collision_normal: Vector3):
+	if not switch_activation_area_scene:
+		push_warning("No switch activation area scene assigned!")
+		return
+	
+	var area_instance = switch_activation_area_scene.instantiate()
+	get_tree().current_scene.add_child(area_instance)
+	
+	# Position the area slightly in front of the collision surface
+	area_instance.global_transform.origin = collision_point + collision_normal * 0.05
+	area_instance.scale = Vector3.ONE * switch_activation_radius
+	
+	# Set up timer to free the area
+	var timer = Timer.new()
+	timer.wait_time = switch_activation_duration
+	timer.one_shot = true
+	timer.timeout.connect(func():
+		area_instance.queue_free()
+		timer.queue_free()
+	)
+	area_instance.add_child(timer)
+	timer.start()
+	
+	return area_instance
 
 func _shoot_object():
 	if not held_object:
@@ -418,24 +447,35 @@ func _shoot_object():
 	query.from = camera.global_transform.origin
 	var shoot_direction = -camera.global_transform.basis.z.normalized()
 	query.to = query.from + shoot_direction * shoot_ray_length
+	# Exclude the player and the object being shot so the ray finds the target surface.
 	query.exclude = [self.get_rid(), shot_object.get_rid()]
 	
 	var result = space_state.intersect_ray(query)
 	var impact_point = query.to # Default to max range if no collision
+	
 	if result:
 		impact_point = result.position
+		# --- FIX START ---
+		# When the shot ray hits a surface, we create the temporary activation area.
+		# This area will trigger any switches it overlaps with.
+		_create_switch_activation_area(result.position, result.normal)
+		if gravity_gun_debug: print("Created switch activation area at:", result.position)
+		# --- FIX END ---
+
 
 	# --- Position the object ---
 	if result:
+		# Place the object slightly in front of the impact surface to avoid collision issues.
 		shot_object.global_transform.origin = impact_point + result.normal * shoot_position_offset
 		if gravity_gun_debug: print("Shot object teleported to safe position:", shot_object.global_transform.origin)
 	else:
+		# If no surface was hit, place it at the max range of the shot.
 		shot_object.global_transform.origin = impact_point
 		if gravity_gun_debug: print("Shot object teleported to max range:", query.to)
 
 	# --- Reset physics properties and apply velocity ---
 	shot_object.freeze = false
-	shot_object.collision_layer = (1 << 2)
+	shot_object.collision_layer = 1 << 2
 	shot_object.collision_mask = (1 << 0) | (1 << 2)
 	shot_object.angular_velocity = Vector3.ZERO
 	shot_object.linear_velocity = shoot_direction * gravity_gun_shoot_force

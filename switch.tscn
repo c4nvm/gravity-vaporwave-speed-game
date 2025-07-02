@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://bwmtp5lbdou4j"]
+
+[ext_resource type="Script" uid="uid://ci6ti2ctblml1" path="res://switch.gd" id="1_it01i"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kxpdx"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_it01i"]
+albedo_color = Color(1, 0, 0, 1)
+emission = Color(0.504394, 0.481575, 0.503931, 1)
+emission_energy_multiplier = 1.87
+
+[sub_resource type="BoxMesh" id="BoxMesh_it01i"]
+material = SubResource("StandardMaterial3D_it01i")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_8307x"]
+radius = 0.75
+
+[node name="Switch" type="StaticBody3D"]
+script = ExtResource("1_it01i")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_kxpdx")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_it01i")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_8307x")

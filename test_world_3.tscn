@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c0x1ehaawhnhg"]
+[gd_scene load_steps=15 format=3 uid="uid://c0x1ehaawhnhg"]
 
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_xchr8"]
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="2_6a12g"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="8_70c8f"]
 [ext_resource type="PackedScene" uid="uid://uphecbnso1no" path="res://Props/Test Props/cube.tscn" id="8_x6dyj"]
 [ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="9_7rwwn"]
+[ext_resource type="PackedScene" uid="uid://bwmtp5lbdou4j" path="res://switch.tscn" id="9_xchr8"]
+[ext_resource type="PackedScene" uid="uid://b2838vlgparcy" path="res://door.tscn" id="10_6a12g"]
 [ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="10_si5yy"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
@@ -100,3 +102,64 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.9538, 0.5, -2.39515)
 
 [node name="Cube3" parent="." instance=ExtResource("8_x6dyj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.00905, 0.5, -10.2466)
+
+[node name="Switch" parent="." instance=ExtResource("9_xchr8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.88578, 0.25, 0.947866)
+linked_doors = Array[NodePath]([NodePath("../Door")])
+
+[node name="Switch2" parent="." instance=ExtResource("9_xchr8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2588, 0.25, -0.0303092)
+linked_doors = Array[NodePath]([NodePath("../Door")])
+
+[node name="Door" parent="." instance=ExtResource("10_6a12g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13)
+required_switches_to_open = 2
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2.75, -13)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(2, 5.5, 1)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 4.25, -13)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(4.1, 2.5, 1)
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.8, -13)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(2, 5.4, 1)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.75, -18.5)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(1, 5.5, 10)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 2.75, -18.5)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(1, 5.5, 10)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, -23)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(6, 5.5, 1)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -18)
+use_collision = true
+collision_layer = 5
+collision_mask = 5
+size = Vector3(8, 1, 11)

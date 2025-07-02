@@ -204,11 +204,11 @@ func _apply_settings_from_ui() -> void:
 	save_settings()
 
 
-func _on_display_mode_selected(index: int) -> void:
+func _on_display_mode_selected(_index: int) -> void:
 	_apply_settings_from_ui()
 
 
-func _on_resolution_selected(index: int) -> void:
+func _on_resolution_selected(_index: int) -> void:
 	if not resolution_button.disabled:
 		_apply_settings_from_ui()
 

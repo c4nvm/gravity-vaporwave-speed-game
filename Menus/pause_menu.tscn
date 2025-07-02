@@ -71,6 +71,16 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Main Menu"
 
+[node name="ResetBestButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+process_mode = 3
+custom_minimum_size = Vector2(200, 70)
+layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(1, 0.5, 0.5, 1)
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 30
+text = "Reset Current Best"
+
 [node name="DeleteTimesButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 3

@@ -1,7 +1,8 @@
-[gd_scene load_steps=26 format=3 uid="uid://bnqi03y2dl6e7"]
+[gd_scene load_steps=27 format=3 uid="uid://bnqi03y2dl6e7"]
 
 [ext_resource type="Script" uid="uid://bt340a7i5ar4w" path="res://player.gd" id="1_4ivg5"]
 [ext_resource type="Shader" uid="uid://de2vc7d4gh74w" path="res://shaders/Outline.gdshader" id="2_ffn7p"]
+[ext_resource type="PackedScene" uid="uid://bbu5poc5f8sho" path="res://activation_area.tscn" id="2_u1c27"]
 [ext_resource type="Shader" uid="uid://lknhyb2p5dot" path="res://shaders/toon.gdshader" id="3_skmdc"]
 [ext_resource type="Script" uid="uid://d13mrf2y62hup" path="res://State Machine/state_machine.gd" id="5_qhaxn"]
 [ext_resource type="Script" uid="uid://c7kiomdsmwjkq" path="res://State Machine/Player States/grounded.gd" id="6_p3tak"]
@@ -105,6 +106,8 @@ gravity_gun_range = 10.0
 gravity_gun_hold_distance = 2.0
 gravity_gun_hold_offset_y = -1.0
 gravity_gun_debug = true
+switch_activation_area_scene = ExtResource("2_u1c27")
+switch_activation_radius = 1.0
 
 [node name="DirectionRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

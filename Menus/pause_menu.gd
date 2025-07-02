@@ -8,12 +8,13 @@ extends CanvasLayer
 
 @onready var resume_button: Button = %ResumeButton
 @onready var restart_button: Button = %RestartButton
+@onready var reset_best_button: Button = %ResetBestButton
 @onready var delete_times_button: Button = %DeleteTimesButton
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var settings_button: Button = %SettingsButton
 @onready var confirmation_dialog: ConfirmationDialog = $PauseMenu/ConfirmationDialog
 
-enum Action { RESTART, DELETE_TIMES, MAIN_MENU }
+enum Action { RESTART, DELETE_LEVEL_TIME, DELETE_TIMES, MAIN_MENU }
 var current_confirmation_action: Action
 
 func _ready() -> void:
@@ -27,6 +28,7 @@ func _ready() -> void:
 	# --- Connect button signals ---
 	resume_button.pressed.connect(GameManager.toggle_pause_menu)
 	restart_button.pressed.connect(_on_restart_pressed)
+	reset_best_button.pressed.connect(_on_reset_best_pressed)
 	delete_times_button.pressed.connect(_on_delete_times_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
@@ -43,12 +45,16 @@ func show_main_pause_menu() -> void:
 	pause_menu_container.show()
 
 func _on_settings_pressed() -> void:
-	pause_menu_container.show()
+	pause_menu_container.hide()
 	settings_menu.show()
 
 func _on_restart_pressed() -> void:
 	current_confirmation_action = Action.RESTART
 	show_confirmation("Restart Level", "Are you sure you want to restart? Your current run will be lost.")
+
+func _on_reset_best_pressed() -> void:
+	current_confirmation_action = Action.DELETE_LEVEL_TIME
+	show_confirmation("Reset Best Time", "This will permanently delete the best time for this level. This cannot be undone.")
 
 func _on_delete_times_pressed() -> void:
 	current_confirmation_action = Action.DELETE_TIMES
@@ -69,6 +75,8 @@ func _on_confirmation_confirmed() -> void:
 		Action.RESTART:
 			# GameManager handles unpausing and scene change
 			GameManager.reload_current_level()
+		Action.DELETE_LEVEL_TIME:
+			GameManager.delete_current_level_time()
 		Action.DELETE_TIMES:
 			GameManager.delete_all_saved_times()
 		Action.MAIN_MENU:
@@ -83,6 +91,7 @@ func _on_confirmation_visibility_changed() -> void:
 func set_buttons_disabled(disabled: bool) -> void:
 	resume_button.disabled = disabled
 	restart_button.disabled = disabled
+	reset_best_button.disabled = disabled
 	delete_times_button.disabled = disabled
 	main_menu_button.disabled = disabled
 	settings_button.disabled = disabled

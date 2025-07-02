@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbu5poc5f8sho"]
+
+[ext_resource type="Script" uid="uid://c6nrpu6mfoqws" path="res://activation_area.gd" id="1_cfrnj"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_x3dvt"]
+radius = 1.0
+
+[node name="ActivationArea" type="Area3D" groups=["activation_area"]]
+script = ExtResource("1_cfrnj")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_x3dvt")

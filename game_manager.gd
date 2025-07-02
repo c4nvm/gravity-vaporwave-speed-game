@@ -73,7 +73,7 @@ func _ready():
 
 
 # -------------------------------------------------------------------
-# ---                  PLAYER EVENT HOOKS (AUDIO LOGIC)                  ---
+# ---				  PLAYER EVENT HOOKS (AUDIO LOGIC)			  ---
 # -------------------------------------------------------------------
 
 func _on_player_first_move():
@@ -167,9 +167,9 @@ func toggle_pause_menu() -> void:
 	get_tree().paused = new_paused_state
 	pause_menu_instance.visible = new_paused_state
 	
-	# If the settings menu is open, hide it when pausing.
+	# If the settings menu is open, hide it when pausing, and show the main pause menu
 	if new_paused_state and is_instance_valid(settings_menu_instance) and settings_menu_instance.visible:
-		settings_menu_instance.hide()
+		pause_menu_instance.show_main_pause_menu()
 
 	update_mouse_mode(not new_paused_state)
 
@@ -296,6 +296,31 @@ func load_best_time(level_id_to_load: String) -> float:
 	var time = file.get_float()
 	file.close()
 	return time
+
+# --- NEW FUNCTION ---
+func delete_current_level_time() -> void:
+	if current_level_id.is_empty():
+		push_error("Cannot delete time: current_level_id is empty.")
+		return
+		
+	var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
+	if not FileAccess.file_exists(file_path):
+		# No file to delete, which is fine.
+		print("No best time existed for level '%s'. Nothing to delete." % current_level_id)
+		return
+
+	var dir = DirAccess.open(SAVE_DIR)
+	if dir == null:
+		push_error("Could not open save directory to delete a file.")
+		return
+	
+	var err = dir.remove(file_path)
+	if err != OK:
+		push_error("Error deleting file '%s': %s" % [file_path, err])
+	
+	# After deleting, tell the gameplay UI to update its display.
+	if is_instance_valid(gameplay_ui):
+		gameplay_ui.load_record_time()
 
 
 func delete_all_saved_times() -> void:
