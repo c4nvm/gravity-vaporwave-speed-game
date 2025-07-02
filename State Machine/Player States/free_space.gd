@@ -1,68 +1,57 @@
 # FreeSpace.gd
 extends State
 
+# Movement settings
+@export var swim_speed := 12.0
+@export var swim_accel := 8.0
+@export var roll_speed := 3.0
+@export var roll_decay := 0.95
+
+# Rotation tracking
+var _pitch := 0.0
+var _yaw := 0.0
+
 func enter():
 	player._enter_free_space_mode()
-	if player.hook_controller:
-		player.hook_controller.set_free_space_mode(true)
+	player.free_space_velocity = player.velocity * 0.5
+	_pitch = 0.0
+	_yaw = 0.0
+	player.free_space_roll = 0.0
 
 func exit():
 	player._enter_planetary_mode()
-	if player.hook_controller:
-		player.hook_controller.set_free_space_mode(false)
-
 
 func process_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if Input.is_action_pressed("roll_left"):
-			player.free_space_roll += player.free_space_roll_speed * get_process_delta_time()
-		if Input.is_action_pressed("roll_right"):
-			player.free_space_roll -= player.free_space_roll_speed * get_process_delta_time()
+		# Use player's mouse sensitivity directly
+		_pitch -= event.relative.y * player.mouse_sensitivity * 0.001
+		_yaw -= event.relative.x * player.mouse_sensitivity * 0.001
+		_pitch = clamp(_pitch, -PI/2, PI/2)
 
-func process_physics(delta):
+func process_physics(_delta):
+	# Apply raw rotation immediately
+	var rot = Basis()
+	rot = rot.rotated(Vector3.RIGHT, _pitch)
+	rot = rot.rotated(Vector3.UP, _yaw)
+	rot = rot.rotated(Vector3.BACK, player.free_space_roll)
+	player.transform.basis = rot.orthonormalized()
+	
+	# Handle roll input
+	if Input.is_action_pressed("roll_left"):
+		player.free_space_roll += roll_speed * _delta
+	if Input.is_action_pressed("roll_right"):
+		player.free_space_roll -= roll_speed * _delta
+	player.free_space_roll *= roll_decay
+	
+	# Movement input (direct with no smoothing)
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	var vertical_input := Input.get_action_strength("jump") - Input.get_action_strength("slide")
 	var move_dir = Vector3(input_dir.x, vertical_input, -input_dir.y).normalized()
-	var target_velocity = move_dir * player.free_space_max_speed
-	var is_hook_pulling = player.hook_controller and player.hook_controller.is_hook_active()
-
-	if is_hook_pulling:
-		var hook_pull = player.hook_controller.get_hook_pull_vector(delta)
-		player.velocity += hook_pull
-		player.free_space_velocity = player.free_space_velocity.lerp(target_velocity * 0.3, player.free_space_acceleration * delta)
-	else:
-		player.free_space_velocity = player.free_space_velocity.lerp(target_velocity, player.free_space_acceleration * delta)
-		if move_dir.length_squared() < 0.1:
-			player.free_space_velocity = player.free_space_velocity.lerp(Vector3.ZERO, player.free_space_deceleration * delta)
-
-	player.free_space_velocity *= player.free_space_momentum_gain
-	var target_basis = Basis()
-	target_basis = target_basis.rotated(Vector3.RIGHT, player.free_space_rotation.x)
-	target_basis = target_basis.rotated(Vector3.UP, player.free_space_rotation.y)
-	target_basis = target_basis.rotated(Vector3.BACK, player.free_space_roll)
-
-	player.transform.basis = player.transform.basis.slerp(target_basis, player.free_space_rotation_speed * delta).orthonormalized()
-	player.free_space_roll *= player.free_space_roll_decay
-
-	_update_free_space_camera(input_dir, vertical_input, delta)
-
-	if is_hook_pulling:
-		player.velocity += player.transform.basis * player.free_space_velocity
-	else:
-		player.velocity = player.transform.basis * player.free_space_velocity
+	
+	# Direct velocity application
+	player.free_space_velocity = move_dir * swim_speed
+	player.velocity = player.transform.basis * player.free_space_velocity
 	player.move_and_slide()
-
-func _update_free_space_camera(input_dir: Vector2, vertical_input: float, delta: float):
-	var camera_target_position = Vector3.ZERO
-	if abs(vertical_input) > 0.1:
-		camera_target_position.y = vertical_input * 0.5
-	if abs(input_dir.x) > 0.1:
-		camera_target_position.x = input_dir.x * 0.5
-	if abs(input_dir.y) > 0.1:
-		camera_target_position.z = input_dir.y * 0.3
-
-	player.free_space_camera_offset = player.free_space_camera_offset.lerp(camera_target_position, player.free_space_camera_lerp_speed * delta)
-	player.camera.position = player.free_space_camera_offset
 
 func get_next_state() -> String:
 	return ""

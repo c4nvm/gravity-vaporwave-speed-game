@@ -31,7 +31,7 @@ func _ready() -> void:
 	load_record_time()
 	
 	# Load and setup the 3D compass
-	var loaded_scene = preload("res://Compass.tscn").instantiate()
+	var loaded_scene = preload("res://compass.tscn").instantiate()
 	if loaded_scene is Node3D:
 		compass_instance = loaded_scene
 		compass_viewport.add_child(compass_instance)

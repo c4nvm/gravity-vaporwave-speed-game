@@ -2,7 +2,7 @@
 extends Node
 
 # Set the path to your main menu scene.
-@export var main_menu_scene: PackedScene = preload("res://menus/main_menu.tscn")
+@export var main_menu_scene: PackedScene = preload("res://Menus/main_menu.tscn")
 
 func _ready() -> void:
 	# When the game starts, this main node will immediately
