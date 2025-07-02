@@ -14,6 +14,7 @@ var audio_manager: Node
 signal level_loaded(level_path: String, level_id: String)
 
 # --- GLOBAL STATE ---
+var can_pause := true # NEW: Flag to control if the game can be paused.
 var is_mouse_captured: bool = false
 var current_level_id: String = ""
 var current_level_path: String = ""
@@ -77,9 +78,8 @@ func _on_player_first_move():
 
 # --- GAME LOOP & INPUT ---
 func _process(_delta: float) -> void:
-	# Check for pause input. This runs even when paused.
-	# Do not allow pause if the level is already complete.
-	if not current_level_path.is_empty() and is_instance_valid(pause_menu_instance) and not is_level_complete:
+	# MODIFIED: Check for pause input, but only if pausing is currently allowed.
+	if can_pause and not current_level_path.is_empty() and is_instance_valid(pause_menu_instance) and not is_level_complete:
 		if Input.is_action_just_pressed("ui_cancel"):
 			toggle_pause_menu()
 
@@ -107,13 +107,16 @@ func _process(_delta: float) -> void:
 # --- SCENE TRANSITION EFFECTS ---
 func start_level_fade_in(duration: float):
 	"""
-	Fades the screen in from black when a level starts.
+	Fades the screen in from black and controls the pause state.
 	Called by the Player node when it's ready.
 	"""
 	if not is_instance_valid(fade_rect):
 		push_error("Fade rectangle node is not valid.")
 		return
 
+	# Make sure pausing is disabled at the start of the fade.
+	can_pause = false
+	
 	# Make it visible and instantly set to black, then tween to transparent.
 	fade_rect.visible = true
 	fade_rect.modulate = Color.BLACK
@@ -126,8 +129,11 @@ func start_level_fade_in(duration: float):
 	# Animate the 'a' (alpha) channel of the modulate property to fade out the black screen.
 	tween.tween_property(fade_rect, "modulate:a", 0.0, duration)
 	
-	# Hide the rectangle after the fade is complete to be safe.
-	tween.tween_callback(func(): fade_rect.visible = false)
+	# MODIFIED: When the tween finishes, hide the fade rectangle AND re-enable pausing.
+	tween.tween_callback(func():
+		fade_rect.visible = false
+		can_pause = true
+	)
 
 
 # --- MOUSE MANAGEMENT ---
@@ -155,17 +161,23 @@ func toggle_pause_menu() -> void:
 # --- SCENE MANAGEMENT ---
 func goto_main_menu() -> void:
 	_cleanup_before_scene_change()
+	# Allow pausing in the main menu
+	can_pause = true
 	get_tree().change_scene_to_file("res://Menus/main_menu.tscn")
 	update_mouse_mode(false)
 
 
 func goto_level_select() -> void:
 	_cleanup_before_scene_change()
+	# Allow pausing in the level select menu (if applicable)
+	can_pause = true
 	get_tree().change_scene_to_file("res://Menus/level_select.tscn")
 	update_mouse_mode(false)
 
 
 func load_level(level_path: String) -> void:
+	# MODIFIED: Disable pausing when starting to load a level.
+	can_pause = false
 	is_level_complete = false # Reset on new level load
 	current_level_path = level_path
 	current_level_id = level_path.get_file().get_basename()
@@ -180,6 +192,8 @@ func load_level(level_path: String) -> void:
 
 
 func reload_current_level() -> void:
+	# MODIFIED: Disable pausing when reloading a level.
+	can_pause = false
 	is_level_complete = false # Reset on level reload
 	
 	# This function is called from the pause menu to restart the level.
