@@ -12,7 +12,7 @@ rings = 1
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_frlnh"]
 height = 0.2
-radius = 0.6
+radius = 1.0
 
 [node name="Bouncepad" type="Area3D"]
 script = ExtResource("1_tihdl")

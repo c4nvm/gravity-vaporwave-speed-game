@@ -3,7 +3,8 @@ extends Control
 
 const LEVELS = {
 	"Test World 1": "res://test_world.tscn",
-	"Test World 2": "res://test_world_2.tscn"
+	"Test World 2": "res://test_world_2.tscn",
+	"Test World 3": "res://test_world_3.tscn"
 }
 
 @onready var level_buttons_container: VBoxContainer = $LevelButtonsContainer

@@ -1,0 +1,88 @@
+[gd_scene load_steps=12 format=3 uid="uid://c0x1ehaawhnhg"]
+
+[ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_xchr8"]
+[ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="2_6a12g"]
+[ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="3_3xb8j"]
+[ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="7_wi2up"]
+[ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="8_70c8f"]
+[ext_resource type="PackedScene" uid="uid://dx2qgaiucer8f" path="res://Level Tools/endpoint.tscn" id="9_7rwwn"]
+[ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="10_si5yy"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
+panorama = ExtResource("2_6a12g")
+
+[sub_resource type="Sky" id="Sky_lf0gk"]
+sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
+
+[sub_resource type="Environment" id="Environment_cnaw2"]
+background_mode = 2
+background_energy_multiplier = 0.5
+sky = SubResource("Sky_lf0gk")
+tonemap_mode = 3
+tonemap_exposure = 0.83
+tonemap_white = 2.35
+ssao_enabled = true
+ssao_radius = 2.0
+ssao_ao_channel_affect = 0.85
+ssil_enabled = true
+sdfgi_bounce_feedback = 1.99
+glow_enabled = true
+glow_levels/2 = 1.97
+glow_levels/3 = 7.9
+glow_levels/5 = 4.85
+glow_levels/6 = 5.95
+glow_bloom = 0.25
+fog_mode = 1
+fog_density = 1.0
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(0.811765, 0.678431, 1, 1)
+volumetric_fog_emission = Color(1, 0.701961, 0.741176, 1)
+volumetric_fog_anisotropy = 0.9
+volumetric_fog_length = 78.87
+volumetric_fog_detail_spread = 0.5
+volumetric_fog_temporal_reprojection_amount = 0.99
+adjustment_enabled = true
+adjustment_contrast = 0.9
+adjustment_saturation = 1.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_50kdo"]
+size = Vector3(100, 37.775, 100)
+
+[node name="test world" type="Node3D"]
+script = ExtResource("1_xchr8")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cnaw2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
+light_color = Color(0.81234, 0.73811, 0.693527, 1)
+light_energy = 0.5
+light_indirect_energy = 0.5
+light_bake_mode = 1
+shadow_enabled = true
+
+[node name="GameUI" parent="." instance=ExtResource("7_wi2up")]
+
+[node name="StartPosition" parent="." instance=ExtResource("8_70c8f")]
+
+[node name="Endpoint" parent="." instance=ExtResource("9_7rwwn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+
+[node name="SpeedrunTimer" type="Node" parent="."]
+script = ExtResource("10_si5yy")
+metadata/_custom_type_script = "uid://cs01dd4m5fjb7"
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.5, -1.5)
+use_collision = true
+size = Vector3(50, 1, 50)
+
+[node name="Area3D" type="Area3D" parent="." groups=["gravity_fields"]]
+gravity_space_override = 3
+script = ExtResource("3_3xb8j")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_50kdo")
+debug_color = Color(0, 0.6, 0.701961, 0.466667)

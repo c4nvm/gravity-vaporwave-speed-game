@@ -4,19 +4,23 @@
 [ext_resource type="Script" uid="uid://dfps0jbcxqfjt" path="res://Menus/pause_menu.gd" id="1_ik086"]
 [ext_resource type="PackedScene" uid="uid://bf7dwntp1n63l" path="res://Menus/confirmation_dialog.tscn" id="4_v7yoa"]
 
-[node name="PauseMenu" type="Control"]
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 128
+script = ExtResource("1_ik086")
+
+[node name="PauseMenu" type="Control" parent="."]
 process_mode = 3
 process_priority = 5
-z_index = 50
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_ik086")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="PauseMenu"]
+z_index = 50
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -29,54 +33,47 @@ offset_right = 98.0
 offset_bottom = 133.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/MarginContainer"]
 process_mode = 3
 layout_mode = 2
+mouse_filter = 2
 
-[node name="ResumeButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ResumeButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-process_mode = 3
 custom_minimum_size = Vector2(200, 70)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Resume"
 
-[node name="SettingsButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SettingsButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 3
-process_priority = 440
-z_index = 100
 custom_minimum_size = Vector2(200, 70)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Settings"
 
-[node name="RestartButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="RestartButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 3
-process_priority = 440
-z_index = 100
 custom_minimum_size = Vector2(200, 70)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Restart"
 
-[node name="MainMenuButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="MainMenuButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 3
-process_priority = 440
-z_index = 100
 custom_minimum_size = Vector2(200, 70)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Main Menu"
 
-[node name="DeleteTimesButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="DeleteTimesButton" type="Button" parent="PauseMenu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 3
-process_priority = 440
-z_index = 100
 custom_minimum_size = Vector2(200, 70)
 layout_mode = 2
 theme_override_colors/font_hover_pressed_color = Color(1, 0.5, 0.5, 1)
@@ -84,7 +81,7 @@ theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "Delete Times"
 
-[node name="SettingsMenu" parent="." instance=ExtResource("1_i2531")]
+[node name="SettingsMenu" parent="PauseMenu" instance=ExtResource("1_i2531")]
 unique_name_in_owner = true
 process_mode = 3
 visible = false
@@ -92,15 +89,17 @@ layout_mode = 2
 anchors_preset = 0
 offset_right = 406.0
 
-[node name="ConfirmationDialog" parent="." instance=ExtResource("4_v7yoa")]
+[node name="ConfirmationDialog" parent="PauseMenu" instance=ExtResource("4_v7yoa")]
 process_mode = 3
 position = Vector2i(745, 450)
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="PauseMenu"]
+z_index = -2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.485)

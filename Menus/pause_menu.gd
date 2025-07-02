@@ -1,5 +1,5 @@
 # PauseMenu.gd
-extends Control
+extends CanvasLayer
 
 ## Pause Menu
 ## Handles all pause menu interactions and confirmations.
@@ -8,7 +8,7 @@ extends Control
 @onready var restart_button: Button = %RestartButton
 @onready var delete_times_button: Button = %DeleteTimesButton
 @onready var main_menu_button: Button = %MainMenuButton
-@onready var confirmation_dialog: ConfirmationDialog = $ConfirmationDialog
+@onready var confirmation_dialog: ConfirmationDialog = $PauseMenu/ConfirmationDialog
 
 enum Action { RESTART, DELETE_TIMES, MAIN_MENU }
 var current_confirmation_action: Action

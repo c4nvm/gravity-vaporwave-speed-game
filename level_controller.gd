@@ -2,7 +2,6 @@ extends Node3D
 
 @export var player_scene: PackedScene = preload("res://player.tscn")
 @export var pause_menu_scene: PackedScene = preload("res://Menus/pause_menu.tscn")
-# REMOVED: @export var level_id: String = ""
 
 @onready var start_position: Marker3D = $StartPosition
 @onready var endpoint: Area3D = $Endpoint
@@ -11,7 +10,6 @@ extends Node3D
 var player_instance: CharacterBody3D
 
 func _ready() -> void:
-	# REMOVED: GameManager.current_level_id = level_id
 	
 	# Instantiate pause menu
 	var pause_instance = pause_menu_scene.instantiate()
