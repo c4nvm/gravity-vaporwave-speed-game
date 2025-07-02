@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://3kty58dc81hw"
+path="res://.godot/imported/default_waiting.wav-e5eb8a6d0ef2b1f238012caeb92eb0f5.sample"
+
+[deps]
+
+source_file="res://Audio/BGM/Test Song 1/default_waiting.wav"
+dest_files=["res://.godot/imported/default_waiting.wav-e5eb8a6d0ef2b1f238012caeb92eb0f5.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

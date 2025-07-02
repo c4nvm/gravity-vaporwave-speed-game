@@ -16,37 +16,49 @@ layout_direction = 2
 layout_mode = 2
 alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Volume" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/Volume"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "     Volume      "
+text = "Master Volume"
 
-[node name="HSlider" type="HSlider" parent="VBoxContainer/HBoxContainer"]
+[node name="HSlider" type="HSlider" parent="VBoxContainer/Volume"]
 custom_minimum_size = Vector2(400, 50)
 layout_mode = 2
+max_value = 1.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+[node name="DisplayMode" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="VBoxContainer/DisplayMode"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "     Fullscreen      "
+text = "Display Mode"
 
-[node name="CheckBox" type="CheckBox" parent="VBoxContainer/HBoxContainer2"]
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/DisplayMode"]
 layout_mode = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Resolution" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer3"]
+[node name="Label" type="Label" parent="VBoxContainer/Resolution"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Display Mode"
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/Resolution"]
+layout_mode = 2
+
+[node name="Back" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/Back"]
 layout_mode = 2
 text = "        "
 
-[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer3"]
+[node name="BackButton" type="Button" parent="VBoxContainer/Back"]
 custom_minimum_size = Vector2(99.32, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30

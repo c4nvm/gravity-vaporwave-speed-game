@@ -1,4 +1,12 @@
+# GameManager.gd
+
 extends Node
+
+# IMPORTANT: Set this to the path of your AudioManager scene.
+var AUDIO_MANAGER_SCENE = preload("res://audio_manager.tscn")
+
+# This will hold the single instance of our AudioManager.
+var audio_manager: Node
 
 # Signal emitted when a new level is loaded, with both path and ID
 signal level_loaded(level_path: String, level_id: String)
@@ -14,14 +22,53 @@ var player_node: CharacterBody3D = null
 var pause_menu_instance: Control = null
 var compasses: Array[Node3D] = []
 
+func _ready():
+	# Instance the AudioManager scene and add it as a child of this autoload.
+	audio_manager = AUDIO_MANAGER_SCENE.instantiate()
+	add_child(audio_manager)
+
+# -------------------------------------------------------------------
+# ---               PLAYER EVENT HOOKS (AUDIO LOGIC)              ---
+# -------------------------------------------------------------------
+
+# This is a placeholder
+func _on_player_first_move():
+	# Transitions from waiting music to gameplay music.
+	audio_manager.start_gameplay_audio()
+
+func save_best_time(time: float) -> void:
+	if current_level_id.is_empty():
+		push_error("Cannot save time - empty level ID!")
+		return
+	
+	audio_manager.play_end_level_audio()
+
+	# --- Rest of your save_best_time logic ---
+	var dir = DirAccess.open("user://")
+	if dir == null:
+		push_error("Failed to access user data directory!")
+		return
+
+	if not dir.dir_exists("best_times"):
+		var err = dir.make_dir("best_times")
+		if err != OK:
+			push_error("Failed to create best_times directory!")
+			return
+
+	var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
+	var file = FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		push_error("Failed to save time for %s. Error: %s" % [current_level_id, FileAccess.get_open_error()])
+		return
+
+	file.store_float(time)
+	file.close()
+
 # --- GAME LOOP ---
 func _process(_delta: float) -> void:
-	# Exit early if there's no player or no compasses to update.
 	if not is_instance_valid(player_node) or compasses.is_empty():
 		return
 		
-	# Get the required data from the player node.
-	# Make sure 'gravity_direction' and 'camera_pivot' are accessible properties on your player script.
 	var current_gravity_dir: Vector3 = player_node.get("gravity_direction")
 	var camera_pivot: Node3D = player_node.get("camera_pivot")
 	
@@ -30,7 +77,6 @@ func _process(_delta: float) -> void:
 
 	var camera_basis: Basis = camera_pivot.global_transform.basis
 	
-	# Update each registered compass with the player's data.
 	for compass in compasses:
 		if is_instance_valid(compass):
 			compass.update_compass(current_gravity_dir, camera_basis)
@@ -63,36 +109,34 @@ func goto_level_select() -> void:
 	update_mouse_mode(false)
 
 func load_level(level_path: String) -> void:
-	# This is the single source of truth for the level ID.
 	current_level_path = level_path
 	current_level_id = level_path.get_file().get_basename()
 	
 	update_mouse_mode(true)
 	get_tree().change_scene_to_file(level_path)
 	level_loaded.emit(level_path, current_level_id)
+	
+	# Plays waiting music as soon as the level loads.
+	audio_manager.play_waiting_music()
 
 func _cleanup_before_scene_change() -> void:
 	get_tree().paused = false
+	audio_manager.stop_all_music()
 	
-	# Clear level-specific data
 	current_level_id = ""
 	current_level_path = ""
 	
-	# Clear node references
 	gameplay_ui = null
 	player_node = null
 	if is_instance_valid(pause_menu_instance):
 		pause_menu_instance.queue_free()
 	pause_menu_instance = null
 	
-	# Clear the compasses list on scene change
 	compasses.clear()
 
 # --- APPLICATION CONTROL ---
 func quit_game() -> void:
-	# Handle web platform differently if needed
 	if OS.get_name() == "HTML5":
-		# This is a placeholder and might not work in all browsers due to security restrictions.
 		JavaScriptBridge.eval("window.close()", true)
 	else:
 		get_tree().quit()
@@ -106,7 +150,7 @@ func register_player(p_node: CharacterBody3D) -> void:
 
 func register_pause_menu(menu_instance: Control) -> void:
 	pause_menu_instance = menu_instance
-	pause_menu_instance.hide() # Start hidden
+	pause_menu_instance.hide()
 
 func register_compass(compass: Node3D) -> void:
 	if not compass in compasses:
@@ -118,31 +162,6 @@ func unregister_compass(compass: Node3D) -> void:
 
 # --- TIME SAVING & LOADING ---
 const SAVE_DIR = "user://best_times/"
-
-func save_best_time(time: float) -> void:
-	if current_level_id.is_empty():
-		push_error("Cannot save time - empty level ID!")
-		return
-
-	var dir = DirAccess.open("user://")
-	if dir == null:
-		push_error("Failed to access user data directory!")
-		return
-
-	if not dir.dir_exists("best_times"):
-		var err = dir.make_dir("best_times")
-		if err != OK:
-			push_error("Failed to create best_times directory!")
-			return
-
-	var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
-	var file = FileAccess.open(file_path, FileAccess.WRITE)
-	if file == null:
-		push_error("Failed to save time for %s. Error: %s" % [current_level_id, FileAccess.get_open_error()])
-		return
-
-	file.store_float(time)
-	file.close()
 
 func load_best_time(level_id_to_load: String) -> float:
 	if level_id_to_load.is_empty():

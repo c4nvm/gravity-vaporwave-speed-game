@@ -1,0 +1,29 @@
+[gd_scene load_steps=6 format=3 uid="uid://c4cvmbinxyy4d"]
+
+[ext_resource type="Script" uid="uid://cuen6a007he5v" path="res://audio_manager.gd" id="1_jisk1"]
+[ext_resource type="AudioStream" uid="uid://3kty58dc81hw" path="res://Audio/BGM/Test Song 1/default_waiting.wav" id="2_nhx87"]
+[ext_resource type="AudioStream" uid="uid://f1ogbypqoocv" path="res://Audio/BGM/Test Song 1/default_playing.wav" id="3_l2k84"]
+[ext_resource type="AudioStream" uid="uid://cge3nyb764hwf" path="res://Audio/BGM/Test Song 1/default_start.wav" id="4_l55mp"]
+[ext_resource type="AudioStream" uid="uid://dn5jyf7gnngpm" path="res://Audio/BGM/Test Song 1/default_end.wav" id="5_v0gdi"]
+
+[node name="AudioManager" type="Node" node_paths=PackedStringArray("waiting_bgm", "playing_bgm", "start_sfx", "end_sfx")]
+script = ExtResource("1_jisk1")
+fade_duration = 0.0
+waiting_bgm = NodePath("WaitingBGM")
+playing_bgm = NodePath("PlayingBGM")
+start_sfx = NodePath("StartSFX")
+end_sfx = NodePath("EndSFX")
+
+[node name="WaitingBGM" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_nhx87")
+
+[node name="PlayingBGM" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_l2k84")
+volume_db = -6.0
+
+[node name="StartSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_l55mp")
+
+[node name="EndSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_v0gdi")
+volume_db = -3.0

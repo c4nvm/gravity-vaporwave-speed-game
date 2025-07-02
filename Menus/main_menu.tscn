@@ -39,11 +39,13 @@ theme_override_font_sizes/font_size = 30
 text = "Quit"
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 0
-offset_left = 236.0
-offset_top = 466.0
-offset_right = 853.0
-offset_bottom = 616.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.122917
+anchor_top = 0.431481
+anchor_right = 0.447917
+anchor_bottom = 0.612963
+metadata/_edit_use_anchors_ = true
 
 [node name="SettingsMenu" parent="MarginContainer" instance=ExtResource("2_p3jrs")]
 layout_mode = 2

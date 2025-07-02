@@ -26,8 +26,12 @@ func register_player(p_node: CharacterBody3D) -> void:
 	reset_timer()
 
 func _process(delta: float) -> void:
+	# This block detects the very first movement of the player.
 	if not has_moved and is_instance_valid(player_node) and player_node.velocity.length() > 0.1:
 		has_moved = true
+		
+		GameManager.audio_manager.start_gameplay_audio()
+		
 		start_timer()
 		
 	if timer_active:
@@ -43,6 +47,8 @@ func start_timer() -> void:
 
 func stop_timer() -> void:
 	timer_active = false
+	
+	GameManager.audio_manager.play_end_level_audio()
 
 func player_finished_level() -> void:
 	if not timer_active:

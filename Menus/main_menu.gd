@@ -4,7 +4,6 @@ extends Control
 @onready var play_button: Button = $VBoxContainer/PlayButton
 @onready var settings_button: Button = $VBoxContainer/SettingsButton
 @onready var quit_button: Button = $VBoxContainer/QuitButton
-# This assumes you have a child node named 'SettingsMenu' which is the settings panel.
 @onready var settings_menu: Control = $MarginContainer/SettingsMenu
 
 func _ready() -> void:

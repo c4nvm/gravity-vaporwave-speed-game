@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cge3nyb764hwf"
+path="res://.godot/imported/default_start.wav-3993198fc8e31e751a1d4e517ed6dfb4.sample"
+
+[deps]
+
+source_file="res://Audio/BGM/Test Song 1/default_start.wav"
+dest_files=["res://.godot/imported/default_start.wav-3993198fc8e31e751a1d4e517ed6dfb4.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=1
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
