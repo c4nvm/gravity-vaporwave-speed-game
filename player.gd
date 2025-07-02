@@ -95,7 +95,6 @@ var transition_start_velocity := Vector3.ZERO
 @onready var slide_ray: RayCast3D = $SlideRay
 @onready var standing_collision: CollisionShape3D = $StandingCollision
 @onready var sliding_collision: CollisionShape3D = $SlidingCollision
-@onready var hook_controller: Node = $HookController
 @onready var game_ui = get_node_or_null("/root/Main/GameUI")
 #endregion
 
@@ -129,7 +128,6 @@ var current_camera_pivot
 
 var vault_cooldown_timer := 0.0
 var ledge_climb_cooldown_timer := 0.0
-var hook_gravity_override: bool = false
 #endregion
 
 func _ready():
@@ -144,9 +142,6 @@ func _ready():
 	current_camera_offset = Vector3.ZERO
 	target_camera_offset = Vector3.ZERO
 
-	if hook_controller:
-		hook_controller.gravity_override_changed.connect(_on_hook_gravity_override_changed)
-
 	state_machine.init(self)
 
 	if state_label:
@@ -159,18 +154,18 @@ func _input(event: InputEvent):
 	# Only process mouse input when captured
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
-	
+
 	# Mouse look handling
 	if event is InputEventMouseMotion:
 		_handle_mouse_movement(event)
-	
+
 	# Pass all other inputs to state machine
 	state_machine.process_input(event)
 
 func _handle_mouse_movement(event: InputEventMouseMotion):
 	if state_machine.current_state.name == "LedgeClimbing":
 		return
-	
+
 	if is_free_space_mode:
 		# Free space mouse control
 		free_space_rotation.x -= event.relative.y * free_space_mouse_sensitivity
@@ -206,7 +201,7 @@ func _physics_process(delta):
 		_switch_movement_mode(nearest_gravity_field == null)
 
 	state_machine.process_physics(delta)
-	
+
 	if is_instance_valid(game_ui):
 		game_ui.update_debug_info(state_machine.current_state.name, velocity)
 
@@ -391,7 +386,7 @@ func _update_gravity():
 
 
 func _apply_gravity(delta):
-	if is_free_space_mode or nearest_gravity_field == null or hook_gravity_override:
+	if is_free_space_mode or nearest_gravity_field == null:
 		return
 
 	if is_grounded:
@@ -406,10 +401,6 @@ func _is_going_uphill() -> bool:
 
 func should_switch_modes() -> bool:
 	return (nearest_gravity_field == null) != is_free_space_mode
-
-
-func _on_hook_gravity_override_changed(should_override: bool):
-	hook_gravity_override = should_override
 
 
 func _update_debug_print(delta):

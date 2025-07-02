@@ -3,22 +3,19 @@ extends State
 
 func process_physics(delta):
 	player._pre_physics_process()
-	
-	# This logic is now compatible with the OLD hook controller.
-	
-	# Apply gravity. The player's _apply_gravity function will correctly do nothing
-	# if the hook_gravity_override is active, which the old hook controller handles.
+
+	# Apply gravity and update player orientation
 	player._update_gravity()
 	player._apply_gravity(delta)
 	
-	# Only allow player air control if the hook is NOT active.
-	if not (player.hook_controller and player.hook_controller.is_hook_active()):
-		_handle_air_movement(delta)
+	# Handle player movement in the air
+	_handle_air_movement(delta)
 
+	# Apply movement and align with surfaces
 	player._align_with_surface(delta)
 	player.move_and_slide()
 	
-	# These actions are still checked while airborne
+	# Check for other airborne actions like vaulting and ledge climbing
 	_handle_vaulting()
 	_handle_ledge_climb()
 	
