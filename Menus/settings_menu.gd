@@ -1,13 +1,16 @@
-# settings_menu.gd
 # A full-featured settings menu with saving, loading, and display options.
 
 extends PanelContainer
+
+# --- SIGNALS ---
+signal fov_changed(new_fov: float)
+signal sensitivity_changed(new_sensitivity: float)
 
 # --- CONSTANTS ---
 const SETTINGS_FILE_PATH = "user://settings.cfg"
 const MASTER_BUS_NAME = "Master"
 const MIN_VOLUME_DB = -80.0  # Minimum volume in decibels (near silent)
-const MAX_VOLUME_DB = 0.0     # Maximum volume in decibels (full volume)
+const MAX_VOLUME_DB = 0.0      # Maximum volume in decibels (full volume)
 
 # Predefined list of common 16:9 resolutions.
 const COMMON_RESOLUTIONS: Array[Vector2i] = [
@@ -22,30 +25,56 @@ const COMMON_RESOLUTIONS: Array[Vector2i] = [
 @onready var master_volume_slider: HSlider = $VBoxContainer/Volume/HSlider
 @onready var display_mode_button: OptionButton = $VBoxContainer/DisplayMode/OptionButton
 @onready var resolution_button: OptionButton = $VBoxContainer/Resolution/OptionButton
+@onready var fov_slider: HSlider = $VBoxContainer/FOV/HSlider
+@onready var sensitivity_slider: HSlider = $VBoxContainer/Sensitivity/HSlider
 @onready var back_button: Button = $VBoxContainer/Back/BackButton
+# NEW: Add references to the labels next to your sliders
+@onready var fov_label: Label = $VBoxContainer/FOV/FovLabel
+@onready var sensitivity_label: Label = $VBoxContainer/Sensitivity/SensitivityLabel
+@onready var volume_label: Label = $VBoxContainer/Volume/VolumeLabel
 
 
 func _ready() -> void:
 	hide() # Hide on start
-	
+
+	# Register with the GameManager to send signals to the player.
+	# Make sure your autoload is named "GameManager".
+	if get_tree().root.has_node("GameManager"):
+		get_tree().root.get_node("GameManager").register_settings_menu(self)
+
 	# Configure volume slider
 	master_volume_slider.min_value = 0.0
 	master_volume_slider.max_value = 1.0
 	master_volume_slider.step = 0.01
 	master_volume_slider.value = 1.0  # Default to full volume
-	
+
+	# Configure FOV slider
+	fov_slider.min_value = 60.0
+	fov_slider.max_value = 120.0
+	fov_slider.step = 1.0
+	fov_slider.value = 90.0 # Default FOV
+
+	# Configure Sensitivity slider
+	sensitivity_slider.min_value = 0.1
+	sensitivity_slider.max_value = 5.0
+	sensitivity_slider.step = 0.1
+	sensitivity_slider.value = 1.2 # Default sensitivity
+
 	_setup_display_options()
 	load_settings()
+	_update_labels() # NEW: Update labels with loaded values
 
 	# Connect signals
 	back_button.pressed.connect(_on_back_button_pressed)
 	master_volume_slider.value_changed.connect(_on_master_volume_changed)
 	display_mode_button.item_selected.connect(_on_display_mode_selected)
 	resolution_button.item_selected.connect(_on_resolution_selected)
+	fov_slider.value_changed.connect(_on_fov_changed)
+	sensitivity_slider.value_changed.connect(_on_sensitivity_changed)
 
 
 # -------------------------------------------------------------------
-# ---                  SETUP AND INITIALIZATION                   ---
+# ---                           SETUP AND INITIALIZATION                          ---
 # -------------------------------------------------------------------
 
 func _setup_display_options() -> void:
@@ -67,7 +96,7 @@ func _setup_display_options() -> void:
 func _get_available_resolutions() -> Array[Vector2i]:
 	"""Returns a sorted list of unique screen resolutions."""
 	var resolutions: Array[Vector2i] = COMMON_RESOLUTIONS.duplicate()
-	
+
 	# Get the primary screen's native resolution
 	var primary_screen_id = DisplayServer.get_primary_screen()
 	var native_res: Vector2i = DisplayServer.screen_get_size(primary_screen_id)
@@ -75,26 +104,30 @@ func _get_available_resolutions() -> Array[Vector2i]:
 	# Add the user's native resolution if it's not already in our list
 	if not resolutions.has(native_res):
 		resolutions.append(native_res)
-	
+
 	# Sort resolutions from smallest to largest
 	resolutions.sort_custom(func(a, b): return a.x < b.x if a.x != b.x else a.y < b.y)
 	return resolutions
 
 
 # -------------------------------------------------------------------
-# ---                  SAVING AND LOADING                         ---
+# ---                           SAVING AND LOADING                            ---
 # -------------------------------------------------------------------
 
 func save_settings() -> void:
 	var config = ConfigFile.new()
-	
+
 	# Audio settings
 	config.set_value("audio", "master_volume", master_volume_slider.value)
-	
+
 	# Display settings
 	config.set_value("display", "mode_id", display_mode_button.get_selected_id())
 	config.set_value("display", "resolution_idx", resolution_button.selected)
 	
+	# Player settings
+	config.set_value("player", "fov", fov_slider.value)
+	config.set_value("player", "sensitivity", sensitivity_slider.value)
+
 	var err = config.save(SETTINGS_FILE_PATH)
 	if err != OK:
 		push_error("Failed to save settings to %s. Error code: %d" % [SETTINGS_FILE_PATH, err])
@@ -109,29 +142,41 @@ func load_settings() -> void:
 		push_warning("No settings file found at %s. Creating one with default values." % SETTINGS_FILE_PATH)
 		_set_bus_volume(MASTER_BUS_NAME, 1.0)  # Default to full volume
 		_apply_settings_from_ui()
+		# Emit default signals on first launch
+		emit_signal("fov_changed", fov_slider.value)
+		emit_signal("sensitivity_changed", sensitivity_slider.value)
 		save_settings()
 		return
-	
+
 	# --- Apply loaded audio settings ---
 	var master_volume = config.get_value("audio", "master_volume", 1.0)
 	master_volume_slider.value = master_volume
 	_set_bus_volume(MASTER_BUS_NAME, master_volume)
-	
+
 	# --- Apply loaded display settings ---
 	# Display mode (fallback to windowed)
 	var mode_id = config.get_value("display", "mode_id", DisplayServer.WINDOW_MODE_WINDOWED)
 	var item_index = display_mode_button.get_item_index(mode_id)
 	display_mode_button.select(item_index if item_index != -1 else 0)
-	
+
 	# Resolution (fallback to highest available)
 	var res_idx = config.get_value("display", "resolution_idx", resolution_button.item_count - 1)
 	resolution_button.select(clamp(res_idx, 0, resolution_button.item_count - 1))
+
+	# --- Apply loaded player settings ---
+	var fov = config.get_value("player", "fov", 90.0)
+	fov_slider.value = fov
+	emit_signal("fov_changed", fov)
+
+	var sensitivity = config.get_value("player", "sensitivity", 1.0)
+	sensitivity_slider.value = sensitivity
+	emit_signal("sensitivity_changed", sensitivity)
 	
 	_apply_settings_from_ui()
 
 
 # -------------------------------------------------------------------
-# ---               APPLY SETTINGS & SIGNALS                      ---
+# ---                        APPLY SETTINGS & SIGNALS                             ---
 # -------------------------------------------------------------------
 
 func _apply_settings_from_ui() -> void:
@@ -139,7 +184,7 @@ func _apply_settings_from_ui() -> void:
 	# --- Apply Display Mode ---
 	var selected_mode_id = display_mode_button.get_selected_id()
 	DisplayServer.window_set_mode(selected_mode_id)
-	
+
 	# Only enable resolution selection in windowed mode
 	resolution_button.disabled = (selected_mode_id != DisplayServer.WINDOW_MODE_WINDOWED)
 
@@ -148,13 +193,13 @@ func _apply_settings_from_ui() -> void:
 		var res_text = resolution_button.get_item_text(resolution_button.selected).split(" × ")
 		var new_size = Vector2i(int(res_text[0]), int(res_text[1]))
 		DisplayServer.window_set_size(new_size)
-		
+
 		# Center window on primary monitor
 		var primary_screen_id = DisplayServer.get_primary_screen()
 		var screen_size = DisplayServer.screen_get_size(primary_screen_id)
 		var screen_pos = DisplayServer.screen_get_position(primary_screen_id)
 		DisplayServer.window_set_position(screen_pos + (screen_size - new_size) / 2)
-	
+
 	# Auto-save after applying any changes
 	save_settings()
 
@@ -170,16 +215,39 @@ func _on_resolution_selected(index: int) -> void:
 
 func _on_master_volume_changed(value: float) -> void:
 	_set_bus_volume(MASTER_BUS_NAME, value)
+	_update_labels() # NEW: Update the labels when the slider moves
 	save_settings()  # Save immediately when volume changes
 
+func _on_fov_changed(value: float) -> void:
+	_update_labels() # NEW: Update the labels when the slider moves
+	emit_signal("fov_changed", value)
+	save_settings()
+
+func _on_sensitivity_changed(value: float) -> void:
+	_update_labels() # NEW: Update the labels when the slider moves
+	emit_signal("sensitivity_changed", value)
+	save_settings()
 
 func _on_back_button_pressed() -> void:
 	hide()  # No need to save here since we're auto-saving on changes
 
 
 # -------------------------------------------------------------------
-# ---                  HELPER FUNCTIONS                           ---
+# ---                           HELPER FUNCTIONS                                ---
 # -------------------------------------------------------------------
+
+# NEW: This function updates the text of the labels to show the current slider values.
+func _update_labels() -> void:
+	if is_instance_valid(fov_label):
+		# Format the FOV as a whole number
+		fov_label.text = str(int(fov_slider.value))
+	if is_instance_valid(sensitivity_label):
+		# Format the sensitivity to two decimal places
+		sensitivity_label.text = "%.2f" % sensitivity_slider.value
+	if is_instance_valid(volume_label):
+		# Format the sensitivity to two decimal places
+		volume_label.text = "%.2f" % master_volume_slider.value
+
 
 func _set_bus_volume(bus_name: String, linear_value: float) -> void:
 	"""Sets the audio bus volume with an exponential curve for more natural control."""

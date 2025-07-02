@@ -4,7 +4,7 @@ extends State
 @export var swim_speed := 12.0
 # Acceleration now controls how quickly you reach swim_speed. Lower is floatier.
 @export var swim_accel := 8.0
-@export var mouse_sensitivity := 0.0012
+# REMOVED: mouse_sensitivity is now inherited from the main player script.
 @export var roll_speed := 3.0
 @export var roll_decay := 0.95
 
@@ -31,9 +31,12 @@ func exit():
 
 func process_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		# Direct unfiltered mouse input
-		_pitch -= event.relative.y * mouse_sensitivity
-		_yaw -= event.relative.x * mouse_sensitivity
+		# UPDATED: Use the unified sensitivity from the player script.
+		# The calculation is divided by 1000 to match the scale used in the main player script.
+		var sensitivity_factor = player.mouse_sensitivity / 1000.0
+		
+		_pitch -= event.relative.y * sensitivity_factor
+		_yaw -= event.relative.x * sensitivity_factor
 		_pitch = clamp(_pitch, -PI/2, PI/2)
 
 

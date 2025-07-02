@@ -27,6 +27,7 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var fall_lerp_weight := 5.0
 
 @export_group("Camera")
+# This is now controlled by the settings menu. The value here acts as a default before settings are loaded.
 @export var mouse_sensitivity := 1.2
 @export var max_look_angle := 89.0
 @export var gravity_smoothness: float = 5.0
@@ -67,7 +68,6 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var free_space_deceleration := 2.0
 @export var free_space_rotation_speed := 2.0
 @export var free_space_momentum_gain := 0.95
-@export var free_space_mouse_sensitivity := 0.002
 @export var free_space_camera_lerp_speed := 10.0
 @export var free_space_roll_speed := 1.0
 @export var free_space_roll_decay := 0.95
@@ -154,7 +154,21 @@ var ledge_climb_cooldown_timer := 0.0
 var held_object: RigidBody3D = null
 #endregion
 
+# Functions to apply settings from the menu
+func set_fov(new_fov: float):
+	if is_instance_valid(camera):
+		camera.fov = new_fov
+
+func set_mouse_sensitivity(new_sensitivity: float):
+	mouse_sensitivity = new_sensitivity
+
+
 func _ready():
+	# UPDATED: Register the player with the GameManager so it can receive settings.
+	# Make sure your autoload is named "GameManager".
+	if get_tree().root.has_node("GameManager"):
+		get_tree().root.get_node("GameManager").register_player(self)
+
 	# --- Spawn logic for input delay and screen fade ---
 	input_enabled = false
 	# Use a timer to enable input after the specified duration.
@@ -169,8 +183,7 @@ func _ready():
 	add_child(spawn_timer)
 	spawn_timer.start()
 
-	# Tell the GameManager (your autoload) to start the fade-in effect.
-	# NOTE: Replace "GameManager" if your autoload singleton is named differently (e.g., "Main").
+	# Tell the GameManager to start the fade-in effect.
 	if get_tree().root.has_node("GameManager"):
 		get_tree().root.get_node("GameManager").start_level_fade_in(level_start_fade_duration)
 
@@ -222,16 +235,19 @@ func _input(event: InputEvent):
 
 
 func _handle_mouse_movement(event: InputEventMouseMotion):
+	# This function is now also used by the FreeSpace state
 	if state_machine.current_state.name == "LedgeClimbing":
 		return
 
-	if is_free_space_mode:
-		free_space_rotation.x -= event.relative.y * free_space_mouse_sensitivity
-		free_space_rotation.y -= event.relative.x * free_space_mouse_sensitivity
-		free_space_rotation.x = clamp(free_space_rotation.x, -PI/2, PI/2)
-	else:
-		rotate(transform.basis.y, -event.relative.x * (mouse_sensitivity/1000))
-		mouse_pitch = clamp(mouse_pitch - event.relative.y * (mouse_sensitivity/1000), -max_look_angle, max_look_angle)
+	# The calculation (mouse_sensitivity / 1000) converts the user-friendly
+	# slider value (e.g., 1.2) into a smaller, more usable value for rotation.
+	var sensitivity_factor = mouse_sensitivity / 1000.0
+
+	# The FreeSpace state handles its own rotation logic, so we only apply
+	# standard rotation if not in that state.
+	if state_machine.current_state.name != "FreeSpace":
+		rotate(transform.basis.y, -event.relative.x * sensitivity_factor)
+		mouse_pitch = clamp(mouse_pitch - event.relative.y * sensitivity_factor, -max_look_angle, max_look_angle)
 		current_camera_pivot.rotation.x = mouse_pitch
 
 
@@ -615,7 +631,7 @@ func _should_switch_gravity_field(new_field) -> bool:
 
 	return (gravity_field_transition_timer <= 0 and
 			(new_field != nearest_gravity_field or
-					 not nearest_gravity_field.is_body_inside(self)))
+							not nearest_gravity_field.is_body_inside(self)))
 
 
 func _update_gravity():

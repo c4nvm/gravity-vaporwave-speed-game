@@ -1,13 +1,16 @@
-# PauseMenu.gd
 extends CanvasLayer
 
 ## Pause Menu
 ## Handles all pause menu interactions and confirmations.
 
+@onready var pause_menu_container = $PauseMenu
+@onready var settings_menu = %SettingsMenu
+
 @onready var resume_button: Button = %ResumeButton
 @onready var restart_button: Button = %RestartButton
 @onready var delete_times_button: Button = %DeleteTimesButton
 @onready var main_menu_button: Button = %MainMenuButton
+@onready var settings_button: Button = %SettingsButton
 @onready var confirmation_dialog: ConfirmationDialog = $PauseMenu/ConfirmationDialog
 
 enum Action { RESTART, DELETE_TIMES, MAIN_MENU }
@@ -19,16 +22,29 @@ func _ready() -> void:
 	
 	# This menu should be hidden when the level starts.
 	hide()
+	settings_menu.hide()
 	
 	# --- Connect button signals ---
 	resume_button.pressed.connect(GameManager.toggle_pause_menu)
 	restart_button.pressed.connect(_on_restart_pressed)
 	delete_times_button.pressed.connect(_on_delete_times_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
+	settings_button.pressed.connect(_on_settings_pressed)
 	
 	# --- Connect confirmation dialog signals ---
 	confirmation_dialog.confirmed.connect(_on_confirmation_confirmed)
 	confirmation_dialog.visibility_changed.connect(_on_confirmation_visibility_changed)
+
+## Call this function from your SettingsMenu to return to the main pause screen.
+## For example, connect the 'pressed' signal of your SettingsMenu's "Back" button
+## to this function in the editor.
+func show_main_pause_menu() -> void:
+	settings_menu.hide()
+	pause_menu_container.show()
+
+func _on_settings_pressed() -> void:
+	pause_menu_container.show()
+	settings_menu.show()
 
 func _on_restart_pressed() -> void:
 	current_confirmation_action = Action.RESTART
@@ -69,3 +85,4 @@ func set_buttons_disabled(disabled: bool) -> void:
 	restart_button.disabled = disabled
 	delete_times_button.disabled = disabled
 	main_menu_button.disabled = disabled
+	settings_button.disabled = disabled

@@ -14,16 +14,21 @@ var audio_manager: Node
 signal level_loaded(level_path: String, level_id: String)
 
 # --- GLOBAL STATE ---
-var can_pause := true # NEW: Flag to control if the game can be paused.
+var can_pause := true
 var is_mouse_captured: bool = false
 var current_level_id: String = ""
 var current_level_path: String = ""
 var is_level_complete: bool = false
+# NEW: Variables to store the current settings
+var current_fov: float = 90.0
+var current_sensitivity: float = 1.0
+
 
 # --- NODE REFERENCES ---
 var gameplay_ui: CanvasLayer = null
 var player_node: CharacterBody3D = null
 var pause_menu_instance: CanvasLayer = null
+var settings_menu_instance: PanelContainer = null
 var compasses: Array[Node3D] = []
 var fade_rect: ColorRect # Reference to the fade-to-black rectangle.
 
@@ -68,17 +73,27 @@ func _ready():
 
 
 # -------------------------------------------------------------------
-# ---                  PLAYER EVENT HOOKS (AUDIO LOGIC)           ---
+# ---                  PLAYER EVENT HOOKS (AUDIO LOGIC)                  ---
 # -------------------------------------------------------------------
 
 func _on_player_first_move():
 	# Start gameplay music on first move.
 	audio_manager.start_gameplay_audio()
 
+# UPDATED: Handlers now also store the current settings
+func _on_fov_changed(new_fov: float):
+	current_fov = new_fov
+	if is_instance_valid(player_node):
+		player_node.set_fov(new_fov)
+
+func _on_sensitivity_changed(new_sensitivity: float):
+	current_sensitivity = new_sensitivity
+	if is_instance_valid(player_node):
+		player_node.set_mouse_sensitivity(new_sensitivity)
 
 # --- GAME LOOP & INPUT ---
 func _process(_delta: float) -> void:
-	# MODIFIED: Check for pause input, but only if pausing is currently allowed.
+	# Check for pause input, but only if pausing is currently allowed.
 	if can_pause and not current_level_path.is_empty() and is_instance_valid(pause_menu_instance) and not is_level_complete:
 		if Input.is_action_just_pressed("ui_cancel"):
 			toggle_pause_menu()
@@ -129,7 +144,7 @@ func start_level_fade_in(duration: float):
 	# Animate the 'a' (alpha) channel of the modulate property to fade out the black screen.
 	tween.tween_property(fade_rect, "modulate:a", 0.0, duration)
 	
-	# MODIFIED: When the tween finishes, hide the fade rectangle AND re-enable pausing.
+	# When the tween finishes, hide the fade rectangle AND re-enable pausing.
 	tween.tween_callback(func():
 		fade_rect.visible = false
 		can_pause = true
@@ -151,6 +166,11 @@ func toggle_pause_menu() -> void:
 	var new_paused_state = not get_tree().paused
 	get_tree().paused = new_paused_state
 	pause_menu_instance.visible = new_paused_state
+	
+	# If the settings menu is open, hide it when pausing.
+	if new_paused_state and is_instance_valid(settings_menu_instance) and settings_menu_instance.visible:
+		settings_menu_instance.hide()
+
 	update_mouse_mode(not new_paused_state)
 
 # --- SCENE MANAGEMENT ---
@@ -171,7 +191,7 @@ func goto_level_select() -> void:
 
 
 func load_level(level_path: String) -> void:
-	# MODIFIED: Disable pausing when starting to load a level.
+	# Disable pausing when starting to load a level.
 	can_pause = false
 	is_level_complete = false # Reset on new level load
 	current_level_path = level_path
@@ -187,7 +207,7 @@ func load_level(level_path: String) -> void:
 
 
 func reload_current_level() -> void:
-	# MODIFIED: Disable pausing when reloading a level.
+	# Disable pausing when reloading a level.
 	can_pause = false
 	is_level_complete = false # Reset on level reload
 	
@@ -217,6 +237,9 @@ func _cleanup_before_scene_change() -> void:
 	if is_instance_valid(pause_menu_instance):
 		pause_menu_instance.queue_free()
 	pause_menu_instance = null
+	
+	# NEW: Clear settings menu instance
+	settings_menu_instance = null
 	
 	compasses.clear()
 
@@ -314,11 +337,27 @@ func register_gameplay_ui(ui_instance: CanvasLayer) -> void:
 
 func register_player(p_node: CharacterBody3D) -> void:
 	player_node = p_node
+	# UPDATED: Immediately apply current settings to the newly registered player.
+	if is_instance_valid(player_node):
+		player_node.set_fov(current_fov)
+		player_node.set_mouse_sensitivity(current_sensitivity)
 
 
 func register_pause_menu(menu_instance: CanvasLayer) -> void:
 	pause_menu_instance = menu_instance
 	pause_menu_instance.hide()
+
+
+func register_settings_menu(settings_instance: PanelContainer) -> void:
+	if is_instance_valid(settings_menu_instance):
+		return # Already registered
+
+	settings_menu_instance = settings_instance
+	# Connect the signals from the settings menu to the handlers in this script
+	if not settings_menu_instance.is_connected("fov_changed", Callable(self, "_on_fov_changed")):
+		settings_menu_instance.connect("fov_changed", Callable(self, "_on_fov_changed"))
+	if not settings_menu_instance.is_connected("sensitivity_changed", Callable(self, "_on_sensitivity_changed")):
+		settings_menu_instance.connect("sensitivity_changed", Callable(self, "_on_sensitivity_changed"))
 
 
 func register_compass(compass: Node3D) -> void:

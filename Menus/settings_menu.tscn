@@ -29,6 +29,9 @@ custom_minimum_size = Vector2(400, 50)
 layout_mode = 2
 max_value = 1.0
 
+[node name="VolumeLabel" type="Label" parent="VBoxContainer/Volume"]
+layout_mode = 2
+
 [node name="DisplayMode" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
@@ -49,6 +52,38 @@ theme_override_font_sizes/font_size = 30
 text = "Display Mode"
 
 [node name="OptionButton" type="OptionButton" parent="VBoxContainer/Resolution"]
+layout_mode = 2
+
+[node name="FOV" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/FOV"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "FOV"
+
+[node name="HSlider" type="HSlider" parent="VBoxContainer/FOV"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+max_value = 1.0
+
+[node name="FovLabel" type="Label" parent="VBoxContainer/FOV"]
+layout_mode = 2
+
+[node name="Sensitivity" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/Sensitivity"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Sensitivity"
+
+[node name="HSlider" type="HSlider" parent="VBoxContainer/Sensitivity"]
+custom_minimum_size = Vector2(400, 50)
+layout_mode = 2
+max_value = 1.0
+
+[node name="SensitivityLabel" type="Label" parent="VBoxContainer/Sensitivity"]
 layout_mode = 2
 
 [node name="Back" type="HBoxContainer" parent="VBoxContainer"]
