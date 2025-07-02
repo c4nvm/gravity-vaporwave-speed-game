@@ -45,18 +45,16 @@ func process_physics(delta):
 	rot = rot.rotated(Vector3.BACK, player.free_space_roll)
 	player.transform.basis = rot.orthonormalized()
 	
-	# Roll input (minimal decay)
-	if Input.is_action_pressed("roll_left"):
+	# Check roll input via the player script
+	if player.is_action_pressed_checked("roll_left"):
 		player.free_space_roll += roll_speed * delta
-	if Input.is_action_pressed("roll_right"):
+	if player.is_action_pressed_checked("roll_right"):
 		player.free_space_roll -= roll_speed * delta
 	player.free_space_roll *= roll_decay
 	
 	# --- Start of floaty movement logic ---
-	# Get input direction
-	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
-	var vertical_input := Input.get_action_strength("jump") - Input.get_action_strength("slide")
-	var move_dir = Vector3(input_dir.x, vertical_input, -input_dir.y).normalized()
+	# Get all movement input from the player script
+	var move_dir = player.get_free_space_input()
 	
 	# Define the velocity we want to reach based on input
 	var target_velocity = move_dir * swim_speed

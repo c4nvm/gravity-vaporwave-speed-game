@@ -1,4 +1,3 @@
-# player.gd
 extends CharacterBody3D
 
 #region State Machine
@@ -11,6 +10,9 @@ extends CharacterBody3D
 #endregion
 
 #region Configuration
+@export_group("Spawning")
+@export var level_start_fade_duration := 2.0 # How long the fade-in lasts and input is disabled.
+
 @export_group("Movement")
 const MAX_SLOPE_ANGLE := 40.0
 @export var speed := 10.0
@@ -117,6 +119,7 @@ var transition_start_velocity := Vector3.ZERO
 #endregion
 
 #region State Variables
+var input_enabled := false
 var gravity_fields: Array[Node] = []
 var nearest_gravity_field: Area3D = null
 var is_on_planet := false
@@ -152,6 +155,26 @@ var held_object: RigidBody3D = null
 #endregion
 
 func _ready():
+	# --- Spawn logic for input delay and screen fade ---
+	input_enabled = false
+	# Use a timer to enable input after the specified duration.
+	var spawn_timer = Timer.new()
+	spawn_timer.wait_time = level_start_fade_duration
+	spawn_timer.one_shot = true
+	# Connect the timer's timeout signal to enable input and then free the timer.
+	spawn_timer.timeout.connect(func():
+		input_enabled = true
+		spawn_timer.queue_free()
+	)
+	add_child(spawn_timer)
+	spawn_timer.start()
+
+	# Tell the GameManager (your autoload) to start the fade-in effect.
+	# NOTE: Replace "GameManager" if your autoload singleton is named differently (e.g., "Main").
+	if get_tree().root.has_node("GameManager"):
+		get_tree().root.get_node("GameManager").start_level_fade_in(level_start_fade_duration)
+
+	# --- Existing _ready() logic ---
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_setup_gravity_gun()
 	_cache_gravity_fields()
@@ -172,6 +195,10 @@ func _ready():
 
 
 func _input(event: InputEvent):
+	# --- Block discrete input events if disabled ---
+	if not input_enabled:
+		return
+
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 
@@ -192,6 +219,7 @@ func _input(event: InputEvent):
 
 	# --- State Machine Input ---
 	state_machine.process_input(event)
+
 
 func _handle_mouse_movement(event: InputEventMouseMotion):
 	if state_machine.current_state.name == "LedgeClimbing":
@@ -235,25 +263,67 @@ func _physics_process(delta):
 	if is_instance_valid(game_ui):
 		game_ui.update_debug_info(state_machine.current_state.name, velocity)
 
+
+# --- Centralized Input Functions ---
+# States will call these functions instead of Input directly.
+
+func get_wish_direction() -> Vector2:
+	"""
+	Gets the player's movement input as a Vector2.
+	Returns Vector2.ZERO if input is disabled.
+	"""
+	if not input_enabled:
+		return Vector2.ZERO
+	return Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+
+func is_action_just_pressed_checked(action: StringName) -> bool:
+	"""
+	Checks if an action was just pressed, but only if input is enabled.
+	"""
+	if not input_enabled:
+		return false
+	return Input.is_action_just_pressed(action)
+
+func is_action_pressed_checked(action: StringName) -> bool:
+	"""
+	Checks if an action is currently held down, but only if input is enabled.
+	"""
+	if not input_enabled:
+		return false
+	return Input.is_action_pressed(action)
+
+func get_free_space_input() -> Vector3:
+	"""
+	Gets the combined movement input for the FreeSpace state.
+	Returns Vector3.ZERO if input is disabled.
+	"""
+	if not input_enabled:
+		return Vector3.ZERO
+	
+	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+	var vertical_input := Input.get_action_strength("jump") - Input.get_action_strength("slide")
+	return Vector3(input_dir.x, vertical_input, -input_dir.y).normalized()
+
+
 #region Gravity Gun
 #==============================================================================
 # GRAVITY GUN SETUP GUIDE (UPDATED)
 #
 # 1. SCENE TREE:
-#	- Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
+#    - Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
 #
 # 2. PHYSICS LAYERS:
-#	- Environment/World geometry should be on **Layer 1**.
-#	- All grabbable RigidBody3D objects must be on **Layer 3**.
+#    - Environment/World geometry should be on **Layer 1**.
+#    - All grabbable RigidBody3D objects must be on **Layer 3**.
 #
 # 3. GROUPS:
-#	- Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
+#    - Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
 #
 # 4. INPUT MAP:
-#	- "pickup_drop" and "shoot_object" actions must be defined.
+#    - "pickup_drop" and "shoot_object" actions must be defined.
 #
 # 5. DEBUGGING:
-#	- Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
+#    - Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
 #
 #==============================================================================
 
@@ -263,7 +333,6 @@ func _setup_gravity_gun():
 
 	if is_instance_valid(gravity_gun_ray):
 		gravity_gun_ray.target_position = Vector3(0, 0, -gravity_gun_range)
-		# MODIFIED: Set mask to check layer 1 (world) and layer 3 (grabbable).
 		# (1 << 0) is layer 1, (1 << 2) is layer 3.
 		gravity_gun_ray.collision_mask = 4
 	else:
@@ -309,7 +378,7 @@ func _drop_object():
 	if gravity_gun_debug: print("--- Gravity Gun: Dropping '", held_object.name, "' ---")
 
 	held_object.freeze = false
-	# MODIFIED: Restore object to layer 3 and set its mask to see layers 1 and 3.
+	# Restore object to layer 3 and set its mask to see layers 1 and 3.
 	held_object.collision_layer = (1 << 2) # Set object's layer to 3
 	held_object.collision_mask = (1 << 0) | (1 << 2) # Collide with layers 1 & 3
 
@@ -546,7 +615,7 @@ func _should_switch_gravity_field(new_field) -> bool:
 
 	return (gravity_field_transition_timer <= 0 and
 			(new_field != nearest_gravity_field or
-					not nearest_gravity_field.is_body_inside(self)))
+					 not nearest_gravity_field.is_body_inside(self)))
 
 
 func _update_gravity():

@@ -1,5 +1,6 @@
 # This is a singleton (autoload) script that manages global game state,
 # scene transitions, audio, and communication between different game nodes.
+# NOTE: Ensure this is named "GameManager" in Project > Project Settings > Autoload
 
 extends Node
 
@@ -16,12 +17,14 @@ signal level_loaded(level_path: String, level_id: String)
 var is_mouse_captured: bool = false
 var current_level_id: String = ""
 var current_level_path: String = ""
+var is_level_complete: bool = false
 
 # --- NODE REFERENCES ---
 var gameplay_ui: CanvasLayer = null
 var player_node: CharacterBody3D = null
 var pause_menu_instance: CanvasLayer = null
 var compasses: Array[Node3D] = []
+var fade_rect: ColorRect # Reference to the fade-to-black rectangle.
 
 # --- DEBUGGING ---
 var print_tree_timer: Timer
@@ -30,7 +33,23 @@ var print_tree_timer: Timer
 func _ready():
 	# Process input when paused and during normal gameplay.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# --- Setup Fade Layer ---
+	var fade_canvas = CanvasLayer.new()
+	fade_canvas.layer = 128 # High value to ensure it's on top of all other UI.
+	add_child(fade_canvas)
 	
+	fade_rect = ColorRect.new()
+	# Start with black, but modulation will control visibility.
+	fade_rect.color = Color.BLACK
+	fade_rect.anchor_right = 1.0
+	fade_rect.anchor_bottom = 1.0
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE # Don't block mouse input.
+	# Start invisible
+	fade_rect.visible = false
+	fade_canvas.add_child(fade_rect)
+
+	# --- Existing _ready() code ---
 	# Instantiate and add the AudioManager.
 	audio_manager = AUDIO_MANAGER_SCENE.instantiate()
 	add_child(audio_manager)
@@ -48,7 +67,7 @@ func _ready():
 
 
 # -------------------------------------------------------------------
-# ---				PLAYER EVENT HOOKS (AUDIO LOGIC)			  ---
+# ---                  PLAYER EVENT HOOKS (AUDIO LOGIC)           ---
 # -------------------------------------------------------------------
 
 func _on_player_first_move():
@@ -59,7 +78,8 @@ func _on_player_first_move():
 # --- GAME LOOP & INPUT ---
 func _process(_delta: float) -> void:
 	# Check for pause input. This runs even when paused.
-	if not current_level_path.is_empty() and is_instance_valid(pause_menu_instance):
+	# Do not allow pause if the level is already complete.
+	if not current_level_path.is_empty() and is_instance_valid(pause_menu_instance) and not is_level_complete:
 		if Input.is_action_just_pressed("ui_cancel"):
 			toggle_pause_menu()
 
@@ -82,6 +102,32 @@ func _process(_delta: float) -> void:
 	for compass in compasses:
 		if is_instance_valid(compass):
 			compass.update_compass(current_gravity_dir, camera_basis)
+
+
+# --- SCENE TRANSITION EFFECTS ---
+func start_level_fade_in(duration: float):
+	"""
+	Fades the screen in from black when a level starts.
+	Called by the Player node when it's ready.
+	"""
+	if not is_instance_valid(fade_rect):
+		push_error("Fade rectangle node is not valid.")
+		return
+
+	# Make it visible and instantly set to black, then tween to transparent.
+	fade_rect.visible = true
+	fade_rect.modulate = Color.BLACK
+	
+	var tween = create_tween()
+	# Use a smooth curve for the fade.
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.set_trans(Tween.TRANS_SINE)
+	
+	# Animate the 'a' (alpha) channel of the modulate property to fade out the black screen.
+	tween.tween_property(fade_rect, "modulate:a", 0.0, duration)
+	
+	# Hide the rectangle after the fade is complete to be safe.
+	tween.tween_callback(func(): fade_rect.visible = false)
 
 
 # --- MOUSE MANAGEMENT ---
@@ -120,6 +166,7 @@ func goto_level_select() -> void:
 
 
 func load_level(level_path: String) -> void:
+	is_level_complete = false # Reset on new level load
 	current_level_path = level_path
 	current_level_id = level_path.get_file().get_basename()
 	
@@ -133,6 +180,8 @@ func load_level(level_path: String) -> void:
 
 
 func reload_current_level() -> void:
+	is_level_complete = false # Reset on level reload
+	
 	# This function is called from the pause menu to restart the level.
 	# Ensure the game is unpaused before reloading.
 	get_tree().paused = false
@@ -147,6 +196,7 @@ func reload_current_level() -> void:
 
 
 func _cleanup_before_scene_change() -> void:
+	is_level_complete = false # Reset when leaving a level
 	get_tree().paused = false
 	audio_manager.stop_all_music()
 	
@@ -166,6 +216,11 @@ func _cleanup_before_scene_change() -> void:
 const SAVE_DIR = "user://best_times/"
 
 func save_best_time(time: float) -> void:
+	# Don't run the level complete logic more than once.
+	if is_level_complete:
+		return
+	is_level_complete = true
+	
 	if current_level_id.is_empty():
 		push_error("Cannot save time - empty level ID!")
 		return

@@ -100,6 +100,7 @@ shader_parameter/effect_power = 0.5
 floor_max_angle = 0.698132
 script = ExtResource("1_4ivg5")
 speed = 15.0
+jump_force = 12.0
 gravity_gun_range = 10.0
 gravity_gun_hold_distance = 2.0
 gravity_gun_hold_offset_y = -1.0

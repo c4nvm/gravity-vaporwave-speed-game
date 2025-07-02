@@ -1,4 +1,3 @@
-# Grounded.gd
 extends State
 
 const COYOTE_TIME = 0.15 # seconds
@@ -25,7 +24,8 @@ func process_physics(delta):
 	player._update_debug_print(delta)
 
 func _handle_movement(delta):
-	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+	# Get input from the player script
+	var input_dir : Vector2 = player.get_wish_direction()
 	var raycast_forward = -player.direction_ray.global_transform.basis.z.normalized()
 	var raycast_right = player.direction_ray.global_transform.basis.x.normalized()
 
@@ -49,7 +49,8 @@ func _handle_movement(delta):
 	else:
 		horizontal_velocity = horizontal_velocity.lerp(Vector3.ZERO, current_decel * delta)
 
-	if Input.is_action_just_pressed("jump"):
+	# Check for jump via the player script
+	if player.is_action_just_pressed_checked("jump"):
 		vertical_velocity = player.up_direction * player.jump_force
 		_coyote_timer = COYOTE_TIME + 0.1
 
@@ -60,7 +61,8 @@ func get_next_state() -> String:
 	if _coyote_timer > COYOTE_TIME:
 		return "Airborne"
 		
-	if player.ground_ray.is_colliding() and Input.is_action_pressed("slide") and player.slide_enabled and player.velocity.length() >= player.slide_enter_speed:
+	# Check for slide via the player script
+	if player.ground_ray.is_colliding() and player.is_action_pressed_checked("slide") and player.slide_enabled and player.velocity.length() >= player.slide_enter_speed:
 		if player.slide_ray.is_colliding():
 			return "Sliding"
 			

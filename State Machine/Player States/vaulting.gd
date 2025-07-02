@@ -1,4 +1,3 @@
-# Vaulting.gd
 extends State
 
 # Note: The vaulting logic has been integrated into the Airborne state.

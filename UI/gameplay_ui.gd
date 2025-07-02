@@ -42,6 +42,10 @@ func _ready() -> void:
 	compass_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	compass_viewport.transparent_bg = true
 	compass_sprite.texture = compass_viewport.get_texture()
+	
+	await get_tree().process_frame
+	
+	self.visible = true
 
 func _process(delta: float) -> void:
 	# --- MODIFIED: Check if player is valid before updating ---

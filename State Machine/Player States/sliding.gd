@@ -1,4 +1,3 @@
-# Sliding.gd
 extends State
 
 func enter():
@@ -21,7 +20,8 @@ func process_physics(delta):
 	player._align_with_surface(delta)
 	player.move_and_slide()
 	player._update_debug_print(delta)
-	if Input.is_action_just_pressed("jump"):
+	# Check for jump via the player script
+	if player.is_action_just_pressed_checked("jump"):
 		_perform_slide_hop()
 
 func _apply_slide_physics(delta):
@@ -51,7 +51,8 @@ func _perform_slide_hop():
 func get_next_state() -> String:
 	# The condition to enter sliding in Grounded.gd already doesn't check for the cooldown,
 	# so we don't need to change anything there.
-	if not Input.is_action_pressed("slide") or player.velocity.length() < player.slide_min_speed:
+	# Check for slide via the player script
+	if not player.is_action_pressed_checked("slide") or player.velocity.length() < player.slide_min_speed:
 		return "Grounded"
 	if not player.ground_ray.is_colliding():
 		return "Airborne"

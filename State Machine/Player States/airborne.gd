@@ -1,4 +1,3 @@
-# Airborne.gd
 extends State
 
 func process_physics(delta):
@@ -22,7 +21,8 @@ func process_physics(delta):
 	player._update_debug_print(delta)
 
 func _handle_air_movement(delta):
-	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+	# Get input from the player script
+	var input_dir : Vector2 = player.get_wish_direction()
 	var raycast_forward = -player.direction_ray.global_transform.basis.z.normalized()
 	var raycast_right = player.direction_ray.global_transform.basis.x.normalized()
 	var vertical_velocity = player.velocity.project(player.up_direction)

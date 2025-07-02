@@ -1,4 +1,3 @@
-# LedgeClimbing.gd
 extends State
 
 var tween: Tween
