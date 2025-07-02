@@ -4,7 +4,6 @@ extends CanvasLayer
 @onready var record_time_label: Label = %BestTimeLabel
 @onready var debug_label: Label = %DebugLabel
 @onready var compass_viewport: SubViewport = $CompassViewport
-@onready var compass_sprite: Sprite2D = $CompassSprite
 
 var current_level_id: String = ""
 var current_record: float = 0.0
