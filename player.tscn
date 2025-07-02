@@ -100,6 +100,10 @@ shader_parameter/effect_power = 0.5
 floor_max_angle = 0.698132
 script = ExtResource("1_4ivg5")
 speed = 15.0
+gravity_gun_range = 10.0
+gravity_gun_hold_distance = 2.0
+gravity_gun_hold_offset_y = -1.0
+gravity_gun_debug = true
 
 [node name="DirectionRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -124,6 +128,7 @@ disabled = true
 
 [node name="GroundRay" type="RayCast3D" parent="."]
 target_position = Vector3(0, -0.15, 0)
+collision_mask = 5
 hit_from_inside = true
 
 [node name="SlideRay" type="RayCast3D" parent="."]
@@ -140,6 +145,13 @@ fov = 90.0
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CameraPivot/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.101331)
 mesh = SubResource("QuadMesh_u1c27")
+
+[node name="GravityGunRay" type="RayCast3D" parent="CameraPivot/Camera3D"]
+target_position = Vector3(0, 0, -10)
+collision_mask = 4
+
+[node name="HoldPosition" type="Marker3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -2)
 
 [node name="CrouchCameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)

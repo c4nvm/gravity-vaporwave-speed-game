@@ -8,6 +8,7 @@
 viewport_path = NodePath("CompassViewport")
 
 [node name="GameUI" type="CanvasLayer"]
+layer = 2
 script = ExtResource("1_pclro")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]

@@ -1,4 +1,3 @@
-# GameManager.gd
 # This is a singleton (autoload) script that manages global game state,
 # scene transitions, audio, and communication between different game nodes.
 
@@ -49,7 +48,7 @@ func _ready():
 
 
 # -------------------------------------------------------------------
-# ---                PLAYER EVENT HOOKS (AUDIO LOGIC)             ---
+# ---				PLAYER EVENT HOOKS (AUDIO LOGIC)			  ---
 # -------------------------------------------------------------------
 
 func _on_player_first_move():
@@ -139,6 +138,10 @@ func reload_current_level() -> void:
 	get_tree().paused = false
 	# Make sure the mouse is captured again for gameplay.
 	update_mouse_mode(true)
+	
+	# Play waiting music on level restart.
+	audio_manager.play_waiting_music()
+	
 	# Reload the currently active scene.
 	get_tree().reload_current_scene()
 

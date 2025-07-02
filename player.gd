@@ -16,7 +16,7 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var speed := 10.0
 @export var jump_force := 10.0
 @export var gravity := 30.0
-@export var grounded_gravity_multiplier: float = 2.0 # <-- ADDED: Multiplier for gravity while on the ground.
+@export var grounded_gravity_multiplier: float = 2.0
 @export var acceleration := 15.0
 @export var deceleration := 20.0
 @export var air_acceleration := 2.0
@@ -81,6 +81,20 @@ var transition_start_velocity := Vector3.ZERO
 @export var max_step_down := 0.5
 @export var step_up_debug := false
 @export var step_down_debug := false
+
+#region Gravity Gun Configuration
+@export_group("Gravity Gun")
+@export var gravity_gun_enabled := true
+@export var gravity_gun_range := 15.0
+@export var gravity_gun_hold_distance := 3.0
+@export var gravity_gun_hold_offset_y := 0.0 # Vertical offset for held object
+@export var gravity_gun_shoot_force := 50.0
+@export var gravity_gun_lerp_speed := 15.0
+@export var gravity_gun_debug := false
+@export var knockback_force := 10.0
+@export var shoot_ray_length := 1000.0
+@export var shoot_position_offset := 0.1 # How far from the impact surface to place the object
+#endregion
 #endregion
 
 #region Nodes
@@ -96,6 +110,10 @@ var transition_start_velocity := Vector3.ZERO
 @onready var standing_collision: CollisionShape3D = $StandingCollision
 @onready var sliding_collision: CollisionShape3D = $SlidingCollision
 @onready var game_ui = get_node_or_null("/root/Main/GameUI")
+
+# Gravity Gun Nodes
+@onready var gravity_gun_ray: RayCast3D = $CameraPivot/Camera3D/GravityGunRay
+@onready var hold_position: Marker3D = $CameraPivot/Camera3D/HoldPosition
 #endregion
 
 #region State Variables
@@ -128,11 +146,14 @@ var current_camera_pivot
 
 var vault_cooldown_timer := 0.0
 var ledge_climb_cooldown_timer := 0.0
+
+# Gravity Gun State
+var held_object: RigidBody3D = null
 #endregion
 
 func _ready():
-	# The GameManager now handles mouse capture, so we remove it from here.
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	_setup_gravity_gun()
 	_cache_gravity_fields()
 	_enter_planetary_mode()
 	max_look_angle = deg_to_rad(max_look_angle)
@@ -151,15 +172,25 @@ func _ready():
 
 
 func _input(event: InputEvent):
-	# Only process mouse input when captured
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 
-	# Mouse look handling
+	# --- Gravity Gun Input ---
+	if gravity_gun_enabled:
+		if Input.is_action_just_pressed("pickup_drop"):
+			if held_object:
+				_drop_object()
+			else:
+				_pickup_object()
+		elif Input.is_action_just_pressed("shoot_object"):
+			if held_object:
+				_shoot_object()
+
+	# --- Mouse Look ---
 	if event is InputEventMouseMotion:
 		_handle_mouse_movement(event)
 
-	# Pass all other inputs to state machine
+	# --- State Machine Input ---
 	state_machine.process_input(event)
 
 func _handle_mouse_movement(event: InputEventMouseMotion):
@@ -167,19 +198,16 @@ func _handle_mouse_movement(event: InputEventMouseMotion):
 		return
 
 	if is_free_space_mode:
-		# Free space mouse control
 		free_space_rotation.x -= event.relative.y * free_space_mouse_sensitivity
 		free_space_rotation.y -= event.relative.x * free_space_mouse_sensitivity
 		free_space_rotation.x = clamp(free_space_rotation.x, -PI/2, PI/2)
 	else:
-		# Planetary mouse control
 		rotate(transform.basis.y, -event.relative.x * (mouse_sensitivity/1000))
 		mouse_pitch = clamp(mouse_pitch - event.relative.y * (mouse_sensitivity/1000), -max_look_angle, max_look_angle)
 		current_camera_pivot.rotation.x = mouse_pitch
 
 
 func _process(delta):
-	# --- The rest of your player script is unchanged ---
 	current_camera_offset = current_camera_offset.lerp(
 		target_camera_offset,
 		crouch_transition_speed * delta
@@ -189,7 +217,9 @@ func _process(delta):
 
 
 func _physics_process(delta):
-	# --- Unchanged ---
+	if held_object:
+		_update_held_object_position(delta)
+
 	_update_nearest_gravity_field()
 
 	if vault_cooldown_timer > 0:
@@ -204,6 +234,142 @@ func _physics_process(delta):
 
 	if is_instance_valid(game_ui):
 		game_ui.update_debug_info(state_machine.current_state.name, velocity)
+
+#region Gravity Gun
+#==============================================================================
+# GRAVITY GUN SETUP GUIDE (UPDATED)
+#
+# 1. SCENE TREE:
+#	- Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
+#
+# 2. PHYSICS LAYERS:
+#	- Environment/World geometry should be on **Layer 1**.
+#	- All grabbable RigidBody3D objects must be on **Layer 3**.
+#
+# 3. GROUPS:
+#	- Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
+#
+# 4. INPUT MAP:
+#	- "pickup_drop" and "shoot_object" actions must be defined.
+#
+# 5. DEBUGGING:
+#	- Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
+#
+#==============================================================================
+
+func _setup_gravity_gun():
+	if not gravity_gun_enabled:
+		return
+
+	if is_instance_valid(gravity_gun_ray):
+		gravity_gun_ray.target_position = Vector3(0, 0, -gravity_gun_range)
+		# MODIFIED: Set mask to check layer 1 (world) and layer 3 (grabbable).
+		# (1 << 0) is layer 1, (1 << 2) is layer 3.
+		gravity_gun_ray.collision_mask = 4
+	else:
+		push_warning("Gravity Gun: 'GravityGunRay' node not found.")
+
+	if is_instance_valid(hold_position):
+		# Use offset variables to set the hold position
+		hold_position.position = Vector3(0, gravity_gun_hold_offset_y, -gravity_gun_hold_distance)
+	else:
+		push_warning("Gravity Gun: 'HoldPosition' node not found.")
+
+	if gravity_gun_debug: print("Gravity Gun: Setup complete.")
+
+
+func _pickup_object():
+	if not is_instance_valid(gravity_gun_ray): return
+	if gravity_gun_debug: print("--- Gravity Gun: Attempting Pickup ---")
+
+	gravity_gun_ray.force_raycast_update()
+
+	if gravity_gun_ray.is_colliding():
+		var collider = gravity_gun_ray.get_collider()
+		if gravity_gun_debug: print("Raycast hit: ", collider.name if is_instance_valid(collider) else "Invalid Collider")
+
+		if collider is RigidBody3D and collider.is_in_group("grabbable"):
+			if gravity_gun_debug: print("SUCCESS: Target '", collider.name, "' is a valid grabbable object.")
+			held_object = collider
+			held_object.freeze = true
+			held_object.collision_layer = 0
+			held_object.collision_mask = 0
+		else:
+			if gravity_gun_debug:
+				var reason = "not a RigidBody3D" if not collider is RigidBody3D else "not in 'grabbable' group"
+				print("FAILURE: Target '", collider.name, "' is not a valid grabbable object (Reason: %s)." % reason)
+	else:
+		if gravity_gun_debug: print("FAILURE: Raycast did not hit any valid object.")
+
+func _drop_object():
+	if not held_object:
+		if gravity_gun_debug: print("--- Gravity Gun: Drop failed. No object held. ---")
+		return
+
+	if gravity_gun_debug: print("--- Gravity Gun: Dropping '", held_object.name, "' ---")
+
+	held_object.freeze = false
+	# MODIFIED: Restore object to layer 3 and set its mask to see layers 1 and 3.
+	held_object.collision_layer = (1 << 2) # Set object's layer to 3
+	held_object.collision_mask = (1 << 0) | (1 << 2) # Collide with layers 1 & 3
+
+	# Give it a gentle push forward from player's momentum
+	held_object.linear_velocity = velocity * 0.5
+	held_object.angular_velocity = Vector3.ZERO
+
+	held_object = null
+
+func _shoot_object():
+	if not held_object:
+		if gravity_gun_debug: print("--- Gravity Gun: Shoot failed. No object held. ---")
+		return
+
+	var shot_object = held_object
+	if gravity_gun_debug: print("--- Gravity Gun: Shooting '", shot_object.name, "' ---")
+	held_object = null
+
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.new()
+	query.from = camera.global_transform.origin
+	var shoot_direction = -camera.global_transform.basis.z.normalized()
+	query.to = query.from + shoot_direction * shoot_ray_length
+	query.exclude = [self.get_rid(), shot_object.get_rid()]
+	
+	var result = space_state.intersect_ray(query)
+	var impact_point = query.to # Default to max range if no collision
+	if result:
+		impact_point = result.position
+
+	# --- Position the object ---
+	if result:
+		shot_object.global_transform.origin = impact_point + result.normal * shoot_position_offset
+		if gravity_gun_debug: print("Shot object teleported to safe position:", shot_object.global_transform.origin)
+	else:
+		shot_object.global_transform.origin = impact_point
+		if gravity_gun_debug: print("Shot object teleported to max range:", query.to)
+
+	# --- Reset physics properties and apply velocity ---
+	shot_object.freeze = false
+	shot_object.collision_layer = (1 << 2)
+	shot_object.collision_mask = (1 << 0) | (1 << 2)
+	shot_object.angular_velocity = Vector3.ZERO
+	shot_object.linear_velocity = shoot_direction * gravity_gun_shoot_force
+	if gravity_gun_debug: print("Applied velocity %s to '%s'" % [shot_object.linear_velocity, shot_object.name])
+
+	# --- Apply knockback to the player ---
+	var knockback_direction = camera.global_transform.basis.z 
+	velocity += knockback_direction * knockback_force
+	if gravity_gun_debug: print("Applied knockback force:", knockback_direction * knockback_force)
+
+func _update_held_object_position(delta: float):
+	if not held_object or not is_instance_valid(hold_position): return
+
+	var target_transform = hold_position.global_transform
+	var new_transform = held_object.global_transform.interpolate_with(target_transform, delta * gravity_gun_lerp_speed)
+
+	held_object.global_transform = new_transform
+
+#endregion
 
 func _pre_physics_process():
 	if player_collider:
@@ -232,6 +398,10 @@ func _safe_project(vector: Vector3, normal: Vector3) -> Vector3:
 func _switch_movement_mode(free_space: bool):
 	if is_free_space_mode == free_space:
 		return
+
+	if held_object:
+		if gravity_gun_debug: print("--- Gravity Gun: Auto-dropping '", held_object.name, "' due to movement mode switch. ---")
+		_drop_object()
 
 	is_transitioning = true
 	transition_timer = 0.0
@@ -376,7 +546,7 @@ func _should_switch_gravity_field(new_field) -> bool:
 
 	return (gravity_field_transition_timer <= 0 and
 			(new_field != nearest_gravity_field or
-				not nearest_gravity_field.is_body_inside(self)))
+					not nearest_gravity_field.is_body_inside(self)))
 
 
 func _update_gravity():
