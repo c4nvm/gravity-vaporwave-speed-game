@@ -67,8 +67,14 @@ horizontal_alignment = 2
 [node name="CompassViewport" type="SubViewport" parent="."]
 own_world_3d = true
 
-[node name="CompassSprite" type="Sprite2D" parent="."]
-z_index = -8
-position = Vector2(143, 938)
-scale = Vector2(0.424219, 0.424219)
+[node name="TextureRect" type="TextureRect" parent="."]
+anchors_preset = -1
+anchor_left = 0.0125
+anchor_top = 0.788889
+anchor_right = 0.1165
+anchor_bottom = 0.973778
+offset_right = 312.32
+offset_bottom = 312.32
+scale = Vector2(0.39, 0.39)
 texture = SubResource("ViewportTexture_i7ma2")
+metadata/_edit_use_anchors_ = true

@@ -41,7 +41,6 @@ func _ready() -> void:
 	# Configure viewport
 	compass_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	compass_viewport.transparent_bg = true
-	compass_sprite.texture = compass_viewport.get_texture()
 	
 	await get_tree().process_frame
 	
