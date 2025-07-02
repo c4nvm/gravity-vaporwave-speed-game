@@ -153,11 +153,6 @@ func toggle_pause_menu() -> void:
 	pause_menu_instance.visible = new_paused_state
 	update_mouse_mode(not new_paused_state)
 
-	# Hide the main game HUD when paused to prevent it from blocking clicks.
-	if is_instance_valid(gameplay_ui):
-		gameplay_ui.visible = not new_paused_state
-
-
 # --- SCENE MANAGEMENT ---
 func goto_main_menu() -> void:
 	_cleanup_before_scene_change()

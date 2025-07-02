@@ -14,13 +14,13 @@
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("1_wmna3")
 
-[sub_resource type="Sky" id="Sky_lf0gk"]
+[sub_resource type="Sky" id="Sky_wmna3"]
 sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
 
 [sub_resource type="Environment" id="Environment_cnaw2"]
 background_mode = 2
 background_energy_multiplier = 0.5
-sky = SubResource("Sky_lf0gk")
+sky = SubResource("Sky_wmna3")
 tonemap_mode = 3
 tonemap_exposure = 0.83
 tonemap_white = 2.35
