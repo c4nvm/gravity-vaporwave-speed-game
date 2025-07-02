@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ulyq88ng6qwr"
 path.s3tc="res://.godot/imported/blue_crystal_43_01_diffuse.jpg-7363ee7102af8ea31c420ab135f9a301.s3tc.ctex"
+path.etc2="res://.godot/imported/blue_crystal_43_01_diffuse.jpg-7363ee7102af8ea31c420ab135f9a301.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_diffuse.jpg"
-dest_files=["res://.godot/imported/blue_crystal_43_01_diffuse.jpg-7363ee7102af8ea31c420ab135f9a301.s3tc.ctex"]
+dest_files=["res://.godot/imported/blue_crystal_43_01_diffuse.jpg-7363ee7102af8ea31c420ab135f9a301.s3tc.ctex", "res://.godot/imported/blue_crystal_43_01_diffuse.jpg-7363ee7102af8ea31c420ab135f9a301.etc2.ctex"]
 
 [params]
 

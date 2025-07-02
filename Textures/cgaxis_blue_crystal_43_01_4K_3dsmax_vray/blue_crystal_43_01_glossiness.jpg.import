@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://3cnswysoh5dr"
 path.s3tc="res://.godot/imported/blue_crystal_43_01_glossiness.jpg-622bd346d7c631bbfa425eebfe6642d2.s3tc.ctex"
+path.etc2="res://.godot/imported/blue_crystal_43_01_glossiness.jpg-622bd346d7c631bbfa425eebfe6642d2.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_glossiness.jpg"
-dest_files=["res://.godot/imported/blue_crystal_43_01_glossiness.jpg-622bd346d7c631bbfa425eebfe6642d2.s3tc.ctex"]
+dest_files=["res://.godot/imported/blue_crystal_43_01_glossiness.jpg-622bd346d7c631bbfa425eebfe6642d2.s3tc.ctex", "res://.godot/imported/blue_crystal_43_01_glossiness.jpg-622bd346d7c631bbfa425eebfe6642d2.etc2.ctex"]
 
 [params]
 

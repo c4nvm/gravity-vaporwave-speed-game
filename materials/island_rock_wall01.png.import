@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bjrtkcx16c6u0"
 path.s3tc="res://.godot/imported/island_rock_wall01.png-a125f9a3f37f48b506d443a316d1181c.s3tc.ctex"
+path.etc2="res://.godot/imported/island_rock_wall01.png-a125f9a3f37f48b506d443a316d1181c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Materials/island_rock_wall01.png"
-dest_files=["res://.godot/imported/island_rock_wall01.png-a125f9a3f37f48b506d443a316d1181c.s3tc.ctex"]
+dest_files=["res://.godot/imported/island_rock_wall01.png-a125f9a3f37f48b506d443a316d1181c.s3tc.ctex", "res://.godot/imported/island_rock_wall01.png-a125f9a3f37f48b506d443a316d1181c.etc2.ctex"]
 
 [params]
 

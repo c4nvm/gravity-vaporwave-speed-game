@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://jl1e7fccamrd"
 path.s3tc="res://.godot/imported/tile_texture.png-8514cc12e1f6a3291e3390e7f2d3bab4.s3tc.ctex"
+path.etc2="res://.godot/imported/tile_texture.png-8514cc12e1f6a3291e3390e7f2d3bab4.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://addons/stairs-body/example/materials/tile_texture.png"
-dest_files=["res://.godot/imported/tile_texture.png-8514cc12e1f6a3291e3390e7f2d3bab4.s3tc.ctex"]
+dest_files=["res://.godot/imported/tile_texture.png-8514cc12e1f6a3291e3390e7f2d3bab4.s3tc.ctex", "res://.godot/imported/tile_texture.png-8514cc12e1f6a3291e3390e7f2d3bab4.etc2.ctex"]
 
 [params]
 

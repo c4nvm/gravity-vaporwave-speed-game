@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dvdg46lb5l6gb"
 path.s3tc="res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.s3tc.ctex"
+path.etc2="res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Textures/cgaxis_blue_crystal_43_01_4K_3dsmax_vray/blue_crystal_43_01_refraction_glossiness.jpg"
-dest_files=["res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.s3tc.ctex"]
+dest_files=["res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.s3tc.ctex", "res://.godot/imported/blue_crystal_43_01_refraction_glossiness.jpg-04d54a6c465997d10359b5ac64b57292.etc2.ctex"]
 
 [params]
 

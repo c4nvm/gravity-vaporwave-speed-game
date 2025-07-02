@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://citlgvsrnlmq7"
 path.s3tc="res://.godot/imported/trims03.png-3221c00904268ce11e818430e8dc7c12.s3tc.ctex"
+path.etc2="res://.godot/imported/trims03.png-3221c00904268ce11e818430e8dc7c12.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Materials/trims03.png"
-dest_files=["res://.godot/imported/trims03.png-3221c00904268ce11e818430e8dc7c12.s3tc.ctex"]
+dest_files=["res://.godot/imported/trims03.png-3221c00904268ce11e818430e8dc7c12.s3tc.ctex", "res://.godot/imported/trims03.png-3221c00904268ce11e818430e8dc7c12.etc2.ctex"]
 
 [params]
 

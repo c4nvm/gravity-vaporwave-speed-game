@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpk2q2pkydiwm"
 path.s3tc="res://.godot/imported/island_rock_grass_blend01.png-7bd1cf35836d125a7239216e27c3899c.s3tc.ctex"
+path.etc2="res://.godot/imported/island_rock_grass_blend01.png-7bd1cf35836d125a7239216e27c3899c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Materials/island_rock_grass_blend01.png"
-dest_files=["res://.godot/imported/island_rock_grass_blend01.png-7bd1cf35836d125a7239216e27c3899c.s3tc.ctex"]
+dest_files=["res://.godot/imported/island_rock_grass_blend01.png-7bd1cf35836d125a7239216e27c3899c.s3tc.ctex", "res://.godot/imported/island_rock_grass_blend01.png-7bd1cf35836d125a7239216e27c3899c.etc2.ctex"]
 
 [params]
 

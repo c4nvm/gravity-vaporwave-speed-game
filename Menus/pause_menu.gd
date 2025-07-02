@@ -45,7 +45,6 @@ func show_main_pause_menu() -> void:
 	pause_menu_container.show()
 
 func _on_settings_pressed() -> void:
-	pause_menu_container.hide()
 	settings_menu.show()
 
 func _on_restart_pressed() -> void:

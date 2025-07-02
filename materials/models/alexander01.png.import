@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://coaw4msiwblwm"
 path.s3tc="res://.godot/imported/alexander01.png-b7ddeae55ef7eebbab44e19cd5302dae.s3tc.ctex"
+path.etc2="res://.godot/imported/alexander01.png-b7ddeae55ef7eebbab44e19cd5302dae.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Materials/models/alexander01.png"
-dest_files=["res://.godot/imported/alexander01.png-b7ddeae55ef7eebbab44e19cd5302dae.s3tc.ctex"]
+dest_files=["res://.godot/imported/alexander01.png-b7ddeae55ef7eebbab44e19cd5302dae.s3tc.ctex", "res://.godot/imported/alexander01.png-b7ddeae55ef7eebbab44e19cd5302dae.etc2.ctex"]
 
 [params]
 
