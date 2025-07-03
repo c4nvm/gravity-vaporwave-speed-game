@@ -10,7 +10,11 @@ var AUDIO_MANAGER_SCENE = preload("res://audio_manager.tscn")
 # Holds the AudioManager instance.
 var audio_manager: Node
 
-# Emitted when a new level is loaded.
+# Emitted when game state changes
+signal level_started()
+signal gameplay_started()
+signal level_completed()
+signal returned_to_menu()
 signal level_loaded(level_path: String, level_id: String)
 
 # --- GLOBAL STATE ---
@@ -19,7 +23,6 @@ var is_mouse_captured: bool = false
 var current_level_id: String = ""
 var current_level_path: String = ""
 var is_level_complete: bool = false
-# NEW: Variables to store the current settings
 var current_fov: float = 90.0
 var current_sensitivity: float = 1.0
 
@@ -29,6 +32,7 @@ var gameplay_ui: CanvasLayer = null
 var player_node: CharacterBody3D = null
 var pause_menu_instance: CanvasLayer = null
 var settings_menu_instance: PanelContainer = null
+var speedrun_timer: Node = null
 var compasses: Array[Node3D] = []
 var fade_rect: ColorRect # Reference to the fade-to-black rectangle.
 
@@ -55,10 +59,15 @@ func _ready():
 	fade_rect.visible = false
 	fade_canvas.add_child(fade_rect)
 
-	# --- Existing _ready() code ---
-	# Instantiate and add the AudioManager.
+	# --- Instantiate AudioManager ---
 	audio_manager = AUDIO_MANAGER_SCENE.instantiate()
 	add_child(audio_manager)
+
+	# --- Connect Signals to AudioManager ---
+	level_started.connect(audio_manager.play_waiting_music)
+	gameplay_started.connect(audio_manager.start_gameplay_audio)
+	level_completed.connect(audio_manager.play_end_level_audio)
+	returned_to_menu.connect(audio_manager.stop_all_music)
 
 	# --- Setup for debounced scene tree printing ---
 	print_tree_timer = Timer.new()
@@ -73,23 +82,25 @@ func _ready():
 
 
 # -------------------------------------------------------------------
-# ---				  PLAYER EVENT HOOKS (AUDIO LOGIC)			  ---
+# ---               PLAYER EVENT HOOKS (AUDIO LOGIC)              ---
 # -------------------------------------------------------------------
 
 func _on_player_first_move():
-	# Start gameplay music on first move.
-	audio_manager.start_gameplay_audio()
+	# Emit signal that gameplay has started.
+	gameplay_started.emit()
 
-# UPDATED: Handlers now also store the current settings
+
 func _on_fov_changed(new_fov: float):
 	current_fov = new_fov
 	if is_instance_valid(player_node):
 		player_node.set_fov(new_fov)
 
+
 func _on_sensitivity_changed(new_sensitivity: float):
 	current_sensitivity = new_sensitivity
 	if is_instance_valid(player_node):
 		player_node.set_mouse_sensitivity(new_sensitivity)
+
 
 # --- GAME LOOP & INPUT ---
 func _process(_delta: float) -> void:
@@ -173,6 +184,7 @@ func toggle_pause_menu() -> void:
 
 	update_mouse_mode(not new_paused_state)
 
+
 # --- SCENE MANAGEMENT ---
 func goto_main_menu() -> void:
 	_cleanup_before_scene_change()
@@ -202,8 +214,8 @@ func load_level(level_path: String) -> void:
 	
 	level_loaded.emit(level_path, current_level_id)
 	
-	# Play waiting music on level load.
-	audio_manager.play_waiting_music()
+	# Signal that a level has started to play the waiting music.
+	level_started.emit()
 
 
 func reload_current_level() -> void:
@@ -217,28 +229,32 @@ func reload_current_level() -> void:
 	# Make sure the mouse is captured again for gameplay.
 	update_mouse_mode(true)
 	
-	# Play waiting music on level restart.
-	audio_manager.play_waiting_music()
+	# Signal that a level has started to play the waiting music.
+	level_started.emit()
 	
 	# Reload the currently active scene.
 	get_tree().reload_current_scene()
 
+func player_did_finish_level() -> void:
+	if is_instance_valid(speedrun_timer):
+		speedrun_timer.player_finished_level()
 
 func _cleanup_before_scene_change() -> void:
 	is_level_complete = false # Reset when leaving a level
 	get_tree().paused = false
-	audio_manager.stop_all_music()
+	returned_to_menu.emit() # Signal to stop all music.
 	
 	current_level_id = ""
 	current_level_path = ""
 	
 	gameplay_ui = null
 	player_node = null
+	speedrun_timer = null # Clear the timer reference
 	if is_instance_valid(pause_menu_instance):
 		pause_menu_instance.queue_free()
 	pause_menu_instance = null
 	
-	# NEW: Clear settings menu instance
+	# Clear settings menu instance
 	settings_menu_instance = null
 	
 	compasses.clear()
@@ -247,7 +263,7 @@ func _cleanup_before_scene_change() -> void:
 # --- TIME SAVING & LOADING ---
 const SAVE_DIR = "user://best_times/"
 
-func save_best_time(time: float) -> void:
+func save_best_time(new_time: float) -> void:
 	# Don't run the level complete logic more than once.
 	if is_level_complete:
 		return
@@ -257,27 +273,32 @@ func save_best_time(time: float) -> void:
 		push_error("Cannot save time - empty level ID!")
 		return
 	
-	audio_manager.play_end_level_audio()
+	level_completed.emit() # Play end-level audio via signal.
 
-	var dir = DirAccess.open("user://")
-	if dir == null:
-		push_error("Failed to access user data directory!")
-		return
+	# --- FIX: Check if the new time is better before saving ---
+	var current_best_time = load_best_time(current_level_id)
 
-	if not dir.dir_exists("best_times"):
-		var err = dir.make_dir("best_times")
-		if err != OK:
-			push_error("Failed to create best_times directory!")
+	# Save only if there's no best time yet (0.0) or if the new time is smaller.
+	if current_best_time == 0.0 or new_time < current_best_time:
+		var dir = DirAccess.open("user://")
+		if dir == null:
+			push_error("Failed to access user data directory!")
 			return
 
-	var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
-	var file = FileAccess.open(file_path, FileAccess.WRITE)
-	if file == null:
-		push_error("Failed to save time for %s. Error: %s" % [current_level_id, FileAccess.get_open_error()])
-		return
+		if not dir.dir_exists("best_times"):
+			var err = dir.make_dir("best_times")
+			if err != OK:
+				push_error("Failed to create best_times directory!")
+				return
 
-	file.store_float(time)
-	file.close()
+		var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
+		var file = FileAccess.open(file_path, FileAccess.WRITE)
+		if file == null:
+			push_error("Failed to save time for %s. Error: %s" % [current_level_id, FileAccess.get_open_error()])
+			return
+
+		file.store_float(new_time)
+		file.close()
 
 
 func load_best_time(level_id_to_load: String) -> float:
@@ -297,7 +318,7 @@ func load_best_time(level_id_to_load: String) -> float:
 	file.close()
 	return time
 
-# --- NEW FUNCTION ---
+
 func delete_current_level_time() -> void:
 	if current_level_id.is_empty():
 		push_error("Cannot delete time: current_level_id is empty.")
@@ -359,13 +380,18 @@ func quit_game() -> void:
 func register_gameplay_ui(ui_instance: CanvasLayer) -> void:
 	gameplay_ui = ui_instance
 
+func register_speedrun_timer(timer_instance: Node) -> void:
+	speedrun_timer = timer_instance
 
 func register_player(p_node: CharacterBody3D) -> void:
 	player_node = p_node
-	# UPDATED: Immediately apply current settings to the newly registered player.
+	# Immediately apply current settings to the newly registered player.
 	if is_instance_valid(player_node):
 		player_node.set_fov(current_fov)
 		player_node.set_mouse_sensitivity(current_sensitivity)
+		# Assuming the player node has a 'first_move' signal.
+		if not player_node.is_connected("first_move", Callable(self, "_on_player_first_move")):
+			player_node.connect("first_move", Callable(self, "_on_player_first_move"))
 
 
 func register_pause_menu(menu_instance: CanvasLayer) -> void:

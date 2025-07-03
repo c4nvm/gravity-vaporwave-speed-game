@@ -1,5 +1,8 @@
 extends CharacterBody3D
 
+# Emitted only on the first frame that movement input is detected.
+signal first_move
+
 #region State Machine
 @onready var state_machine = $StateMachine
 #endregion
@@ -124,6 +127,7 @@ var transition_start_velocity := Vector3.ZERO
 
 #region State Variables
 var input_enabled := false
+var _has_moved := false # Tracks if the player has moved yet.
 var gravity_fields: Array[Node] = []
 var nearest_gravity_field: Area3D = null
 var is_on_planet := false
@@ -168,7 +172,7 @@ func set_mouse_sensitivity(new_sensitivity: float):
 
 
 func _ready():
-	# UPDATED: Register the player with the GameManager so it can receive settings.
+	# Register the player with the GameManager so it can receive settings.
 	# Make sure your autoload is named "GameManager".
 	if get_tree().root.has_node("GameManager"):
 		get_tree().root.get_node("GameManager").register_player(self)
@@ -294,7 +298,15 @@ func get_wish_direction() -> Vector2:
 	"""
 	if not input_enabled:
 		return Vector2.ZERO
-	return Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+		
+	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+	
+	# Check if this is the first movement input.
+	if not _has_moved and input_dir.length_squared() > 0:
+		first_move.emit() # Emit the signal ONCE.
+		_has_moved = true # Prevent this block from running again.
+		
+	return input_dir
 
 func is_action_just_pressed_checked(action: StringName) -> bool:
 	"""
@@ -455,12 +467,10 @@ func _shoot_object():
 	
 	if result:
 		impact_point = result.position
-		# --- FIX START ---
 		# When the shot ray hits a surface, we create the temporary activation area.
 		# This area will trigger any switches it overlaps with.
 		_create_switch_activation_area(result.position, result.normal)
 		if gravity_gun_debug: print("Created switch activation area at:", result.position)
-		# --- FIX END ---
 
 
 	# --- Position the object ---

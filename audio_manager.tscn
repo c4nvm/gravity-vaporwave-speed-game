@@ -1,29 +1,34 @@
-[gd_scene load_steps=6 format=3 uid="uid://c4cvmbinxyy4d"]
+[gd_scene load_steps=7 format=3 uid="uid://c4cvmbinxyy4d"]
 
 [ext_resource type="Script" uid="uid://cuen6a007he5v" path="res://audio_manager.gd" id="1_jisk1"]
+[ext_resource type="Script" uid="uid://2iaf7trvdx0m" path="res://audio_profile.gd" id="2_l2k84"]
 [ext_resource type="AudioStream" uid="uid://3kty58dc81hw" path="res://Audio/BGM/Test Song 1/default_waiting.wav" id="2_nhx87"]
 [ext_resource type="AudioStream" uid="uid://f1ogbypqoocv" path="res://Audio/BGM/Test Song 1/default_playing.wav" id="3_l2k84"]
 [ext_resource type="AudioStream" uid="uid://cge3nyb764hwf" path="res://Audio/BGM/Test Song 1/default_start.wav" id="4_l55mp"]
 [ext_resource type="AudioStream" uid="uid://dn5jyf7gnngpm" path="res://Audio/BGM/Test Song 1/default_end.wav" id="5_v0gdi"]
 
-[node name="AudioManager" type="Node" node_paths=PackedStringArray("waiting_bgm", "playing_bgm", "start_sfx", "end_sfx")]
+[node name="AudioManager" type="Node"]
 script = ExtResource("1_jisk1")
 fade_duration = 0.0
+
+[node name="Default" type="Node" parent="." node_paths=PackedStringArray("waiting_bgm", "playing_bgm", "start_sfx", "end_sfx")]
+script = ExtResource("2_l2k84")
 waiting_bgm = NodePath("WaitingBGM")
 playing_bgm = NodePath("PlayingBGM")
 start_sfx = NodePath("StartSFX")
 end_sfx = NodePath("EndSFX")
+metadata/_custom_type_script = "uid://2iaf7trvdx0m"
 
-[node name="WaitingBGM" type="AudioStreamPlayer" parent="."]
+[node name="WaitingBGM" type="AudioStreamPlayer" parent="Default"]
 stream = ExtResource("2_nhx87")
 
-[node name="PlayingBGM" type="AudioStreamPlayer" parent="."]
+[node name="PlayingBGM" type="AudioStreamPlayer" parent="Default"]
 stream = ExtResource("3_l2k84")
 volume_db = -6.0
 
-[node name="StartSFX" type="AudioStreamPlayer" parent="."]
+[node name="StartSFX" type="AudioStreamPlayer" parent="Default"]
 stream = ExtResource("4_l55mp")
 
-[node name="EndSFX" type="AudioStreamPlayer" parent="."]
+[node name="EndSFX" type="AudioStreamPlayer" parent="Default"]
 stream = ExtResource("5_v0gdi")
 volume_db = -3.0

@@ -2,6 +2,7 @@ extends Node3D
 
 @export var player_scene: PackedScene = preload("res://player.tscn")
 @export var pause_menu_scene: PackedScene = preload("res://Menus/pause_menu.tscn")
+@export var soundtrack_profile: String = "default"
 
 @onready var start_position: Marker3D = $StartPosition
 @onready var endpoint: Area3D = $Endpoint
@@ -10,14 +11,15 @@ extends Node3D
 var player_instance: CharacterBody3D
 
 func _ready() -> void:
+	# Set soundtrack through GameManager
+	GameManager.audio_manager.set_soundtrack_profile(soundtrack_profile)
 	
 	# Instantiate pause menu
 	var pause_instance = pause_menu_scene.instantiate()
 	pause_instance.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(pause_instance)
-	GameManager.register_pause_menu(pause_instance) # Register the pause menu
-
-	# It's safer to wait for the next frame before spawning the player
+	GameManager.register_pause_menu(pause_instance)
+	
 	await get_tree().process_frame
 
 	if not player_scene:

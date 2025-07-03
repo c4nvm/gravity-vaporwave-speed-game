@@ -4,7 +4,6 @@ class_name SpeedrunTimer
 
 var time_elapsed: float = 0.0
 var timer_active: bool = false
-var has_moved: bool = false
 
 var gameplay_ui: CanvasLayer
 var player_node: CharacterBody3D
@@ -19,27 +18,27 @@ func setup_references() -> void:
 		return
 	
 	gameplay_ui.update_timer(0.0)
-	gameplay_ui.load_record_time() 
+	gameplay_ui.load_record_time()
+	
+	# Register the timer with the manager
+	GameManager.register_speedrun_timer(self)
+	
+	# Connect to the GameManager's signal to start the timer.
+	GameManager.gameplay_started.connect(start_timer)
 
 func register_player(p_node: CharacterBody3D) -> void:
 	player_node = p_node
 	reset_timer()
 
 func _process(delta: float) -> void:
-	# This block detects the very first movement of the player.
-	if not has_moved and is_instance_valid(player_node) and player_node.velocity.length() > 0.1:
-		has_moved = true
-		
-		GameManager.audio_manager.start_gameplay_audio()
-		
-		start_timer()
-		
+	# This function now only needs to increment the timer when it's active.
 	if timer_active:
 		time_elapsed += delta
 		if is_instance_valid(gameplay_ui):
 			gameplay_ui.update_timer(time_elapsed)
 
 func start_timer() -> void:
+	# This function is now called by the GameManager.gameplay_started signal.
 	if not timer_active:
 		timer_active = true
 		if is_instance_valid(gameplay_ui):
@@ -47,8 +46,6 @@ func start_timer() -> void:
 
 func stop_timer() -> void:
 	timer_active = false
-	
-	GameManager.audio_manager.play_end_level_audio()
 
 func player_finished_level() -> void:
 	if not timer_active:
@@ -56,13 +53,15 @@ func player_finished_level() -> void:
 	
 	stop_timer()
 	
+	# Tell the GameManager to handle the end-of-level logic.
+	GameManager.save_best_time(time_elapsed)
+	
 	if is_instance_valid(gameplay_ui):
 		gameplay_ui.show_final_time(time_elapsed)
 
 func reset_timer() -> void:
 	time_elapsed = 0.0
 	timer_active = false
-	has_moved = false
 	if is_instance_valid(gameplay_ui):
 		gameplay_ui.update_timer(0.0)
 		gameplay_ui.set_timer_visibility(Color.LIGHT_BLUE)
