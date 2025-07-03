@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-# Emitted only on the first frame that movement input is detected.
+# Emitted on the first physics frame the player is considered to be moving (velocity > 0).
 signal first_move
 
 #region State Machine
@@ -284,6 +284,13 @@ func _physics_process(delta):
 
 	state_machine.process_physics(delta)
 
+	# Emit the first_move signal once the player's velocity is greater than a threshold.
+	# This is more robust than checking for input, as it captures movement from
+	# jumping, sliding, knockback, etc.
+	if not _has_moved and velocity.length_squared() > 0.01:
+		first_move.emit()
+		_has_moved = true
+
 	if is_instance_valid(game_ui):
 		game_ui.update_debug_info(state_machine.current_state.name, velocity)
 
@@ -299,14 +306,9 @@ func get_wish_direction() -> Vector2:
 	if not input_enabled:
 		return Vector2.ZERO
 		
-	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
-	
-	# Check if this is the first movement input.
-	if not _has_moved and input_dir.length_squared() > 0:
-		first_move.emit() # Emit the signal ONCE.
-		_has_moved = true # Prevent this block from running again.
-		
-	return input_dir
+	# The check for first_move was moved to _physics_process to be based on
+	# velocity, which is more reliable and covers all forms of movement.
+	return Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 
 func is_action_just_pressed_checked(action: StringName) -> bool:
 	"""
@@ -342,20 +344,20 @@ func get_free_space_input() -> Vector3:
 # GRAVITY GUN SETUP GUIDE (UPDATED)
 #
 # 1. SCENE TREE:
-#    - Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
+#	- Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
 #
 # 2. PHYSICS LAYERS:
-#    - Environment/World geometry should be on **Layer 1**.
-#    - All grabbable RigidBody3D objects must be on **Layer 3**.
+#	- Environment/World geometry should be on **Layer 1**.
+#	- All grabbable RigidBody3D objects must be on **Layer 3**.
 #
 # 3. GROUPS:
-#    - Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
+#	- Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
 #
 # 4. INPUT MAP:
-#    - "pickup_drop" and "shoot_object" actions must be defined.
+#	- "pickup_drop" and "shoot_object" actions must be defined.
 #
 # 5. DEBUGGING:
-#    - Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
+#	- Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
 #
 #==============================================================================
 
