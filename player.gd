@@ -7,11 +7,6 @@ signal first_move
 @onready var state_machine = $StateMachine
 #endregion
 
-#region UI
-# Note: This path might need to be adjusted based on your final scene structure
-@onready var state_label: Label = get_node_or_null("CanvasLayer/Label")
-#endregion
-
 #region Configuration
 @export_group("Spawning")
 @export var level_start_fade_duration := 2.0 # How long the fade-in lasts and input is disabled.
@@ -126,6 +121,8 @@ var transition_start_velocity := Vector3.ZERO
 #endregion
 
 #region State Variables
+var movement_locked := true 
+var spawn_protection_timer : Timer 
 var input_enabled := false
 var _has_moved := false # Tracks if the player has moved yet.
 var gravity_fields: Array[Node] = []
@@ -160,6 +157,11 @@ var ledge_climb_cooldown_timer := 0.0
 
 # Gravity Gun State
 var held_object: RigidBody3D = null
+
+# Variable to store the time of spawn for debug printing
+var spawn_time := 0.0
+# Variable to store the last mouse movement vector for debug printing
+var last_mouse_movement := Vector2.ZERO
 #endregion
 
 # Functions to apply settings from the menu
@@ -172,30 +174,32 @@ func set_mouse_sensitivity(new_sensitivity: float):
 
 
 func _ready():
-	# Register the player with the GameManager so it can receive settings.
-	# Make sure your autoload is named "GameManager".
+	# --- Initialize spawn time ---
+	spawn_time = Time.get_ticks_msec()
+	
+	# --- Force reset all movement ---
+	velocity = Vector3.ZERO
+	free_space_velocity = Vector3.ZERO
+	
+	# --- Create spawn protection timer ---
+	spawn_protection_timer = Timer.new()
+	spawn_protection_timer.wait_time = level_start_fade_duration
+	spawn_protection_timer.one_shot = true
+	spawn_protection_timer.timeout.connect(_on_spawn_protection_end)
+	add_child(spawn_protection_timer)
+	
+	# --- Delay ground detection ---
+	await get_tree().physics_frame
+	is_grounded = ground_ray.is_colliding()
+	print("Ground ray colliding at spawn? ", is_grounded)
+	
+	# --- Start timers ---
+	spawn_protection_timer.start()
+	
+	# --- Existing setup ---
 	if get_tree().root.has_node("GameManager"):
 		get_tree().root.get_node("GameManager").register_player(self)
-
-	# --- Spawn logic for input delay and screen fade ---
-	input_enabled = false
-	# Use a timer to enable input after the specified duration.
-	var spawn_timer = Timer.new()
-	spawn_timer.wait_time = level_start_fade_duration
-	spawn_timer.one_shot = true
-	# Connect the timer's timeout signal to enable input and then free the timer.
-	spawn_timer.timeout.connect(func():
-		input_enabled = true
-		spawn_timer.queue_free()
-	)
-	add_child(spawn_timer)
-	spawn_timer.start()
-
-	# Tell the GameManager to start the fade-in effect.
-	if get_tree().root.has_node("GameManager"):
-		get_tree().root.get_node("GameManager").start_level_fade_in(level_start_fade_duration)
-
-	# --- Existing _ready() logic ---
+	
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_setup_gravity_gun()
 	_cache_gravity_fields()
@@ -206,14 +210,13 @@ func _ready():
 	camera.position = Vector3.ZERO
 	current_camera_offset = Vector3.ZERO
 	target_camera_offset = Vector3.ZERO
-
 	state_machine.init(self)
 
-	if state_label:
-		state_machine.state_changed.connect(func(new_state_name): state_label.text = "State: " + new_state_name)
-		if state_machine.current_state:
-			state_label.text = "State: " + state_machine.current_state.name
-
+func _on_spawn_protection_end():
+	movement_locked = false
+	input_enabled = true
+	spawn_protection_timer.queue_free()
+	print("Spawn protection ended - movement unlocked")
 
 func _input(event: InputEvent):
 	# --- Block discrete input events if disabled ---
@@ -247,6 +250,10 @@ func _handle_mouse_movement(event: InputEventMouseMotion):
 	if state_machine.current_state.name == "LedgeClimbing":
 		return
 
+	# --- NEW: Store mouse movement for debug print ---
+	last_mouse_movement = event.relative
+	# --- END NEW ---
+	
 	# The calculation (mouse_sensitivity / 1000) converts the user-friendly
 	# slider value (e.g., 1.2) into a smaller, more usable value for rotation.
 	var sensitivity_factor = mouse_sensitivity / 1000.0
@@ -267,30 +274,71 @@ func _process(delta):
 	camera.position = current_camera_offset
 	state_machine.process_frame(delta)
 
+func _print_tick_debug_info():
+	var elapsed_time = (Time.get_ticks_msec() - spawn_time) / 1000.0
+	
+	var current_state_name = "N/A"
+	if state_machine and state_machine.current_state:
+		current_state_name = state_machine.current_state.name
+		
+	var actions_to_check = ["move_left", "move_right", "move_backward", "move_forward", "jump", "slide"]
+	var pressed_actions = []
+	
+	for action in actions_to_check:
+		if Input.is_action_pressed(action):
+			pressed_actions.append(action)
+	
+	var inputs_pressed_str = ", ".join(pressed_actions) if not pressed_actions.is_empty() else "None"
+	
+	var cam_rot_deg = camera.global_rotation_degrees
+	
+	# --- MODIFIED: Added up_direction to the print statement ---
+	print("Time: %.3f | State: %s | Vel: (%.2f, %.2f, %.2f) | CamRot: (%.1f, %.1f, %.1f) | Up: (%.2f, %.2f, %.2f)" % [
+		elapsed_time, 
+		current_state_name, 
+		velocity.x, 
+		velocity.y, 
+		velocity.z,
+		cam_rot_deg.x,
+		cam_rot_deg.y,
+		cam_rot_deg.z,
+		up_direction.x,
+		up_direction.y,
+		up_direction.z
+	])
+	
+	last_mouse_movement = Vector2.ZERO
 
 func _physics_process(delta):
+	_print_tick_debug_info()
+	
+	# --- BLOCK ALL PHYSICS IF LOCKED ---
+	if movement_locked:
+		velocity = Vector3.ZERO
+		free_space_velocity = Vector3.ZERO
+		return
+	
+	# --- Existing held object logic ---
 	if held_object:
 		_update_held_object_position(delta)
-
+	
+	# --- Existing gravity/state logic ---
 	_update_nearest_gravity_field()
-
 	if vault_cooldown_timer > 0:
 		vault_cooldown_timer -= delta
 	if ledge_climb_cooldown_timer > 0:
 		ledge_climb_cooldown_timer -= delta
-
+	
 	if should_switch_modes() and not is_transitioning:
 		_switch_movement_mode(nearest_gravity_field == null)
-
+	
 	state_machine.process_physics(delta)
-
-	# Emit the first_move signal once the player's velocity is greater than a threshold.
-	# This is more robust than checking for input, as it captures movement from
-	# jumping, sliding, knockback, etc.
-	if not _has_moved and velocity.length_squared() > 0.01:
+	
+	# --- Modified first_move check ---
+	if not _has_moved and velocity.length_squared() > 0.01 and not movement_locked:
 		first_move.emit()
 		_has_moved = true
-
+	
 	if is_instance_valid(game_ui):
 		game_ui.update_debug_info(state_machine.current_state.name, velocity)
 
@@ -344,20 +392,20 @@ func get_free_space_input() -> Vector3:
 # GRAVITY GUN SETUP GUIDE (UPDATED)
 #
 # 1. SCENE TREE:
-#	- Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
+#    - Player (CharacterBody3D) > CameraPivot > Camera3D > GravityGunRay / HoldPosition
 #
 # 2. PHYSICS LAYERS:
-#	- Environment/World geometry should be on **Layer 1**.
-#	- All grabbable RigidBody3D objects must be on **Layer 3**.
+#    - Environment/World geometry should be on **Layer 1**.
+#    - All grabbable RigidBody3D objects must be on **Layer 3**.
 #
 # 3. GROUPS:
-#	- Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
+#    - Add all grabbable `RigidBody3D` nodes to a group named "grabbable".
 #
 # 4. INPUT MAP:
-#	- "pickup_drop" and "shoot_object" actions must be defined.
+#    - "pickup_drop" and "shoot_object" actions must be defined.
 #
 # 5. DEBUGGING:
-#	- Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
+#    - Enable the "Gravity Gun Debug" property in the Inspector to see print logs.
 #
 #==============================================================================
 
@@ -597,14 +645,36 @@ func _update_transition(delta):
 		velocity = transition_start_velocity.lerp(horizontal_velocity + up_component, weight)
 
 
+# --- MODIFIED ---
 func _cache_gravity_fields():
 	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
-	if gravity_fields.size() > 0:
-		nearest_gravity_field = gravity_fields[0]
-		is_on_planet = true
-		floor_max_angle = deg_to_rad(MAX_SLOPE_ANGLE)
+	var spawn_field: Area3D = null
+
+	# First, search specifically for the spawn field.
+	for field in gravity_fields:
+		if field.get("is_spawn") and field.is_spawn:
+			spawn_field = field
+			break
+	
+	# If a spawn field is found, prioritize it.
+	if is_instance_valid(spawn_field):
+		nearest_gravity_field = spawn_field
+		print("Player spawned in designated spawn gravity field: ", nearest_gravity_field.name)
+	# If no spawn field is designated, fall back to the closest one.
+	elif not gravity_fields.is_empty():
+		_update_nearest_gravity_field() # Run a full check to find the best starting field
+		print("No spawn field found. Initialized with nearest field: ", nearest_gravity_field.name if nearest_gravity_field else "None")
+	else:
+		nearest_gravity_field = null
+
+	is_on_planet = nearest_gravity_field != null
+	if is_on_planet:
+		_update_gravity()
+		
+	floor_max_angle = deg_to_rad(MAX_SLOPE_ANGLE)
 
 
+# --- MODIFIED ---
 func _update_nearest_gravity_field():
 	gravity_fields = get_tree().get_nodes_in_group("gravity_fields")
 	if gravity_fields.is_empty():
@@ -612,6 +682,11 @@ func _update_nearest_gravity_field():
 		nearest_gravity_field = null
 		last_gravity_field = null
 		return
+
+	# --- NEW: Spawn Field Lock ---
+	# If we are currently inside the designated spawn field, do not search for a new one.
+	if nearest_gravity_field and nearest_gravity_field.get("is_spawn") and nearest_gravity_field.is_spawn and nearest_gravity_field.is_body_inside(self):
+		return # Stay locked to the spawn field.
 
 	gravity_field_transition_timer -= get_process_delta_time()
 	var candidate_fields = _get_valid_gravity_fields()
@@ -636,15 +711,16 @@ func _update_nearest_gravity_field():
 	is_on_planet = nearest_gravity_field != null
 
 
+# --- MODIFIED ---
 func _get_valid_gravity_fields() -> Array:
 	var candidate_fields := []
-	var current_priority = nearest_gravity_field.priority if nearest_gravity_field else -1
 
 	for field in gravity_fields:
 		if not is_instance_valid(field):
 			continue
 
-		var should_consider = field.is_body_inside(self) if field.is_directional else true
+		# This now checks if the player is inside the Area3D for ALL field types.
+		var should_consider = field.is_body_inside(self)
 
 		if should_consider:
 			candidate_fields.append({
@@ -652,13 +728,20 @@ func _get_valid_gravity_fields() -> Array:
 				"priority": field.priority,
 				"strength": field.gravity_strength,
 				"distance": global_position.distance_to(field.global_position),
-				"is_new": field != nearest_gravity_field
+				"is_new": field != nearest_gravity_field,
+				"is_directional": not field.gravity_point,
+				"is_spawn": field.get("is_spawn") # <<< NEW: Add spawn flag for sorting
 			})
 
 	return candidate_fields
 
 
+# --- MODIFIED ---
 func _sort_gravity_fields(a, b) -> bool:
+	# --- NEW: Prioritize spawn field above all else ---
+	if a.is_spawn != b.is_spawn:
+		return a.is_spawn # 'true' is > 'false', so a spawn field is preferred.
+
 	if a.priority != b.priority:
 		return a.priority > b.priority
 
@@ -668,14 +751,20 @@ func _sort_gravity_fields(a, b) -> bool:
 		return a_dot < b_dot
 	elif a.is_new != b.is_new:
 		return a.is_new
-	elif a.field.is_directional != b.field.is_directional:
-		return a.field.is_directional
+	elif a.is_directional != b.is_directional:
+		return a.is_directional
 	else:
-		return a.strength > b.strength if a.field.is_directional else a.distance < b.distance
+		return a.strength > b.strength if a.is_directional else a.distance < b.distance
 
 
 func _should_switch_gravity_field(new_field) -> bool:
 	if nearest_gravity_field == null:
+		return true
+
+	# --- NEW: Allow switching AWAY from a spawn field once exited ---
+	# This case handles when the spawn field is no longer the best candidate
+	# because the player has left its bounds.
+	if nearest_gravity_field.get("is_spawn") and nearest_gravity_field.is_spawn and not nearest_gravity_field.is_body_inside(self):
 		return true
 
 	if new_field.priority > nearest_gravity_field.priority:
@@ -683,11 +772,19 @@ func _should_switch_gravity_field(new_field) -> bool:
 
 	return (gravity_field_transition_timer <= 0 and
 			(new_field != nearest_gravity_field or
-							not nearest_gravity_field.is_body_inside(self)))
+			 not nearest_gravity_field.is_body_inside(self)))
 
 
 func _update_gravity():
 	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
+		# --- Add these debug prints to find the issue ---
+		print("--- Gravity Update Check ---")
+		print("Field Name: %s" % nearest_gravity_field.name)
+		print("Field is_point_source: %s" % nearest_gravity_field.gravity_point)
+		print("Field's directional vector: %s" % nearest_gravity_field.gravity_direction)
+		print("--------------------------")
+		# --- End of debug prints ---
+
 		gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized() if nearest_gravity_field.gravity_point else nearest_gravity_field.gravity_direction
 		self.up_direction = -gravity_direction
 
@@ -714,6 +811,14 @@ func _update_debug_print(delta):
 	debug_timer += delta
 	if debug_timer >= DEBUG_PRINT_INTERVAL:
 		debug_timer = 0.0
+
+func _debug_ground_ray():
+	print("--- Ground Ray Debug ---")
+	print("Colliding: ", ground_ray.is_colliding())
+	if ground_ray.is_colliding():
+		print("Collider: ", ground_ray.get_collider().name)
+		print("Normal: ", ground_ray.get_collision_normal())
+	print("-----------------------")
 
 func _stair_step_down():
 	if is_free_space_mode or not is_grounded:

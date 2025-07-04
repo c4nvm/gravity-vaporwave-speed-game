@@ -24,13 +24,13 @@ surface_material_override/0 = ExtResource("2_1rd8e")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_j81u8")
 
-[node name="Area3D" type="Area3D" parent="." groups=["gravity_fields"]]
+[node name="PlanetField" type="Area3D" parent="." groups=["gravity_fields"]]
 gravity_space_override = 3
 gravity_point = true
 gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 script = ExtResource("2_c66fx")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetField"]
 shape = SubResource("SphereShape3D_rorap")
 debug_color = Color(0, 0.6, 0.701961, 1)

@@ -28,6 +28,11 @@ func _ready() -> void:
 
 	spawn_player()
 	endpoint.body_entered.connect(_on_endpoint_body_entered)
+	
+	# --- FIX ---
+	# Tell the GameManager to start the fade-in using the duration from the player.
+	GameManager.start_level_fade_in(player_instance.level_start_fade_duration)
+
 
 func spawn_player() -> void:
 	player_instance = player_scene.instantiate()

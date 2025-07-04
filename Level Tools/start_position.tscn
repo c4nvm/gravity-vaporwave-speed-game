@@ -1,3 +1,7 @@
 [gd_scene format=3 uid="uid://n7f4gsm8j1d2"]
 
 [node name="StartPosition" type="Marker3D"]
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+target_position = Vector3(0, 0, -1)

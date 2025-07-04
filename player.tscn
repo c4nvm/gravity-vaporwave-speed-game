@@ -131,9 +131,10 @@ shape = SubResource("SphereShape3D_g6ire")
 disabled = true
 
 [node name="GroundRay" type="RayCast3D" parent="."]
-target_position = Vector3(0, -0.15, 0)
+target_position = Vector3(0, -0.25, 0)
 collision_mask = 5
 hit_from_inside = true
+debug_shape_custom_color = Color(1, 1, 0, 1)
 
 [node name="SlideRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

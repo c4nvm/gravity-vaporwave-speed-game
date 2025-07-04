@@ -74,15 +74,15 @@ func _ready():
 	returned_to_menu.connect(audio_manager.stop_all_music)
 
 	# --- Setup for debounced scene tree printing ---
-	print_tree_timer = Timer.new()
-	print_tree_timer.wait_time = 0.05 # Small delay to batch rapid changes
-	print_tree_timer.one_shot = true
-	print_tree_timer.timeout.connect(_print_scene_tree)
-	add_child(print_tree_timer)
+	#print_tree_timer = Timer.new()
+	#print_tree_timer.wait_time = 0.05 # Small delay to batch rapid changes
+	#print_tree_timer.one_shot = true
+	#print_tree_timer.timeout.connect(_print_scene_tree)
+	#add_child(print_tree_timer)
 
 	# Connect to scene tree changes to trigger the debug print.
-	get_tree().node_added.connect(_on_scene_tree_changed)
-	get_tree().node_removed.connect(_on_scene_tree_changed)
+	#get_tree().node_added.connect(_on_scene_tree_changed)
+	#get_tree().node_removed.connect(_on_scene_tree_changed)
 
 
 # -------------------------------------------------------------------
@@ -463,8 +463,6 @@ func unregister_compass(compass: Node3D) -> void:
 
 # --- DEBUGGING ---
 func _on_scene_tree_changed(_node: Node):
-	# Start or restart the timer to print the tree after a short delay.
-	# This prevents printing for every single node change during a batch operation.
 	print_tree_timer.start()
 
 
