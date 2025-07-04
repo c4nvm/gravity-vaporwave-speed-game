@@ -35,9 +35,13 @@ var settings_menu_instance: PanelContainer = null
 var speedrun_timer: Node = null
 var compasses: Array[Node3D] = []
 var fade_rect: ColorRect # Reference to the fade-to-black rectangle.
+var restart_tween: Tween # Tween for the restart fade logic
 
 # --- DEBUGGING ---
 var print_tree_timer: Timer
+
+# --- CONSTANTS ---
+const RESTART_FADE_DURATION: float = 1.0
 
 
 func _ready():
@@ -104,6 +108,38 @@ func _on_sensitivity_changed(new_sensitivity: float):
 
 # --- GAME LOOP & INPUT ---
 func _process(_delta: float) -> void:
+	# --- Restart Logic ---
+	# Only allow restart if a level is loaded, the game is not paused, and the level is not complete.
+	if not current_level_path.is_empty() and not get_tree().paused and not is_level_complete:
+		if Input.is_action_just_pressed("restart"):
+			# If a tween is already running (e.g., from a quick release), kill it.
+			if is_instance_valid(restart_tween):
+				restart_tween.kill()
+
+			# Start a new fade-to-black tween.
+			fade_rect.visible = true
+			restart_tween = create_tween()
+			restart_tween.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+			# Fade to fully black over the specified duration.
+			restart_tween.tween_property(fade_rect, "modulate:a", 1.0, RESTART_FADE_DURATION)
+			# Once the fade is complete, reload the level.
+			restart_tween.tween_callback(reload_current_level)
+
+		if Input.is_action_just_released("restart"):
+			# If the player lets go, check if a restart tween was in progress.
+			if is_instance_valid(restart_tween):
+				# Stop the current tween from finishing (and thus from reloading).
+				restart_tween.kill()
+				restart_tween = null # Clear the reference.
+
+				# Create a new tween to fade back out to transparent.
+				var fade_out_tween = create_tween()
+				fade_out_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+				# Fade out slightly faster than the fade in.
+				fade_out_tween.tween_property(fade_rect, "modulate:a", 0.0, RESTART_FADE_DURATION / 2.0)
+				# Hide the rect when done to prevent it from being invisible but present.
+				fade_out_tween.tween_callback(func(): fade_rect.visible = false)
+
 	# Check for pause input, but only if pausing is currently allowed.
 	if can_pause and not current_level_path.is_empty() and is_instance_valid(pause_menu_instance) and not is_level_complete:
 		if Input.is_action_just_pressed("ui_cancel"):
@@ -219,6 +255,10 @@ func load_level(level_path: String) -> void:
 
 
 func reload_current_level() -> void:
+	# This function may be called from a tween, so kill the reference.
+	if is_instance_valid(restart_tween):
+		restart_tween = null
+		
 	# Disable pausing when reloading a level.
 	can_pause = false
 	is_level_complete = false # Reset on level reload
