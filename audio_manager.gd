@@ -4,7 +4,10 @@ extends Node
 ## The duration, in seconds, for music to fade in or out.
 @export var fade_duration: float = 1.0
 
-# Dictionary to hold all audio profile nodes
+## A dedicated container for player-specific sound effects that do not change with the level profile.
+@export var player_sfx_container: Node
+
+# Dictionary to hold all audio profile nodes for level-specific sounds (like BGM).
 var _audio_profiles: Dictionary = {}
 # Current active profile
 var _current_profile: String = "default"
@@ -27,7 +30,7 @@ func _register_audio_profiles():
 	if not _audio_profiles.has("default"):
 		push_error("No default audio profile found!")
 
-## Sets the current soundtrack profile
+## Sets the current soundtrack profile for level-specific audio.
 func set_soundtrack_profile(profile_name: String):
 	var normalized_name = profile_name.to_lower()
 	if normalized_name in _audio_profiles:
@@ -37,11 +40,24 @@ func set_soundtrack_profile(profile_name: String):
 		push_warning("Audio profile '%s' not found. Using default." % profile_name)
 		_current_profile = "default"
 
-## Gets the current audio stream player for a given type
+## Gets an audio stream player. It checks the constant player SFX container first,
+## then falls back to the current level-specific audio profile.
 func _get_player(type: String) -> AudioStreamPlayer:
+	# 1. Prioritize the constant player SFX container.
+	if is_instance_valid(player_sfx_container) and player_sfx_container.has_node(type):
+		var player = player_sfx_container.get_node(type)
+		if player is AudioStreamPlayer:
+			return player
+
+	# 2. If not found in the player container, check the current level profile.
 	if _current_profile in _audio_profiles:
 		var profile: AudioProfile = _audio_profiles[_current_profile]
-		return profile.get_node(type) if profile.has_node(type) else null
+		if profile.has_node(type):
+			var player = profile.get_node(type)
+			if player is AudioStreamPlayer:
+				return player
+				
+	# 3. If not found anywhere, return null.
 	return null
 
 ## Fades out a music track using a Tween.
@@ -121,10 +137,36 @@ func stop_all_music():
 	if playing_bgm and playing_bgm.playing:
 		playing_bgm.stop()
 
-## Plays a one-shot sound effect from the current profile
+## Plays a one-shot sound effect.
 func play_sfx(sfx_name: String):
 	var sfx_player = _get_player(sfx_name)
 	if sfx_player:
 		sfx_player.play()
 	else:
-		push_warning("SFX '%s' not found in current profile" % sfx_name)
+		push_warning("SFX '%s' not found in player container or current profile." % sfx_name)
+
+## Plays a looping sound effect.
+func play_looping_sfx(sfx_name: String):
+	var sfx_player = _get_player(sfx_name)
+	if sfx_player:
+		if not sfx_player.playing: # Don't restart if already playing
+			sfx_player.play()
+	else:
+		push_warning("Looping SFX '%s' not found in player container or current profile." % sfx_name)
+
+## Stops a looping sound effect.
+func stop_looping_sfx(sfx_name: String):
+	var sfx_player = _get_player(sfx_name)
+	if sfx_player:
+		if sfx_player.playing:
+			sfx_player.stop()
+	else:
+		push_warning("Looping SFX '%s' not found in player container or current profile." % sfx_name)
+
+func stop_all_looping_sfx():
+	if not is_instance_valid(player_sfx_container):
+		return
+
+	for sfx_player in player_sfx_container.get_children():
+		if sfx_player is AudioStreamPlayer and sfx_player.playing:
+			sfx_player.stop()

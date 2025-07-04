@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://bwmtp5lbdou4j"]
+[gd_scene load_steps=15 format=3 uid="uid://bwmtp5lbdou4j"]
 
 [ext_resource type="Script" uid="uid://ci6ti2ctblml1" path="res://switch.gd" id="1_it01i"]
 
@@ -17,6 +17,57 @@ size = Vector3(0.5, 0.5, 0.5)
 [sub_resource type="SphereShape3D" id="SphereShape3D_8307x"]
 radius = 0.75
 
+[sub_resource type="Curve" id="Curve_it01i"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.536785, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_ds62l"]
+curve = SubResource("Curve_it01i")
+
+[sub_resource type="Curve" id="Curve_8307x"]
+_limits = [-200.0, 200.0, 0.0, 1.0]
+_data = [Vector2(0, 0.851044), 0.0, 0.0, 0, 0, Vector2(0.99455, 0.851044), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_1nx7o"]
+curve = SubResource("Curve_8307x")
+
+[sub_resource type="Curve" id="Curve_ds62l"]
+_limits = [0.0, 3.0, 0.0, 1.0]
+_data = [Vector2(0, 3), 0.0, 0.0, 0, 0, Vector2(0.504087, 1.58936), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_rlq62"]
+curve = SubResource("Curve_ds62l")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_it01i"]
+spread = 180.0
+initial_velocity_min = 25.0
+initial_velocity_max = 25.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = -100.0
+linear_accel_max = -94.56
+linear_accel_curve = SubResource("CurveTexture_1nx7o")
+tangential_accel_min = -1.24
+tangential_accel_max = -1.24
+scale_min = 0.1
+scale_max = 0.1
+scale_over_velocity_min = 62.05
+scale_over_velocity_max = 178.8
+scale_over_velocity_curve = SubResource("CurveTexture_rlq62")
+alpha_curve = SubResource("CurveTexture_ds62l")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8ifr0"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_1tjdf"]
+material = SubResource("StandardMaterial3D_8ifr0")
+radius = 0.1
+height = 0.2
+
 [node name="Switch" type="StaticBody3D"]
 script = ExtResource("1_it01i")
 
@@ -30,3 +81,12 @@ mesh = SubResource("BoxMesh_it01i")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("SphereShape3D_8307x")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 300
+one_shot = true
+explosiveness = 0.9
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_it01i")
+draw_pass_1 = SubResource("SphereMesh_1tjdf")

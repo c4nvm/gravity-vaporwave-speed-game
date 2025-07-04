@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4cvmbinxyy4d"]
+[gd_scene load_steps=9 format=3 uid="uid://c4cvmbinxyy4d"]
 
 [ext_resource type="Script" uid="uid://cuen6a007he5v" path="res://audio_manager.gd" id="1_jisk1"]
 [ext_resource type="Script" uid="uid://2iaf7trvdx0m" path="res://audio_profile.gd" id="2_l2k84"]
@@ -6,10 +6,13 @@
 [ext_resource type="AudioStream" uid="uid://f1ogbypqoocv" path="res://Audio/BGM/Test Song 1/default_playing.wav" id="3_l2k84"]
 [ext_resource type="AudioStream" uid="uid://cge3nyb764hwf" path="res://Audio/BGM/Test Song 1/default_start.wav" id="4_l55mp"]
 [ext_resource type="AudioStream" uid="uid://dn5jyf7gnngpm" path="res://Audio/BGM/Test Song 1/default_end.wav" id="5_v0gdi"]
+[ext_resource type="AudioStream" uid="uid://ckthor14o2he5" path="res://Audio/SFX/pickup_sound.wav" id="7_v0gdi"]
+[ext_resource type="AudioStream" uid="uid://ui7j71chiuc4" path="res://Audio/SFX/laser_sound_2.wav" id="8_v0gdi"]
 
-[node name="AudioManager" type="Node"]
+[node name="AudioManager" type="Node" node_paths=PackedStringArray("player_sfx_container")]
 script = ExtResource("1_jisk1")
 fade_duration = 0.0
+player_sfx_container = NodePath("PlayerSFXContainer")
 
 [node name="Default" type="Node" parent="." node_paths=PackedStringArray("waiting_bgm", "playing_bgm", "start_sfx", "end_sfx")]
 script = ExtResource("2_l2k84")
@@ -32,3 +35,15 @@ stream = ExtResource("4_l55mp")
 [node name="EndSFX" type="AudioStreamPlayer" parent="Default"]
 stream = ExtResource("5_v0gdi")
 volume_db = -3.0
+
+[node name="PlayerSFXContainer" type="Node" parent="."]
+
+[node name="GravityGunHold" type="AudioStreamPlayer" parent="PlayerSFXContainer"]
+
+[node name="PickupSound" type="AudioStreamPlayer" parent="PlayerSFXContainer"]
+stream = ExtResource("7_v0gdi")
+volume_db = 12.0
+
+[node name="GravityGunShoot" type="AudioStreamPlayer" parent="PlayerSFXContainer"]
+stream = ExtResource("8_v0gdi")
+volume_db = 12.0

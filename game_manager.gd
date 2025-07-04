@@ -72,17 +72,18 @@ func _ready():
 	gameplay_started.connect(audio_manager.start_gameplay_audio)
 	level_completed.connect(audio_manager.play_end_level_audio)
 	returned_to_menu.connect(audio_manager.stop_all_music)
+	returned_to_menu.connect(audio_manager.stop_all_looping_sfx)
 
 	# --- Setup for debounced scene tree printing ---
-	#print_tree_timer = Timer.new()
-	#print_tree_timer.wait_time = 0.05 # Small delay to batch rapid changes
-	#print_tree_timer.one_shot = true
-	#print_tree_timer.timeout.connect(_print_scene_tree)
-	#add_child(print_tree_timer)
+	print_tree_timer = Timer.new()
+	print_tree_timer.wait_time = 0.05 # Small delay to batch rapid changes
+	print_tree_timer.one_shot = true
+	print_tree_timer.timeout.connect(_print_scene_tree)
+	add_child(print_tree_timer)
 
 	# Connect to scene tree changes to trigger the debug print.
-	#get_tree().node_added.connect(_on_scene_tree_changed)
-	#get_tree().node_removed.connect(_on_scene_tree_changed)
+	get_tree().node_added.connect(_on_scene_tree_changed)
+	get_tree().node_removed.connect(_on_scene_tree_changed)
 
 
 # -------------------------------------------------------------------
@@ -93,6 +94,22 @@ func _on_player_first_move():
 	# Emit signal that gameplay has started.
 	gameplay_started.emit()
 
+func play_pickup_sound():
+	if is_instance_valid(audio_manager):
+		audio_manager.play_looping_sfx("PickupSound")
+
+func play_gravity_gun_hold_sound():
+	if is_instance_valid(audio_manager):
+		audio_manager.play_looping_sfx("GravityGunHold")
+
+func stop_gravity_gun_hold_sound():
+	if is_instance_valid(audio_manager):
+		audio_manager.stop_looping_sfx("GravityGunHold")
+
+func play_gravity_gun_shoot_sound():
+	if is_instance_valid(audio_manager):
+		audio_manager.play_sfx("GravityGunShoot")
+# --- END NEW ---
 
 func _on_fov_changed(new_fov: float):
 	current_fov = new_fov

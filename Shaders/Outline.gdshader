@@ -49,6 +49,10 @@ uniform float grazing_fresnel_power = 5.0;
 uniform float grazing_angle_mask_power = 1.0;
 uniform float grazing_angle_modulation_factor = 50.0;
 
+// New uniform group for pixelation control
+group_uniforms pixelation;
+uniform float pixel_size : hint_range(1.0, 16.0) = 4.0;
+
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear, repeat_disable;
 
 #ifndef SUPPORT_MOBILE
@@ -59,7 +63,7 @@ varying flat mat4 model_view_matrix;
 
 struct UVNeighbors {
 	vec2 center;
-	vec2 left;     vec2 right;     vec2 up;          vec2 down;
+	vec2 left;	  vec2 right;	  vec2 up;		   vec2 down;
 	vec2 top_left; vec2 top_right; vec2 bottom_left; vec2 bottom_right;
 };
 
@@ -76,10 +80,10 @@ UVNeighbors getNeighbors(vec2 center, float width, float aspect) {
 	n.center = center;
 	n.left   = center - h_offset;
 	n.right  = center + h_offset;
-	n.up     = center - v_offset;
+	n.up	 = center - v_offset;
 	n.down   = center + v_offset;
-	n.top_left     = center - (h_offset - v_offset);
-	n.top_right    = center + (h_offset - v_offset);
+	n.top_left	 = center - (h_offset - v_offset);
+	n.top_right	= center + (h_offset - v_offset);
 	n.bottom_left  = center - (h_offset + v_offset);
 	n.bottom_right = center + (h_offset + v_offset);
 	return n;
@@ -101,7 +105,7 @@ NeighborDepthSamples getLinearDepthSamples(UVNeighbors uvs, sampler2D depth_tex,
 	result.c_d  = getLinearDepth(texture(depth_tex, uvs.center).r, uvs.center, invProjMat);
 	result.l_d  = getLinearDepth(texture(depth_tex, uvs.left).r  , uvs.left  , invProjMat);
 	result.r_d  = getLinearDepth(texture(depth_tex, uvs.right).r , uvs.right , invProjMat);
-	result.u_d  = getLinearDepth(texture(depth_tex, uvs.up).r    , uvs.up    , invProjMat);
+	result.u_d  = getLinearDepth(texture(depth_tex, uvs.up).r	, uvs.up	, invProjMat);
 	result.d_d  = getLinearDepth(texture(depth_tex, uvs.down).r  , uvs.down  , invProjMat);
 	result.tl_d = getLinearDepth(texture(depth_tex, uvs.top_left).r, uvs.top_left, invProjMat);
 	result.tr_d = getLinearDepth(texture(depth_tex, uvs.top_right).r, uvs.top_right, invProjMat);
@@ -149,45 +153,45 @@ vec3 reconstructWorldPosition(float depth, mat4 model_view, mat4 inv_proj, vec2 
 
 #ifndef NAIVE_NORMAL_RECONSTRUCTION
 vec3 reconstructWorldNormal(sampler2D depth_tex, mat4 model_view, mat4 inv_proj, vec2 screen_uv, mat4 world, mat4 inv_cam, vec2 viewport_size) {
-    vec2 e = vec2(1.0 / viewport_size);
-    float c0 = texture(depth_tex, screen_uv                ).r;
-    float l2 = texture(depth_tex, screen_uv - vec2(2,0) * e).r;
-    float l1 = texture(depth_tex, screen_uv - vec2(1,0) * e).r;
-    float r1 = texture(depth_tex, screen_uv + vec2(1,0) * e).r;
-    float r2 = texture(depth_tex, screen_uv + vec2(2,0) * e).r;
-    float b2 = texture(depth_tex, screen_uv - vec2(0,2) * e).r;
-    float b1 = texture(depth_tex, screen_uv - vec2(0,1) * e).r;
-    float t1 = texture(depth_tex, screen_uv + vec2(0,1) * e).r;
-    float t2 = texture(depth_tex, screen_uv + vec2(0,2) * e).r;
+	vec2 e = vec2(1.0 / viewport_size);
+	float c0 = texture(depth_tex, screen_uv				 ).r;
+	float l2 = texture(depth_tex, screen_uv - vec2(2,0) * e).r;
+	float l1 = texture(depth_tex, screen_uv - vec2(1,0) * e).r;
+	float r1 = texture(depth_tex, screen_uv + vec2(1,0) * e).r;
+	float r2 = texture(depth_tex, screen_uv + vec2(2,0) * e).r;
+	float b2 = texture(depth_tex, screen_uv - vec2(0,2) * e).r;
+	float b1 = texture(depth_tex, screen_uv - vec2(0,1) * e).r;
+	float t1 = texture(depth_tex, screen_uv + vec2(0,1) * e).r;
+	float t2 = texture(depth_tex, screen_uv + vec2(0,2) * e).r;
 
-    float dl = abs(l1 * l2 / (2.0 * l2 - l1) - c0);
-    float dr = abs(r1 * r2 / (2.0 * r2 - r1) - c0);
-    float db = abs(b1 * b2 / (2.0 * b2 - b1) - c0);
-    float dt = abs(t1 * t2 / (2.0 * t2 - t1) - c0);
+	float dl = abs(l1 * l2 / (2.0 * l2 - l1) - c0);
+	float dr = abs(r1 * r2 / (2.0 * r2 - r1) - c0);
+	float db = abs(b1 * b2 / (2.0 * b2 - b1) - c0);
+	float dt = abs(t1 * t2 / (2.0 * t2 - t1) - c0);
 
-    vec3 ce = reconstructWorldPosition(c0, model_view, inv_proj, screen_uv, world, inv_cam);
+	vec3 ce = reconstructWorldPosition(c0, model_view, inv_proj, screen_uv, world, inv_cam);
 
-    vec3 dpdx = (dl<dr) ?  ce-reconstructWorldPosition(l1, model_view, inv_proj, screen_uv - vec2(1,0) * e, world, inv_cam) :
-                          -ce+reconstructWorldPosition(r1, model_view, inv_proj, screen_uv + vec2(1,0) * e, world, inv_cam) ;
-    vec3 dpdy = (db<dt) ?  ce-reconstructWorldPosition(b1, model_view, inv_proj, screen_uv - vec2(0,1) * e, world, inv_cam) :
-                          -ce+reconstructWorldPosition(t1, model_view, inv_proj, screen_uv + vec2(0,1) * e, world, inv_cam) ;
+	vec3 dpdx = (dl<dr) ?  ce-reconstructWorldPosition(l1, model_view, inv_proj, screen_uv - vec2(1,0) * e, world, inv_cam) :
+						   -ce+reconstructWorldPosition(r1, model_view, inv_proj, screen_uv + vec2(1,0) * e, world, inv_cam) ;
+	vec3 dpdy = (db<dt) ?  ce-reconstructWorldPosition(b1, model_view, inv_proj, screen_uv - vec2(0,1) * e, world, inv_cam) :
+						   -ce+reconstructWorldPosition(t1, model_view, inv_proj, screen_uv + vec2(0,1) * e, world, inv_cam) ;
 
-    return normalize(cross(dpdx,dpdy));
+	return normalize(cross(dpdx,dpdy));
 }
 #else
 vec3 reconstructWorldNormal(sampler2D depth_tex, mat4 model_view, mat4 inv_proj, vec2 screen_uv, mat4 world, mat4 inv_cam, vec2 viewport_size) {
-    vec3 pos = reconstructWorldPosition(texture(depth_tex, screen_uv).x, model_view, inv_proj, screen_uv, world, inv_cam);
-    return normalize(cross(dFdx(pos), dFdy(pos)));
+	vec3 pos = reconstructWorldPosition(texture(depth_tex, screen_uv).x, model_view, inv_proj, screen_uv, world, inv_cam);
+	return normalize(cross(dFdx(pos), dFdy(pos)));
 }
 #endif//!NAIVE_NORMAL_RECONSTRUCTION
 
 float detectEdgesNormalReconstructed(UVNeighbors uvs, sampler2D depth_tex, mat4 model_view, mat4 inv_proj, vec2 screen_uv, mat4 world, mat4 inv_cam, vec2 viewport_size){
-	vec3 n_u  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.up,           world, inv_cam, viewport_size);
-	vec3 n_d  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.down,         world, inv_cam, viewport_size);
-	vec3 n_l  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.left,         world, inv_cam, viewport_size);
-	vec3 n_r  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.right,        world, inv_cam, viewport_size);
-	vec3 n_tl = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.top_left,     world, inv_cam, viewport_size);
-	vec3 n_tr = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.top_right,    world, inv_cam, viewport_size);
+	vec3 n_u  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.up,		   world, inv_cam, viewport_size);
+	vec3 n_d  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.down,		   world, inv_cam, viewport_size);
+	vec3 n_l  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.left,		   world, inv_cam, viewport_size);
+	vec3 n_r  = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.right,		  world, inv_cam, viewport_size);
+	vec3 n_tl = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.top_left,	   world, inv_cam, viewport_size);
+	vec3 n_tr = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.top_right,	  world, inv_cam, viewport_size);
 	vec3 n_bl = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.bottom_left,  world, inv_cam, viewport_size);
 	vec3 n_br = reconstructWorldNormal(depth_tex, model_view, inv_proj, uvs.bottom_right, world, inv_cam, viewport_size);
 
@@ -236,27 +240,34 @@ void vertex() {
 	POSITION = vec4(VERTEX, 1.0);
 
 #ifdef SUPPORT_MOBILE
-    model_view_matrix = INV_VIEW_MATRIX * mat4(VIEW_MATRIX[0],VIEW_MATRIX[1],VIEW_MATRIX[2],VIEW_MATRIX[3]);;
+	model_view_matrix = INV_VIEW_MATRIX * mat4(VIEW_MATRIX[0],VIEW_MATRIX[1],VIEW_MATRIX[2],VIEW_MATRIX[3]);;
 #endif
 }
 
 void fragment() {
+	// --- Start of Pixelation Logic ---
+	// Snap fragment coordinates to a grid based on pixel_size.
+	vec2 pixelated_fragcoord = floor(FRAGCOORD.xy / pixel_size) * pixel_size;
+	// Convert the snapped coordinates back to UV space (0-1 range).
+	vec2 pixelated_uv = pixelated_fragcoord / VIEWPORT_SIZE.xy;
+	// --- End of Pixelation Logic ---
+	
 	float aspect = float(VIEWPORT_SIZE.y) / float(VIEWPORT_SIZE.x);
 
-	UVNeighbors n = getNeighbors(SCREEN_UV, max_thickness, aspect);
+	UVNeighbors n = getNeighbors(pixelated_uv, max_thickness, aspect);
 	NeighborDepthSamples depth_samples = getLinearDepthSamples(n, DEPTH_TEXTURE, INV_PROJECTION_MATRIX);
 
 	float min_d = getMinimumDepth(depth_samples);
 	float thickness = clamp(remap(min_d, min_distance, max_distance, max_thickness, min_thickness), min_thickness, max_thickness);
 	float fade_a = clamp(remap(min_d, min_distance, max_distance, 1.0, 0.0), 0.0, 1.0);
 
-	n = getNeighbors(SCREEN_UV, thickness, aspect);
+	n = getNeighbors(pixelated_uv, thickness, aspect);
 	depth_samples = getLinearDepthSamples(n, DEPTH_TEXTURE, INV_PROJECTION_MATRIX);
 
 #ifndef SUPPORT_MOBILE
-	vec3 pixel_normal = texture(NORMR_TEXTURE, SCREEN_UV).xyz;
+	vec3 pixel_normal = texture(NORMR_TEXTURE, pixelated_uv).xyz;
 #else
-	vec3 pixel_normal = reconstructWorldNormal(DEPTH_TEXTURE, model_view_matrix, INV_PROJECTION_MATRIX, SCREEN_UV, MODEL_MATRIX, INV_VIEW_MATRIX, VIEWPORT_SIZE.xy);
+	vec3 pixel_normal = reconstructWorldNormal(DEPTH_TEXTURE, model_view_matrix, INV_PROJECTION_MATRIX, pixelated_uv, MODEL_MATRIX, INV_VIEW_MATRIX, VIEWPORT_SIZE.xy);
 #endif
 
 	float depthEdges = detectEdgesDepth(depth_samples, pixel_normal, VIEW);
@@ -264,7 +275,7 @@ void fragment() {
 #ifndef SUPPORT_MOBILE
 	float normEdges = min(detectEdgesNormal(n, NORMR_TEXTURE, CAMERA_DIRECTION_WORLD), 1.0);
 #else
-	float normEdges = min(detectEdgesNormalReconstructed(n, DEPTH_TEXTURE, model_view_matrix, INV_PROJECTION_MATRIX, SCREEN_UV, MODEL_MATRIX, INV_VIEW_MATRIX, VIEWPORT_SIZE.xy), 1.0);
+	float normEdges = min(detectEdgesNormalReconstructed(n, DEPTH_TEXTURE, model_view_matrix, INV_PROJECTION_MATRIX, pixelated_uv, MODEL_MATRIX, INV_VIEW_MATRIX, VIEWPORT_SIZE.xy), 1.0);
 #endif
 
 	ALBEDO.rgb = outlineColor.rgb;

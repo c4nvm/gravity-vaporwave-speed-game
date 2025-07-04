@@ -77,6 +77,7 @@ size = Vector3(5, 0.1, 49.4077)
 [node name="Area3D" type="Area3D" parent="CSGBox3D" groups=["gravity_fields"]]
 gravity_space_override = 3
 script = ExtResource("4_kkg2a")
+is_spawn = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D/Area3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.173889, 9.48242, 1.18178)

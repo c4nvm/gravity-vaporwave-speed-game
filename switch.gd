@@ -51,6 +51,7 @@ func activate():
 		var door = get_node_or_null(door_path)
 		if door and door.has_method("switch_activated"):
 			door.switch_activated(self)
+	$GPUParticles3D.emitting = true
 
 func deactivate():
 	if not is_active:

@@ -93,6 +93,10 @@ var transition_start_velocity := Vector3.ZERO
 @export var knockback_force := 10.0
 @export var shoot_ray_length := 1000.0
 @export var shoot_position_offset := 0.1 # How far from the impact surface to place the object
+@export var laser_beam_segment_scene: PackedScene # The scene to instance for the laser beam effect.
+@export var laser_beam_lifetime := 0.5 # How long the beam stays visible before fading.
+@export var laser_fade_duration := 0.3 # How long each segment takes to fade out.
+@export var laser_fade_delay_per_segment := 0.03 # Delay between each segment starting to fade.
 
 @export_group("Switch Interaction")
 @export var switch_activation_area_scene: PackedScene
@@ -310,7 +314,7 @@ func _print_tick_debug_info():
 	last_mouse_movement = Vector2.ZERO
 
 func _physics_process(delta):
-	_print_tick_debug_info()
+	#_print_tick_debug_info()
 	
 	# --- BLOCK ALL PHYSICS IF LOCKED ---
 	if movement_locked:
@@ -445,6 +449,11 @@ func _pickup_object():
 			held_object.freeze = true
 			held_object.collision_layer = 0
 			held_object.collision_mask = 0
+			
+			# --- NEW: Play looping hold sound via GameManager ---
+			if get_tree().root.has_node("GameManager"):
+				get_tree().root.get_node("GameManager").play_gravity_gun_hold_sound()
+				get_tree().root.get_node("GameManager").play_pickup_sound()
 		else:
 			if gravity_gun_debug:
 				var reason = "not a RigidBody3D" if not collider is RigidBody3D else "not in 'grabbable' group"
@@ -456,6 +465,10 @@ func _drop_object():
 	if not held_object:
 		if gravity_gun_debug: print("--- Gravity Gun: Drop failed. No object held. ---")
 		return
+
+	# --- NEW: Stop looping hold sound via GameManager ---
+	if get_tree().root.has_node("GameManager"):
+		get_tree().root.get_node("GameManager").stop_gravity_gun_hold_sound()
 
 	if gravity_gun_debug: print("--- Gravity Gun: Dropping '", held_object.name, "' ---")
 
@@ -500,7 +513,13 @@ func _shoot_object():
 		if gravity_gun_debug: print("--- Gravity Gun: Shoot failed. No object held. ---")
 		return
 
+	# --- NEW: Stop hold sound and play shoot sound via GameManager ---
+	if get_tree().root.has_node("GameManager"):
+		get_tree().root.get_node("GameManager").stop_gravity_gun_hold_sound()
+		get_tree().root.get_node("GameManager").play_gravity_gun_shoot_sound()
+
 	var shot_object = held_object
+	var start_position = shot_object.global_transform.origin # Capture start position for beam effect
 	if gravity_gun_debug: print("--- Gravity Gun: Shooting '", shot_object.name, "' ---")
 	held_object = null
 
@@ -522,6 +541,8 @@ func _shoot_object():
 		_create_switch_activation_area(result.position, result.normal)
 		if gravity_gun_debug: print("Created switch activation area at:", result.position)
 
+	# --- Create the laser beam effect ---
+	_create_laser_beam(start_position, impact_point)
 
 	# --- Position the object ---
 	if result:
@@ -545,6 +566,100 @@ func _shoot_object():
 	var knockback_direction = camera.global_transform.basis.z 
 	velocity += knockback_direction * knockback_force
 	if gravity_gun_debug: print("Applied knockback force:", knockback_direction * knockback_force)
+
+func _create_laser_beam(start_pos: Vector3, end_pos: Vector3):
+	"""
+	Creates a visual beam effect from a start to an end point.
+	It does this by creating a Path3D, populating it with points,
+	and then instancing a segment scene at each point. The whole
+	effect is temporary and cleans itself up.
+	"""
+	# 1. Check if the scene to instance is valid.
+	if not laser_beam_segment_scene:
+		push_warning("Gravity Gun: 'laser_beam_segment_scene' is not set. Cannot create beam effect.")
+		return
+
+	# 2. Create the Path3D node to hold the trajectory.
+	var beam_path = Path3D.new()
+	beam_path.name = "LaserBeamPath" # Good practice to name nodes.
+	beam_path.curve = Curve3D.new()
+	get_tree().current_scene.add_child(beam_path)
+
+	# 3. Get the curve and calculate path parameters.
+	var curve = beam_path.curve
+	var direction = (end_pos - start_pos).normalized()
+	var total_distance = start_pos.distance_to(end_pos)
+	var segment_length = 1.0 # The distance between each beam segment.
+
+	# 4. Populate the curve with points along the beam's trajectory.
+	var current_distance = 0.0
+	while current_distance < total_distance:
+		var point_position = start_pos + direction * current_distance
+		# Add point relative to the Path3D's position (which is origin).
+		curve.add_point(point_position)
+		current_distance += segment_length
+	# Add the final point to ensure the beam reaches the very end.
+	curve.add_point(end_pos)
+
+	# 5. Instance the beam segments at each point on the curve.
+	for i in range(curve.get_point_count()):
+		var segment = laser_beam_segment_scene.instantiate()
+		beam_path.add_child(segment)
+		segment.global_position = curve.get_point_position(i)
+		segment.look_at(segment.global_position + direction, Vector3.UP)
+
+	# 6. Start the fade-out process without waiting for it to finish here.
+	_fade_out_beam(beam_path)
+
+# This new async function will handle the fading and cleanup.
+func _fade_out_beam(beam_path: Path3D):
+	"""
+	Waits for the beam's lifetime, then fades out each segment sequentially
+	before cleaning up the entire effect.
+	"""
+	# Wait for the initial lifetime before starting the fade.
+	await get_tree().create_timer(laser_beam_lifetime).timeout
+
+	# If the path was destroyed for some reason (e.g., scene change), stop.
+	if not is_instance_valid(beam_path):
+		return
+
+	var segments = beam_path.get_children()
+	# Calculate the total time needed for all fades to start.
+	var total_fade_start_time = segments.size() * laser_fade_delay_per_segment
+	
+	for segment in segments:
+		# Check if the segment is still valid before trying to fade it.
+		if not is_instance_valid(segment):
+			continue
+
+		# This assumes the segment scene's root is a MeshInstance3D or has one as a child.
+		var mesh_instance: MeshInstance3D = null
+		if segment is MeshInstance3D:
+			mesh_instance = segment
+		else:
+			# Try to find the first MeshInstance3D child if the root isn't one.
+			for child in segment.get_children():
+				if child is MeshInstance3D:
+					mesh_instance = child
+					break
+		
+		if not mesh_instance:
+			# If no mesh, just free it after a delay.
+			var tween = create_tween()
+			tween.tween_interval(laser_fade_duration)
+			tween.tween_callback(segment.queue_free)
+
+		# Wait a little before starting the next segment's fade.
+		await get_tree().create_timer(laser_fade_delay_per_segment).timeout
+
+	# After starting all the fade tweens, wait for the whole process to complete
+	# before removing the parent Path3D node.
+	await get_tree().create_timer(laser_fade_duration).timeout
+	
+	# Finally, clean up the parent Path3D node.
+	if is_instance_valid(beam_path):
+		beam_path.queue_free()
 
 func _update_held_object_position(delta: float):
 	if not held_object or not is_instance_valid(hold_position): return
@@ -778,11 +893,11 @@ func _should_switch_gravity_field(new_field) -> bool:
 func _update_gravity():
 	if nearest_gravity_field and is_instance_valid(nearest_gravity_field):
 		# --- Add these debug prints to find the issue ---
-		print("--- Gravity Update Check ---")
-		print("Field Name: %s" % nearest_gravity_field.name)
-		print("Field is_point_source: %s" % nearest_gravity_field.gravity_point)
-		print("Field's directional vector: %s" % nearest_gravity_field.gravity_direction)
-		print("--------------------------")
+		#print("--- Gravity Update Check ---")
+		#print("Field Name: %s" % nearest_gravity_field.name)
+		#print("Field is_point_source: %s" % nearest_gravity_field.gravity_point)
+		#print("Field's directional vector: %s" % nearest_gravity_field.gravity_direction)
+		#print("--------------------------")
 		# --- End of debug prints ---
 
 		gravity_direction = (nearest_gravity_field.global_transform.origin - global_transform.origin).normalized() if nearest_gravity_field.gravity_point else nearest_gravity_field.gravity_direction
