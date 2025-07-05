@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://iptfr5cotvy6"]
+
+[ext_resource type="Script" uid="uid://ba5kb5gl6emhq" path="res://dialogic_test.gd" id="1_87cfi"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_87cfi")

@@ -17,6 +17,7 @@ shader_parameter/min_distance = 2.0
 shader_parameter/grazing_fresnel_power = 5.0
 shader_parameter/grazing_angle_mask_power = 1.0
 shader_parameter/grazing_angle_modulation_factor = 50.0
+shader_parameter/pixel_size = 4.0
 
 [resource]
 next_pass = SubResource("ShaderMaterial_pq5gd")

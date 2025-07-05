@@ -1,0 +1,7 @@
+label go back
+test: what the hell bruh
+test: where tf my uber takin me bruh
+[text_input text="Where are you taking them?" var="test_reply" placeholder="miami florida"]
+if {test_reply} == "miami florida":
+	test: what the HELL why the FUCK did you take me to miami
+	jump 
