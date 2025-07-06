@@ -42,6 +42,7 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var slide_downhill_accel := 1.2
 @export var crouch_camera_offset := Vector3(0, -0.9, 0)
 @export var crouch_transition_speed := 5.0
+@export var pre_land_slide_distance := 0.5
 
 @export_group("Advanced Movement")
 @export var slide_hop_boost := 1.6
@@ -63,6 +64,17 @@ const MAX_SLOPE_ANGLE := 40.0
 @export var ledge_climb_duration := 0.5
 @export var ledge_climb_cooldown := 0.5
 @export var ledge_climb_min_upward_speed := -1.0
+
+@export_group("Ground Slam")
+@export var ground_slam_enabled := true
+@export var slam_force := 50.0
+@export var slam_horizontal_dampening := 0.2
+@export var slam_takeoff_cooldown := 0.25
+@export var slam_impact_radius := 5.0
+@export var slam_impact_force := 3.0
+@export var slam_boost_window := 0.3
+@export var slam_boost_multiplier := 1.5
+@export var slam_jump_boost_multiplier := 1.4
 
 @export_group("Free Space Movement")
 @export var free_space_max_speed := 20.0
@@ -100,7 +112,6 @@ var transition_start_velocity := Vector3.ZERO
 @export var laser_beam_segment_scene: PackedScene
 @export var laser_beam_lifetime := 0.5
 @export var laser_fade_duration := 0.3
-# The delay between each segment starting to fade, creating a sequential effect.
 @export var laser_fade_delay_per_segment := 0.03
 
 @export_group("Switch Interaction")
@@ -110,6 +121,7 @@ var transition_start_velocity := Vector3.ZERO
 #endregion
 
 #region Nodes
+@onready var pre_land_slide_ray: RayCast3D = $PreLandSlideRay
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var direction_ray: RayCast3D = $DirectionRay
@@ -127,6 +139,10 @@ var transition_start_velocity := Vector3.ZERO
 #endregion
 
 #region State Variables
+var wants_to_slide_on_land := false
+var slam_boost_timer := 0.0
+var time_since_airborne := 0.0
+var just_did_slide_hop := false
 var movement_locked := true
 var spawn_protection_timer : Timer
 var input_enabled := false
@@ -147,6 +163,7 @@ var is_free_space_mode := false
 var is_transitioning := false
 var gravity_field_transition_timer := 0.1
 const GRAVITY_FIELD_TRANSITION_COOLDOWN := 0.1
+const GroundSlamEffect = preload("res://VFX/ground_slam_effect.tscn")
 var last_gravity_field = null
 var previous_velocity := Vector3.ZERO
 var current_camera_offset := Vector3.ZERO
@@ -162,6 +179,8 @@ var ledge_climb_cooldown_timer := 0.0
 var held_object: RigidBody3D = null
 var spawn_time := 0.0
 var last_mouse_movement := Vector2.ZERO
+var _slam_query_params: PhysicsShapeQueryParameters3D
+var _slam_shape: CylinderShape3D
 #endregion
 
 func set_fov(new_fov: float):
@@ -172,11 +191,11 @@ func set_mouse_sensitivity(new_sensitivity: float):
 	mouse_sensitivity = new_sensitivity
 
 func _ready():
+	pre_land_slide_ray.target_position = Vector3.DOWN * pre_land_slide_distance
 	spawn_time = Time.get_ticks_msec()
 	velocity = Vector3.ZERO
 	free_space_velocity = Vector3.ZERO
 	
-	# Lock player movement at the start of the level for a short duration.
 	spawn_protection_timer = Timer.new()
 	spawn_protection_timer.wait_time = level_start_fade_duration
 	spawn_protection_timer.one_shot = true
@@ -184,7 +203,6 @@ func _ready():
 	add_child(spawn_protection_timer)
 	spawn_protection_timer.start()
 	
-	# Wait one physics frame before the first ground check to ensure physics world is settled.
 	await get_tree().physics_frame
 	is_grounded = ground_ray.is_colliding()
 	
@@ -201,7 +219,13 @@ func _ready():
 	camera.position = Vector3.ZERO
 	current_camera_offset = Vector3.ZERO
 	target_camera_offset = Vector3.ZERO
+	_setup_slam_query()
 	state_machine.init(self)
+
+func _setup_slam_query():
+	_slam_shape = CylinderShape3D.new()
+	_slam_query_params = PhysicsShapeQueryParameters3D.new()
+	_slam_query_params.exclude = [get_rid()]
 
 func _on_spawn_protection_end():
 	movement_locked = false
@@ -225,7 +249,6 @@ func _input(event: InputEvent):
 	if event is InputEventMouseMotion:
 		_handle_mouse_movement(event)
 	
-	# Delegate input handling to the current state.
 	state_machine.process_input(event)
 
 func _handle_mouse_movement(event: InputEventMouseMotion):
@@ -241,16 +264,15 @@ func _handle_mouse_movement(event: InputEventMouseMotion):
 		current_camera_pivot.rotation.x = mouse_pitch
 
 func _process(delta):
-	# Smoothly interpolate the camera's offset for effects like crouching.
 	current_camera_offset = current_camera_offset.lerp(
 		target_camera_offset,
 		crouch_transition_speed * delta
 	)
 	camera.position = current_camera_offset
 	
-	# Allow states to run frame-based logic (e.g., for visual effects).
 	state_machine.process_frame(delta)
 
+# Replace your existing _physics_process with this version
 func _physics_process(delta):
 	if movement_locked:
 		velocity = Vector3.ZERO
@@ -267,21 +289,27 @@ func _physics_process(delta):
 	if ledge_climb_cooldown_timer > 0:
 		ledge_climb_cooldown_timer -= delta
 	
+	# Decrement the slam boost timer
+	if slam_boost_timer > 0:
+		slam_boost_timer -= delta
+	
+	# Update airborne timer and slide hop status
+	if not is_on_floor():
+		time_since_airborne += delta
+	else:
+		time_since_airborne = 0.0
+		# Reset the slide hop flag once the player is grounded again
+		just_did_slide_hop = false
+	
 	if should_switch_modes() and not is_transitioning:
 		_switch_movement_mode(nearest_gravity_field == null)
 	
-	# Delegate physics-based logic to the current state.
 	state_machine.process_physics(delta)
 	
 	if not _has_moved and velocity.length_squared() > 0.01 and not movement_locked:
 		first_move.emit()
 		_has_moved = true
-	
-	if is_instance_valid(game_ui):
-		game_ui.update_debug_info(state_machine.current_state.name, velocity)
 
-
-#region Centralized Input Wrappers
 func get_wish_direction() -> Vector2:
 	if not input_enabled: return Vector2.ZERO
 	return Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
@@ -299,15 +327,12 @@ func get_free_space_input() -> Vector3:
 	var input_dir := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	var vertical_input := Input.get_action_strength("jump") - Input.get_action_strength("slide")
 	return Vector3(input_dir.x, vertical_input, -input_dir.y).normalized()
-#endregion
 
-
-#region Gravity Gun
 func _setup_gravity_gun():
 	if not gravity_gun_enabled: return
 	if is_instance_valid(gravity_gun_ray):
 		gravity_gun_ray.target_position = Vector3(0, 0, -gravity_gun_range)
-		gravity_gun_ray.collision_mask = 1 << 2 # Only see layer 3 ("grabbable")
+		gravity_gun_ray.collision_mask = 1 << 2
 	else:
 		push_warning("Gravity Gun: 'GravityGunRay' node not found.")
 
@@ -324,7 +349,7 @@ func _pickup_object():
 		if collider is RigidBody3D and collider.is_in_group("grabbable"):
 			held_object = collider
 			held_object.freeze = true
-			held_object.collision_layer = 0 # Make object non-collidable while held
+			held_object.collision_layer = 0
 			held_object.collision_mask = 0
 			if get_tree().root.has_node("GameManager"):
 				get_tree().root.get_node("GameManager").play_gravity_gun_hold_sound()
@@ -335,8 +360,8 @@ func _drop_object():
 	if get_tree().root.has_node("GameManager"):
 		get_tree().root.get_node("GameManager").stop_gravity_gun_hold_sound()
 	held_object.freeze = false
-	held_object.collision_layer = 1 << 2 # Restore to layer 3
-	held_object.collision_mask = (1 << 0) | (1 << 2) # Collide with layers 1 & 3
+	held_object.collision_layer = 1 << 2
+	held_object.collision_mask = (1 << 0) | (1 << 2)
 	held_object.linear_velocity = velocity * 0.5
 	held_object.angular_velocity = Vector3.ZERO
 	held_object = null
@@ -399,13 +424,10 @@ func _shoot_object():
 	var knockback_direction = camera.global_transform.basis.z
 	velocity += knockback_direction * knockback_force
 	if $CanvasLayer/Shockwave/AnimationPlayer.is_playing():
-		$CanvasLayer/Shockwave/AnimationPlayer.stop()
+		$CanvasLayer/Shockwave/AnimationPlayer.play("RESET")
 	$CanvasLayer/Shockwave/AnimationPlayer.play("Shockwave")
-	await $CanvasLayer/Shockwave/AnimationPlayer.animation_finished
-	$CanvasLayer/Shockwave/AnimationPlayer.play("RESET")
 
 func _create_laser_beam(start_pos: Vector3, end_pos: Vector3):
-	"""Creates a visual beam by instancing segments along a temporary Path3D."""
 	if not laser_beam_segment_scene:
 		push_warning("Gravity Gun: 'laser_beam_segment_scene' is not set.")
 		return
@@ -420,7 +442,6 @@ func _create_laser_beam(start_pos: Vector3, end_pos: Vector3):
 	var total_distance = start_pos.distance_to(end_pos)
 	var segment_length = 1.0
 
-	# Populate the curve with points along the beam's trajectory.
 	var current_distance = 0.0
 	while current_distance < total_distance:
 		var point_position = start_pos + direction * current_distance
@@ -428,18 +449,15 @@ func _create_laser_beam(start_pos: Vector3, end_pos: Vector3):
 		current_distance += segment_length
 	curve.add_point(end_pos)
 
-	# Instance a segment at each point on the curve.
 	for i in range(curve.get_point_count()):
 		var segment = laser_beam_segment_scene.instantiate()
 		beam_path.add_child(segment)
 		segment.global_position = curve.get_point_position(i)
 		segment.look_at(segment.global_position + direction, Vector3.UP)
 
-	# Start the fade-out process asynchronously.
 	_fade_out_beam(beam_path)
 
 func _fade_out_beam(beam_path: Path3D):
-	"""Async function to fade out each beam segment sequentially, then cleans up."""
 	await get_tree().create_timer(laser_beam_lifetime).timeout
 	if not is_instance_valid(beam_path): return
 
@@ -457,23 +475,19 @@ func _fade_out_beam(beam_path: Path3D):
 					mesh_instance = child
 					break
 		
-		# If a mesh is found, tween its material's alpha to 0.
 		if mesh_instance and mesh_instance.get_surface_override_material(0):
-			# Duplicate the material to ensure segments fade independently.
 			var material = mesh_instance.get_surface_override_material(0).duplicate()
 			mesh_instance.set_surface_override_material(0, material)
 			var start_color = material.albedo_color
 			var end_color = Color(start_color.r, start_color.g, start_color.b, 0.0)
 			tween.tween_property(material, "albedo_color", end_color, laser_fade_duration)
 		else:
-			tween.tween_interval(laser_fade_duration) # Fallback wait
+			tween.tween_interval(laser_fade_duration)
 
 		tween.tween_callback(segment.queue_free)
 		
-		# Wait before starting the next segment's fade.
 		await get_tree().create_timer(laser_fade_delay_per_segment).timeout
 
-	# Wait for the final segment's fade to complete before cleaning up the parent.
 	await get_tree().create_timer(laser_fade_duration).timeout
 	if is_instance_valid(beam_path):
 		beam_path.queue_free()
@@ -483,7 +497,6 @@ func _update_held_object_position(delta: float):
 	var target_transform = hold_position.global_transform
 	var new_transform = held_object.global_transform.interpolate_with(target_transform, delta * gravity_gun_lerp_speed)
 	held_object.global_transform = new_transform
-#endregion
 
 func _pre_physics_process():
 	if player_collider:
@@ -651,50 +664,62 @@ func _is_going_uphill() -> bool:
 func should_switch_modes() -> bool:
 	return (nearest_gravity_field == null) != is_free_space_mode
 
-#region Debug Functions
-func _print_tick_debug_info():
-	var elapsed_time = (Time.get_ticks_msec() - spawn_time) / 1000.0
-	var current_state_name = "N/A"
-	if state_machine and state_machine.current_state:
-		current_state_name = state_machine.current_state.name
-	var actions_to_check = ["move_left", "move_right", "move_backward", "move_forward", "jump", "slide"]
-	var pressed_actions = []
-	for action in actions_to_check:
-		if Input.is_action_pressed(action):
-			pressed_actions.append(action)
-	var inputs_pressed_str = ", ".join(pressed_actions) if not pressed_actions.is_empty() else "None"
-	var cam_rot_deg = camera.global_rotation_degrees
-	print("Time: %.3f | State: %s | Vel: (%.2f, %.2f, %.2f) | CamRot: (%.1f, %.1f, %.1f) | Up: (%.2f, %.2f, %.2f)" % [
-		elapsed_time,
-		current_state_name,
-		velocity.x,
-		velocity.y,
-		velocity.z,
-		cam_rot_deg.x,
-		cam_rot_deg.y,
-		cam_rot_deg.z,
-		up_direction.x,
-		up_direction.y,
-		up_direction.z
-	])
-	last_mouse_movement = Vector2.ZERO
+func perform_ground_slam_impact():
+	# 1. Play visual and audio feedback
+	_play_ground_slam_feedback()
 
-func _update_debug_print(delta):
-	debug_timer += delta
-	if debug_timer >= DEBUG_PRINT_INTERVAL:
-		debug_timer = 0.0
-		_print_tick_debug_info()
+	# 2. Configure the query shape and position for this specific impact
+	_slam_shape.radius = slam_impact_radius
+	_slam_shape.height = slam_impact_radius / 2.0 # Keep height minimal
+	_slam_query_params.shape_rid = _slam_shape.get_rid()
+	_slam_query_params.transform = global_transform
 
-func _debug_ground_ray():
-	print("--- Ground Ray Debug ---")
-	print("Colliding: ", ground_ray.is_colliding())
-	if ground_ray.is_colliding():
-		print("Collider: ", ground_ray.get_collider().name)
-		print("Normal: ", ground_ray.get_collision_normal())
-	print("-----------------------")
-#endregion
+	# 3. Execute the physics query to find nearby objects
+	var space_state = get_world_3d().direct_space_state
+	var results = space_state.intersect_shape(_slam_query_params)
 
-#region Stair Stepping
+	# 4. Process all affected objects
+	for hit in results:
+		var collider = hit.collider
+		if not is_instance_valid(collider):
+			continue
+
+		# Break any "breakable" objects
+		if collider.is_in_group("breakable") and collider.has_method("break_object"):
+			# Pass impact position and player velocity for a more dynamic shatter
+			collider.break_object(global_position, velocity)
+
+		# Apply force to any standard rigid bodies
+		elif collider is RigidBody3D:
+			var direction = (collider.global_position - global_position).normalized()
+			var impulse = direction * slam_impact_force
+			collider.apply_central_impulse(impulse)
+
+	# 5. Activate the slam boost mechanic
+	slam_boost_timer = slam_boost_window
+
+func _play_ground_slam_feedback():
+	# Instantiate and configure the visual effect
+	if GroundSlamEffect:
+		var slam_effect_instance = GroundSlamEffect.instantiate()
+		get_tree().root.add_child(slam_effect_instance)
+		slam_effect_instance.global_position = global_position
+		
+		# Configure the effect's properties based on player stats
+		# Note: Your effect scene must have these properties (`target_radius`, `duration`)
+		# defined with @export for this to work.
+		if slam_effect_instance.has_method("configure"):
+			slam_effect_instance.configure(slam_impact_radius, 0.4)
+		else:
+			if "target_radius" in slam_effect_instance:
+				slam_effect_instance.target_radius = slam_impact_radius
+			if "duration" in slam_effect_instance:
+				slam_effect_instance.duration = 0.4 # Or another value
+
+	# Play sound effect via the game manager
+	if GameManager.audio_manager:
+		GameManager.audio_manager.play_sfx("GroundSlamImpact")
+
 func _stair_step_down():
 	if is_free_space_mode or not is_grounded: return
 	if velocity.y <= 0 and was_grounded:
@@ -746,4 +771,3 @@ func _stair_step_up():
 	velocity.y = 0
 	global_pos.y = test_transform.origin.y
 	global_position = global_pos
-#endregion

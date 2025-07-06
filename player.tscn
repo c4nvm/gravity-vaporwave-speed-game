@@ -1,8 +1,8 @@
-[gd_scene load_steps=33 format=3 uid="uid://bnqi03y2dl6e7"]
+[gd_scene load_steps=34 format=3 uid="uid://bnqi03y2dl6e7"]
 
 [ext_resource type="Script" uid="uid://bt340a7i5ar4w" path="res://player.gd" id="1_4ivg5"]
 [ext_resource type="Shader" uid="uid://de2vc7d4gh74w" path="res://shaders/Outline.gdshader" id="2_ffn7p"]
-[ext_resource type="PackedScene" uid="uid://dp02g6q3dtl2c" path="res://beam_segment.tscn" id="2_op7ga"]
+[ext_resource type="PackedScene" uid="uid://dp02g6q3dtl2c" path="res://VFX/beam_segment.tscn" id="2_op7ga"]
 [ext_resource type="PackedScene" uid="uid://bbu5poc5f8sho" path="res://activation_area.tscn" id="2_u1c27"]
 [ext_resource type="Shader" uid="uid://lknhyb2p5dot" path="res://shaders/toon.gdshader" id="3_skmdc"]
 [ext_resource type="Script" uid="uid://d13mrf2y62hup" path="res://State Machine/state_machine.gd" id="5_qhaxn"]
@@ -14,6 +14,7 @@
 [ext_resource type="Shader" uid="uid://cuii6jj6mssvi" path="res://shaders/chromatic_aberation.gdshader" id="11_nvl01"]
 [ext_resource type="Script" uid="uid://bvfpftyt2on5m" path="res://State Machine/Player States/vaulting.gd" id="11_usg6b"]
 [ext_resource type="Script" uid="uid://bclo2ptuddgjk" path="res://shaders/chromatic_aberation.gd" id="12_ivps1"]
+[ext_resource type="Script" uid="uid://mqdc201xw068" path="res://State Machine/Player States/ground_slam.gd" id="13_pylmc"]
 [ext_resource type="Shader" uid="uid://ckv5c0kkhjlow" path="res://shaders/distortion.gdshader" id="13_urp6f"]
 [ext_resource type="Script" uid="uid://dnvetk7s52dp6" path="res://speed_lines.gd" id="14_bwjto"]
 [ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="15_606se"]
@@ -108,6 +109,21 @@ shader_parameter/force = 1.69
 shader_parameter/size = 0.0
 shader_parameter/thickness = 0.055
 
+[sub_resource type="Animation" id="Animation_pbfsw"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:material:shader_parameter/size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
 [sub_resource type="Animation" id="Animation_pylmc"]
 resource_name = "Shockwave"
 step = 0.1
@@ -122,21 +138,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(0.116629, 1),
 "update": 0,
 "values": [0.0, 1.1]
-}
-
-[sub_resource type="Animation" id="Animation_pbfsw"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:material:shader_parameter/size")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [0.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pbfsw"]
@@ -156,7 +157,7 @@ gravity_gun_hold_offset_y = -1.0
 gravity_gun_debug = true
 laser_beam_segment_scene = ExtResource("2_op7ga")
 switch_activation_area_scene = ExtResource("2_u1c27")
-switch_activation_radius = 1.0
+switch_activation_radius = 2.0
 
 [node name="DirectionRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -178,12 +179,6 @@ shape = SubResource("CapsuleShape3D_4ivg5")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("SphereShape3D_g6ire")
 disabled = true
-
-[node name="GroundRay" type="RayCast3D" parent="."]
-target_position = Vector3(0, -0.25, 0)
-collision_mask = 5
-hit_from_inside = true
-debug_shape_custom_color = Color(1, 1, 0, 1)
 
 [node name="SlideRay" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -235,6 +230,9 @@ script = ExtResource("10_kv52j")
 [node name="Vaulting" type="Node" parent="StateMachine"]
 script = ExtResource("11_usg6b")
 
+[node name="GroundSlam" type="Node" parent="StateMachine"]
+script = ExtResource("13_pylmc")
+
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Chromatic Aberration" type="ColorRect" parent="CanvasLayer"]
@@ -277,3 +275,12 @@ libraries = {
 
 [node name="SpeedrunTimer" type="Node" parent="."]
 script = ExtResource("15_606se")
+
+[node name="PreLandSlideRay" type="RayCast3D" parent="."]
+target_position = Vector3(0, -0.5, 0)
+
+[node name="GroundRay" type="RayCast3D" parent="."]
+target_position = Vector3(0, -0.25, 0)
+collision_mask = 5
+hit_from_inside = true
+debug_shape_custom_color = Color(1, 1, 0, 1)

@@ -251,7 +251,7 @@ void fragment() {
 	// Convert the snapped coordinates back to UV space (0-1 range).
 	vec2 pixelated_uv = pixelated_fragcoord / VIEWPORT_SIZE.xy;
 	// --- End of Pixelation Logic ---
-	
+
 	float aspect = float(VIEWPORT_SIZE.y) / float(VIEWPORT_SIZE.x);
 
 	UVNeighbors n = getNeighbors(pixelated_uv, max_thickness, aspect);

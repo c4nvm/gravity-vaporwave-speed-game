@@ -51,7 +51,7 @@ project/assembly_name="gravity-vaporwave-speed-game"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/dialogic/plugin.cfg")
+enabled=PackedStringArray("res://addons/dialogic/plugin.cfg", "res://addons/voronoishatter/plugin.cfg")
 
 [global_group]
 
@@ -61,6 +61,7 @@ gravity_fields=""
 grind_rails=""
 grabbable=""
 activation_area=""
+breakable=""
 
 [importer_defaults]
 

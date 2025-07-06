@@ -8,28 +8,21 @@ extends CanvasLayer
 var current_level_id: String = ""
 var current_record: float = 0.0
 var player: CharacterBody3D
-var compass_instance: Node3D # Renamed for clarity
+var compass_instance: Node3D
 
 func _ready() -> void:
 	GameManager.register_gameplay_ui(self)
 	
-	# --- MODIFIED: Get the player reference from the GameManager ---
-	# This assumes the player is ready before the UI.
-	# A signal-based approach could be more robust if load order varies.
+	# Attempt to get the player node immediately. It might be null if the UI is ready first.
 	player = GameManager.player_node
-	# ----------------------------------------------------------------
 	
-	# Set default text values
 	record_time_label.text = "Record: --:--:---"
 	timer_label.text = "00:00:000"
 
-	# Directly get the level ID from the GameManager when the UI is ready.
 	current_level_id = GameManager.current_level_id
 	
-	# Call the function to load and display the record.
 	load_record_time()
 	
-	# Load and setup the 3D compass
 	var loaded_scene = preload("res://compass.tscn").instantiate()
 	if loaded_scene is Node3D:
 		compass_instance = loaded_scene
@@ -37,7 +30,6 @@ func _ready() -> void:
 	else:
 		push_error("Failed to load Compass.tscn as a Node3D")
 
-	# Configure viewport
 	compass_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	compass_viewport.transparent_bg = true
 	
@@ -46,27 +38,42 @@ func _ready() -> void:
 	self.visible = true
 
 func _process(delta: float) -> void:
-	# --- MODIFIED: Check if player is valid before updating ---
-	if is_instance_valid(player):
-		update_compass()
-	# --------------------------------------------------------
+	# If the player reference is not yet valid, try to get it from the GameManager.
+	# This handles cases where the UI is ready before the player has registered itself.
+	if not is_instance_valid(player):
+		player = GameManager.player_node
+		# If it's still not valid, we can't do anything yet, so we wait for the next frame.
+		if not is_instance_valid(player):
+			# Hide the debug label if there is no player
+			debug_label.text = "State: N/A\nVel: (0.0, 0.0, 0.0)"
+			return
+
+	# Once we have a valid player reference, update the UI elements.
+	update_compass()
+	_update_debug_label()
+
+func _update_debug_label():
+	"""Pulls data from the player and updates the debug label."""
+	var state_name = "N/A"
+	# Check if the state machine and its current state are valid before accessing them.
+	if player.has_node("StateMachine") and player.state_machine.current_state:
+		state_name = player.state_machine.current_state.name
+
+	# Format the velocity and state information.
+	var vel_text = "Vel: (%.1f, %.1f, %.1f)" % [player.velocity.x, player.velocity.y, player.velocity.z]
+	debug_label.text = "State: %s\n%s" % [state_name, vel_text]
 
 func update_compass() -> void:
-	# Also check if the compass instance is valid
 	if not is_instance_valid(compass_instance):
 		return
 	
-	# --- MODIFIED: Get the camera pivot's global basis for full rotation ---
-	# This is the key change: camera_pivot has both yaw and pitch.
-	var camera_basis = player.camera_pivot.global_transform.basis
-	# ---------------------------------------------------------------------
+	# This requires a 'camera_pivot' node on your player.
+	if not player.has_node("CameraPivot"): return
+	var camera_pivot = player.get_node("CameraPivot")
 	
-	# Update the 3D compass with the player's gravity and camera orientation
+	var camera_basis = camera_pivot.global_transform.basis
+	
 	compass_instance.update_compass(player.gravity_direction, camera_basis)
-
-# This function can now be removed or kept as a fallback
-# func set_player_reference(player_ref: CharacterBody3D) -> void:
-# 	player = player_ref
 
 func load_record_time() -> void:
 	if current_level_id.is_empty():
@@ -96,11 +103,6 @@ func show_final_time(final_time: float) -> void:
 
 func set_timer_visibility(color: Color) -> void:
 	timer_label.add_theme_color_override("font_color", color)
-
-func update_debug_info(debug_string: String, velocity: Vector3) -> void:
-	# Renamed from update_debug to avoid conflict and be more descriptive
-	var vel_text = "Vel: (%.1f, %.1f, %.1f)" % [velocity.x, velocity.y, velocity.z]
-	debug_label.text = debug_string + "\n" + vel_text
 
 func format_time(seconds: float) -> String:
 	var minutes := int(seconds / 60)

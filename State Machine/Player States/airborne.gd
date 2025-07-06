@@ -1,27 +1,21 @@
 extends State
 
+func enter():
+	player.time_since_airborne = 0.0
+	# Ensure the slide intent flag is false when becoming airborne.
+	player.wants_to_slide_on_land = false
+
 func process_physics(delta):
 	player._pre_physics_process()
-
-	# Apply gravity and update player orientation
 	player._update_gravity()
 	player._apply_gravity(delta)
-	
-	# Handle player movement in the air
 	_handle_air_movement(delta)
-
-	# Apply movement and align with surfaces
 	player._align_with_surface(delta)
 	player.move_and_slide()
-	
-	# Check for other airborne actions like vaulting and ledge climbing
 	_handle_vaulting()
 	_handle_ledge_climb()
-	
-	player._update_debug_print(delta)
 
 func _handle_air_movement(delta):
-	# Get input from the player script
 	var input_dir : Vector2 = player.get_wish_direction()
 	var raycast_forward = -player.direction_ray.global_transform.basis.z.normalized()
 	var raycast_right = player.direction_ray.global_transform.basis.x.normalized()
@@ -61,9 +55,21 @@ func _handle_vaulting():
 
 func _check_and_perform_vault(collision: KinematicCollision3D) -> bool:
 	var world_space = player.get_world_3d().direct_space_state
-	var wall_normal = collision.get_normal()
 	var player_center = player.global_position
 	var player_height = player.player_collider.shape.height
+	var up_direction = -player.gravity_direction
+
+	# Ceiling check: Cast a short ray upwards from the player's head.
+	var ceiling_check_start = player_center
+	var ceiling_check_end = ceiling_check_start + (up_direction*2)
+	var ceiling_query_params = PhysicsRayQueryParameters3D.create(ceiling_check_start, ceiling_check_end)
+	ceiling_query_params.exclude = [player.get_rid()]
+
+	# If the ray hits something, there's a ceiling, so don't vault.
+	if world_space.intersect_ray(ceiling_query_params):
+		return false
+
+	var wall_normal = collision.get_normal()
 	var downward_velocity = player.velocity.dot(player.gravity_direction)
 
 	if downward_velocity > player.vault_min_downward_speed:
@@ -146,6 +152,20 @@ func _check_and_perform_climb(wall_point: Vector3, wall_normal: Vector3):
 	player.state_machine.transition_to("LedgeClimbing")
 
 func get_next_state() -> String:
+	# Check for slide/slam input first.
+	if player.is_action_just_pressed_checked("slide"):
+		# Check if the player is close to the ground.
+		if player.pre_land_slide_ray.is_colliding():
+			# If close, set a flag to slide upon landing instead of slamming now.
+			player.wants_to_slide_on_land = true
+		# If not close to the ground, perform a normal ground slam check.
+		elif player.ground_slam_enabled and \
+				player.time_since_airborne > player.slam_takeoff_cooldown and \
+				not player.just_did_slide_hop:
+			return "GroundSlam"
+
+	# Check if we have landed.
 	if player.ground_ray.is_colliding():
 		return "Grounded"
+		
 	return ""

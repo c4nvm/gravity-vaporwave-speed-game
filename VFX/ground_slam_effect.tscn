@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://cegajobur3kle"]
+
+[ext_resource type="Script" uid="uid://cem30306ycit4" path="res://VFX/ground_slam_effect.gd" id="1_syl58"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_f0m1q"]
+inner_radius = 0.9
+rings = 24
+ring_segments = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mfp3d"]
+transparency = 1
+cull_mode = 2
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 0.76
+
+[node name="GroundSlamEffect" type="Node3D"]
+script = ExtResource("1_syl58")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("TorusMesh_f0m1q")
+surface_material_override/0 = SubResource("StandardMaterial3D_mfp3d")
