@@ -3,6 +3,8 @@ extends Node3D
 @export var player_scene: PackedScene = preload("res://player.tscn")
 @export var pause_menu_scene: PackedScene = preload("res://Menus/pause_menu.tscn")
 @export var soundtrack_profile: String = "default"
+## Set this in the inspector for each level. It tells the level select screen how many icons to draw.
+@export var total_collectibles_in_level: int = 0
 
 @onready var start_position: Marker3D = $StartPosition
 @onready var endpoint: Area3D = $Endpoint
@@ -20,6 +22,9 @@ func _ready() -> void:
 	add_child(pause_instance)
 	GameManager.register_pause_menu(pause_instance)
 	
+	# Update collectibles that have already been found.
+	_initialize_collectibles()
+	
 	await get_tree().process_frame
 
 	if not player_scene:
@@ -29,9 +34,28 @@ func _ready() -> void:
 	spawn_player()
 	endpoint.body_entered.connect(_on_endpoint_body_entered)
 	
-	# --- FIX ---
 	# Tell the GameManager to start the fade-in using the duration from the player.
 	GameManager.start_level_fade_in(player_instance.level_start_fade_duration)
+
+
+func _initialize_collectibles() -> void:
+	# Get the ID of the current level scene file.
+	var level_id = get_tree().current_scene.scene_file_path.get_file().get_basename()
+	
+	# Load the list of collectibles that have already been found in this level.
+	var found_collectibles = GameManager.load_collectibles(level_id)
+	
+	if found_collectibles.is_empty():
+		return
+
+	var collectibles_in_scene = get_tree().get_nodes_in_group("collectible_item")
+	
+	for item in collectibles_in_scene:
+		if "collectible_id" in item:
+			if item.collectible_id in found_collectibles:
+				# This item was already found. Call its function to change its state.
+				if item.has_method("set_as_collected"):
+					item.set_as_collected()
 
 
 func spawn_player() -> void:

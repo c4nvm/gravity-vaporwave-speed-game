@@ -62,6 +62,7 @@ grind_rails=""
 grabbable=""
 activation_area=""
 breakable=""
+collectible_item=""
 
 [importer_defaults]
 

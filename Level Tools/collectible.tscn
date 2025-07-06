@@ -1,0 +1,78 @@
+[gd_scene load_steps=13 format=3 uid="uid://cib6ks7bq7apc"]
+
+[ext_resource type="Script" uid="uid://dx6wis7rx1l78" path="res://Level Tools/collectible.gd" id="1_rd2yi"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xt0yh"]
+transparency = 1
+albedo_color = Color(0.513726, 0.513726, 0.513726, 0.494118)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_d4byk"]
+radius = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8orai"]
+albedo_color = Color(1, 1, 0, 1)
+emission_enabled = true
+emission = Color(1, 1, 0, 1)
+emission_energy_multiplier = 2.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_yciwo"]
+material = SubResource("StandardMaterial3D_8orai")
+
+[sub_resource type="Curve" id="Curve_xt0yh"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.307902, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_6blb1"]
+curve = SubResource("Curve_xt0yh")
+
+[sub_resource type="Curve" id="Curve_obtmh"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.354223, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_ectdp"]
+curve = SubResource("Curve_obtmh")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_obtmh"]
+emission_shape = 1
+emission_sphere_radius = 1.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_max = 1.0
+gravity = Vector3(0, 0, 0)
+tangential_accel_min = -2.23517e-06
+tangential_accel_max = 3.64
+scale_min = 0.45
+scale_max = 5.65
+scale_curve = SubResource("CurveTexture_ectdp")
+alpha_curve = SubResource("CurveTexture_6blb1")
+hue_variation_min = -0.26
+hue_variation_max = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aoc0y"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_ectdp"]
+material = SubResource("StandardMaterial3D_aoc0y")
+radius = 0.05
+height = 0.1
+
+[node name="Collectible" type="Area3D" groups=["collectible"]]
+script = ExtResource("1_rd2yi")
+collected_material = SubResource("StandardMaterial3D_xt0yh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_d4byk")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.389748, 0.0899805, 6.68184e-08, -0.08155, 0.353232, 0.169047, 0.0380274, -0.164715, 0.362523, 0, 0, 0)
+mesh = SubResource("BoxMesh_yciwo")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+amount = 24
+lifetime = 2.0
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_obtmh")
+draw_pass_1 = SubResource("SphereMesh_ectdp")

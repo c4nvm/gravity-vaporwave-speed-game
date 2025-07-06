@@ -1,7 +1,8 @@
+#
 # This is a singleton (autoload) script that manages global game state,
 # scene transitions, audio, and communication between different game nodes.
 # NOTE: Ensure this is named "GameManager" in Project > Project Settings > Autoload
-
+#
 extends Node
 
 # Path to the AudioManager scene.
@@ -42,11 +43,20 @@ var print_tree_timer: Timer
 
 # --- CONSTANTS ---
 const RESTART_FADE_DURATION: float = 1.0
+const SAVE_DIR = "user://best_times/"
+const COLLECTIBLES_SAVE_DIR = "user://collectibles/"
 
 
 func _ready():
 	# Process input when paused and during normal gameplay.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# --- Setup Save Directories ---
+	var dir = DirAccess.open("user://")
+	if not dir.dir_exists("best_times"):
+		dir.make_dir("best_times")
+	if not dir.dir_exists("collectibles"):
+		dir.make_dir("collectibles")
 
 	# --- Setup Fade Layer ---
 	var fade_canvas = CanvasLayer.new()
@@ -109,7 +119,6 @@ func stop_gravity_gun_hold_sound():
 func play_gravity_gun_shoot_sound():
 	if is_instance_valid(audio_manager):
 		audio_manager.play_sfx("GravityGunShoot")
-# --- END NEW ---
 
 func _on_fov_changed(new_fov: float):
 	current_fov = new_fov
@@ -317,8 +326,7 @@ func _cleanup_before_scene_change() -> void:
 	compasses.clear()
 
 
-# --- TIME SAVING & LOADING ---
-const SAVE_DIR = "user://best_times/"
+# --- DATA SAVING & LOADING ---
 
 func save_best_time(new_time: float) -> void:
 	# Don't run the level complete logic more than once.
@@ -332,22 +340,10 @@ func save_best_time(new_time: float) -> void:
 	
 	level_completed.emit() # Play end-level audio via signal.
 
-	# --- FIX: Check if the new time is better before saving ---
 	var current_best_time = load_best_time(current_level_id)
 
 	# Save only if there's no best time yet (0.0) or if the new time is smaller.
 	if current_best_time == 0.0 or new_time < current_best_time:
-		var dir = DirAccess.open("user://")
-		if dir == null:
-			push_error("Failed to access user data directory!")
-			return
-
-		if not dir.dir_exists("best_times"):
-			var err = dir.make_dir("best_times")
-			if err != OK:
-				push_error("Failed to create best_times directory!")
-				return
-
 		var file_path = SAVE_DIR.path_join(current_level_id + ".dat")
 		var file = FileAccess.open(file_path, FileAccess.WRITE)
 		if file == null:
@@ -376,6 +372,57 @@ func load_best_time(level_id_to_load: String) -> float:
 	return time
 
 
+func save_collectible(level_id: String, collectible_id: String) -> void:
+	if level_id.is_empty() or collectible_id.is_empty():
+		push_error("Cannot save collectible - level ID or collectible ID is empty.")
+		return
+
+	# Load the list of collectibles already found for this level.
+	var found_collectibles: Array = load_collectibles(level_id)
+
+	# If this collectible is already in the list, we don't need to save again.
+	if collectible_id in found_collectibles:
+		return
+
+	# Add the new collectible ID and save the updated list.
+	found_collectibles.append(collectible_id)
+
+	var file_path = COLLECTIBLES_SAVE_DIR.path_join(level_id + ".dat")
+	var file = FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		push_error("Failed to save collectibles for %s. Error: %s" % [level_id, FileAccess.get_open_error()])
+		return
+
+	# Store the entire array as a variant.
+	file.store_var(found_collectibles)
+	file.close()
+
+
+func load_collectibles(level_id_to_load: String) -> Array:
+	if level_id_to_load.is_empty():
+		return []
+
+	var file_path = COLLECTIBLES_SAVE_DIR.path_join(level_id_to_load + ".dat")
+	if not FileAccess.file_exists(file_path):
+		return [] # Return an empty array if no save file exists.
+
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		push_error("Failed to load collectibles for %s. Error: %s" % [level_id_to_load, FileAccess.get_open_error()])
+		return []
+
+	# get_var() returns the data in its original type (in this case, an Array).
+	var collectibles = file.get_var()
+	file.close()
+
+	if collectibles is Array:
+		return collectibles
+	else:
+		# Handle cases where the file is corrupt or not an array.
+		push_error("Collectible save file for '%s' is corrupt." % level_id_to_load)
+		return []
+
+
 func delete_current_level_time() -> void:
 	if current_level_id.is_empty():
 		push_error("Cannot delete time: current_level_id is empty.")
@@ -392,7 +439,7 @@ func delete_current_level_time() -> void:
 		push_error("Could not open save directory to delete a file.")
 		return
 	
-	var err = dir.remove(file_path)
+	var err = dir.remove(file_path.get_file())
 	if err != OK:
 		push_error("Error deleting file '%s': %s" % [file_path, err])
 	
@@ -402,25 +449,29 @@ func delete_current_level_time() -> void:
 
 
 func delete_all_saved_times() -> void:
-	# This function is called from the pause menu.
-	var dir = DirAccess.open(SAVE_DIR)
-	if dir == null:
-		# This can happen if the directory was never created, which is not an error.
-		print("Best times directory doesn't exist. Nothing to delete.")
-		return
-
-	# Iterate over all files in the directory and remove them.
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if not dir.current_is_dir() and file_name.ends_with(".dat"):
-			var err = dir.remove(file_name)
-			if err != OK:
-				push_error("Failed to delete file: %s" % file_name)
-		file_name = dir.get_next()
+	# This function now deletes ALL save data, not just times.
 	
-	# After deleting the files, if the gameplay UI is active, tell it to
-	# reload the record time, which will now be non-existent.
+	# Delete best times
+	var time_dir = DirAccess.open(SAVE_DIR)
+	if time_dir:
+		time_dir.list_dir_begin()
+		var file_name = time_dir.get_next()
+		while file_name != "":
+			if not time_dir.current_is_dir() and file_name.ends_with(".dat"):
+				time_dir.remove(file_name)
+			file_name = time_dir.get_next()
+			
+	# Delete collectibles data
+	var collectible_dir = DirAccess.open(COLLECTIBLES_SAVE_DIR)
+	if collectible_dir:
+		collectible_dir.list_dir_begin()
+		var file_name = collectible_dir.get_next()
+		while file_name != "":
+			if not collectible_dir.current_is_dir() and file_name.ends_with(".dat"):
+				collectible_dir.remove(file_name)
+			file_name = collectible_dir.get_next()
+	
+	# After deleting, if the gameplay UI is active, tell it to reload the record time.
 	if is_instance_valid(gameplay_ui):
 		gameplay_ui.load_record_time()
 

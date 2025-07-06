@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://c0x1ehaawhnhg"]
+[gd_scene load_steps=17 format=3 uid="uid://c0x1ehaawhnhg"]
 
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_xchr8"]
 [ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="2_6a12g"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b2838vlgparcy" path="res://door.tscn" id="10_6a12g"]
 [ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="10_si5yy"]
 [ext_resource type="PackedScene" uid="uid://by4ekm1ysr3au" path="res://breakable.tscn" id="11_6a12g"]
+[ext_resource type="PackedScene" uid="uid://cib6ks7bq7apc" path="res://Level Tools/collectible.tscn" id="12_3xb8j"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("2_6a12g")
@@ -55,6 +56,11 @@ size = Vector3(100, 37.775, 100)
 
 [node name="test world" type="Node3D"]
 script = ExtResource("1_xchr8")
+total_collectibles_in_level = 1
+
+[node name="Collectible" parent="." instance=ExtResource("12_3xb8j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.3, -22)
+collectible_id = "1"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_cnaw2")
