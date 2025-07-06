@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dq2akkhly00lx"
-path="res://.godot/imported/alexander.glb-4e0d897ddbee7cc6ebac3190dbfa0482.scn"
+path="res://.godot/imported/alexander.glb-afa5d79e5addf6a36802145d9a4b176d.scn"
 
 [deps]
 
-source_file="res://Models/alexander.glb"
-dest_files=["res://.godot/imported/alexander.glb-4e0d897ddbee7cc6ebac3190dbfa0482.scn"]
+source_file="res://models/alexander.glb"
+dest_files=["res://.godot/imported/alexander.glb-afa5d79e5addf6a36802145d9a4b176d.scn"]
 
 [params]
 
@@ -34,7 +34,7 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"Face": {
+"alexander": {
 "use_external/enabled": true,
 "use_external/path": "uid://cmh5u8ms6fyl7"
 }
