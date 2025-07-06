@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c4cvmbinxyy4d"]
+[gd_scene load_steps=11 format=3 uid="uid://c4cvmbinxyy4d"]
 
 [ext_resource type="Script" uid="uid://cuen6a007he5v" path="res://audio_manager.gd" id="1_jisk1"]
 [ext_resource type="Script" uid="uid://2iaf7trvdx0m" path="res://audio_profile.gd" id="2_l2k84"]
@@ -9,6 +9,7 @@
 [ext_resource type="AudioStream" uid="uid://ckthor14o2he5" path="res://Audio/SFX/pickup_sound.wav" id="7_v0gdi"]
 [ext_resource type="AudioStream" uid="uid://ui7j71chiuc4" path="res://Audio/SFX/laser_sound_2.wav" id="8_v0gdi"]
 [ext_resource type="AudioStream" uid="uid://hw8s4b4dw0km" path="res://Audio/SFX/ground_slam_impact_2.wav" id="9_7fh0q"]
+[ext_resource type="AudioStream" uid="uid://dn88g0jwu2gf0" path="res://Audio/SFX/collectible_pickup.wav" id="10_op7ad"]
 
 [node name="AudioManager" type="Node" node_paths=PackedStringArray("player_sfx_container")]
 script = ExtResource("1_jisk1")
@@ -52,3 +53,7 @@ volume_db = 12.0
 [node name="GroundSlamImpact" type="AudioStreamPlayer" parent="PlayerSFXContainer"]
 stream = ExtResource("9_7fh0q")
 volume_db = 12.0
+
+[node name="CollectiblePickup" type="AudioStreamPlayer" parent="PlayerSFXContainer"]
+stream = ExtResource("10_op7ad")
+volume_db = 3.0
