@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c0x1ehaawhnhg"]
+[gd_scene load_steps=18 format=3 uid="uid://c0x1ehaawhnhg"]
 
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_xchr8"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="3_3xb8j"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://cs01dd4m5fjb7" path="res://speedrun_timer.gd" id="10_si5yy"]
 [ext_resource type="PackedScene" uid="uid://by4ekm1ysr3au" path="res://breakable.tscn" id="11_6a12g"]
 [ext_resource type="PackedScene" uid="uid://cib6ks7bq7apc" path="res://Level Tools/collectible.tscn" id="12_3xb8j"]
+[ext_resource type="PackedScene" uid="uid://8kuwsrtonyo1" path="res://models/moon.glb" id="13_ennh8"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
 panorama = ExtResource("3_ennh8")
@@ -66,12 +67,14 @@ collectible_id = "1"
 environment = SubResource("Environment_cnaw2")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
-transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
+transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 23.759, 58.0385, -16.4486)
+top_level = true
 light_color = Color(0.891294, 0.905298, 0.968449, 1)
-light_energy = 0.2
-light_indirect_energy = 0.5
+light_energy = 0.178
+light_indirect_energy = 0.43
+light_volumetric_fog_energy = 0.269
+light_specular = 6.848
 light_bake_mode = 1
-shadow_enabled = true
 
 [node name="GameUI" parent="." instance=ExtResource("7_wi2up")]
 
@@ -174,3 +177,6 @@ size = Vector3(8, 1, 11)
 
 [node name="Breakable" parent="." instance=ExtResource("11_6a12g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 4.1704, 0)
+
+[node name="moon" parent="." instance=ExtResource("13_ennh8")]
+transform = Transform3D(-11.6441, -5, -15.4731, -4.10488, 19.3185, -3.15355, 15.7342, 1.33975, -12.2735, 458.887, 193.662, -303.51)

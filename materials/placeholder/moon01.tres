@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bv7x7k62bufy8"]
+
+[ext_resource type="Texture2D" uid="uid://cj8injpprw0rh" path="res://materials/placeholder/lroc_color_poles_1k.jpg" id="1_5t6tv"]
+
+[resource]
+albedo_texture = ExtResource("1_5t6tv")
+rim_enabled = true
+rim_tint = 0.0
+clearcoat_enabled = true
