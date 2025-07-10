@@ -1,8 +1,8 @@
 [gd_scene load_steps=17 format=3 uid="uid://c0x1ehaawhnhg"]
 
 [ext_resource type="Script" uid="uid://ciinv8fdf6esy" path="res://level_controller.gd" id="1_xchr8"]
-[ext_resource type="Texture2D" uid="uid://bld1ipp6fwdqt" path="res://HDRI/Pastel_Sky.hdr" id="2_6a12g"]
 [ext_resource type="Script" uid="uid://b5fcr5i58deil" path="res://gravity_fields.gd" id="3_3xb8j"]
+[ext_resource type="Texture2D" uid="uid://cgba74y2qntcr" path="res://HDRI/chaos.hdr" id="3_ennh8"]
 [ext_resource type="PackedScene" uid="uid://ddxhm3hiqd52l" path="res://UI/gameplay_ui.tscn" id="7_wi2up"]
 [ext_resource type="PackedScene" uid="uid://n7f4gsm8j1d2" path="res://Level Tools/start_position.tscn" id="8_70c8f"]
 [ext_resource type="PackedScene" uid="uid://uphecbnso1no" path="res://Props/Test Props/cube.tscn" id="8_x6dyj"]
@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://cib6ks7bq7apc" path="res://Level Tools/collectible.tscn" id="12_3xb8j"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_dsnr4"]
-panorama = ExtResource("2_6a12g")
+panorama = ExtResource("3_ennh8")
 
 [sub_resource type="Sky" id="Sky_lf0gk"]
 sky_material = SubResource("PanoramaSkyMaterial_dsnr4")
@@ -41,8 +41,8 @@ fog_mode = 1
 fog_density = 1.0
 volumetric_fog_enabled = true
 volumetric_fog_density = 0.01
-volumetric_fog_albedo = Color(0.811765, 0.678431, 1, 1)
-volumetric_fog_emission = Color(1, 0.701961, 0.741176, 1)
+volumetric_fog_albedo = Color(0.78387, 0.721127, 0.949248, 1)
+volumetric_fog_emission = Color(0.116944, 0.0353542, 0.16757, 1)
 volumetric_fog_anisotropy = 0.9
 volumetric_fog_length = 78.87
 volumetric_fog_detail_spread = 0.5
@@ -67,8 +67,8 @@ environment = SubResource("Environment_cnaw2")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(-0.566443, -0.433013, 0.701172, -0.04569, 0.866025, 0.497908, -0.822833, 0.25, -0.510338, 0, 70.3795, -34.7456)
-light_color = Color(0.81234, 0.73811, 0.693527, 1)
-light_energy = 0.5
+light_color = Color(0.891294, 0.905298, 0.968449, 1)
+light_energy = 0.2
 light_indirect_energy = 0.5
 light_bake_mode = 1
 shadow_enabled = true
