@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ch7nlduh6oibg"]
 
-[ext_resource type="PackedScene" uid="uid://b4cirl1lps4w3" path="res://models/crystal01.glb" id="1_4fahs"]
+[ext_resource type="PackedScene" uid="uid://b4cirl1lps4w3" path="res://models/detail/crystal01.glb" id="1_4fahs"]
 
 [node name="Crystal01" type="Node3D"]
 

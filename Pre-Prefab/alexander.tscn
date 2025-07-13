@@ -1,5 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://cqt0gp4rcqk42"]
 
-[ext_resource type="PackedScene" uid="uid://dq2akkhly00lx" path="res://models/alexander.glb" id="1_v2l0d"]
+[ext_resource type="PackedScene" uid="uid://dq2akkhly00lx" path="res://models/detail/alexander.glb" id="1_v2l0d"]
 
 [node name="alexander" instance=ExtResource("1_v2l0d")]

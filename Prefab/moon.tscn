@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://djam78vn2xan8"]
 
-[ext_resource type="PackedScene" uid="uid://8kuwsrtonyo1" path="res://models/moon.glb" id="1_d83hm"]
+[ext_resource type="PackedScene" uid="uid://8kuwsrtonyo1" path="res://models/detail/moon.glb" id="1_d83hm"]
 
 [node name="Node3D" type="Node3D"]
 

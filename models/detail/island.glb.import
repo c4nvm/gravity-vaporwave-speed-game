@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://xkn5mo4pwuke"
-path="res://.godot/imported/computer01.glb-f5134e2567ca3ab657a694bc67364d33.scn"
+uid="uid://b5r7lckxnnfq4"
+path="res://.godot/imported/island.glb-5d91199212ededd98d8f729b467bdb0e.scn"
 
 [deps]
 
-source_file="res://Models/computer01.glb"
-dest_files=["res://.godot/imported/computer01.glb-f5134e2567ca3ab657a694bc67364d33.scn"]
+source_file="res://models/detail/island.glb"
+dest_files=["res://.godot/imported/island.glb-5d91199212ededd98d8f729b467bdb0e.scn"]
 
 [params]
 
@@ -34,19 +34,26 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"Macintosh": {
+"grass": {
 "use_external/enabled": true,
-"use_external/path": "uid://dkiwsdr0tai5h"
+"use_external/path": "uid://c5brv84ueljll"
 },
-"Macintosh_Screen": {
+"grass_rock_blend": {
 "use_external/enabled": true,
-"use_external/path": "uid://bxrdjehesccof"
+"use_external/path": "uid://n4yakju3yhm6"
+},
+"rock": {
+"use_external/enabled": true,
+"use_external/path": "uid://smyb115mssa0"
+},
+"tile": {
+"use_external/enabled": true,
+"use_external/path": "uid://2lgs4o1fog41"
 }
 },
 "nodes": {
-"PATH:Mac": {
-"generate/physics": true,
-"physics/shape_type": 1
+"PATH:Cube_002": {
+"generate/physics": true
 }
 }
 }

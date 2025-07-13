@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cemekbnvnhg55"
-path="res://.godot/imported/tree.glb-1ee26ef37813771cc0c8a0c0595409f2.scn"
+uid="uid://b8cf8deojhk8n"
+path="res://.godot/imported/dome_shattered.glb-15a3edc03cb9d6acc04b48b3464eacab.scn"
 
 [deps]
 
-source_file="res://Models/tree.glb"
-dest_files=["res://.godot/imported/tree.glb-1ee26ef37813771cc0c8a0c0595409f2.scn"]
+source_file="res://models/detail/dome_shattered.glb"
+dest_files=["res://.godot/imported/dome_shattered.glb-15a3edc03cb9d6acc04b48b3464eacab.scn"]
 
 [params]
 
@@ -32,13 +32,6 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={
-"materials": {
-"treepalm": {
-"use_external/enabled": true,
-"use_external/path": "uid://bt6gh8hs6207y"
-}
-}
-}
+_subresources={}
 gltf/naming_version=1
 gltf/embedded_image_handling=1

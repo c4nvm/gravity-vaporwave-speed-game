@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c3xdv5akvunm2"]
 
-[ext_resource type="PackedScene" uid="uid://csm41sxkv1ats" path="res://models/keyboard01.glb" id="1_jhodv"]
+[ext_resource type="PackedScene" uid="uid://csm41sxkv1ats" path="res://models/detail/keyboard01.glb" id="1_jhodv"]
 
 [node name="Node3D" type="Node3D"]
 

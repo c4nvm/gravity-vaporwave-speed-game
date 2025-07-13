@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dq2akkhly00lx"
-path="res://.godot/imported/alexander.glb-4e0d897ddbee7cc6ebac3190dbfa0482.scn"
+uid="uid://cox4dekhnwwbc"
+path="res://.godot/imported/rock02.glb-cb07f84a5cf5a90597267949757bdeee.scn"
 
 [deps]
 
-source_file="res://Models/alexander.glb"
-dest_files=["res://.godot/imported/alexander.glb-4e0d897ddbee7cc6ebac3190dbfa0482.scn"]
+source_file="res://models/detail/rock02.glb"
+dest_files=["res://.godot/imported/rock02.glb-cb07f84a5cf5a90597267949757bdeee.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"alexander": {
+"rock": {
 "use_external/enabled": true,
-"use_external/path": "uid://cmh5u8ms6fyl7"
+"use_external/path": "uid://smyb115mssa0"
 }
 }
 }

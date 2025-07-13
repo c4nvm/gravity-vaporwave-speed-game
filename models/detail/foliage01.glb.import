@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dfs0jmmowgq3r"
-path="res://.godot/imported/rock06.glb-6d0af203ab7ac60695900c7a4a2fc372.scn"
+uid="uid://rn2t0xjmuuaf"
+path="res://.godot/imported/foliage01.glb-ac5468a710e3304fb5532e16e26087f9.scn"
 
 [deps]
 
-source_file="res://Models/rock06.glb"
-dest_files=["res://.godot/imported/rock06.glb-6d0af203ab7ac60695900c7a4a2fc372.scn"]
+source_file="res://models/detail/foliage01.glb"
+dest_files=["res://.godot/imported/foliage01.glb-ac5468a710e3304fb5532e16e26087f9.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"rock": {
+"foliage": {
 "use_external/enabled": true,
-"use_external/path": "uid://smyb115mssa0"
+"use_external/path": "uid://c66enwis1a432"
 }
 }
 }

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://8kuwsrtonyo1"
-path="res://.godot/imported/moon.glb-e54948b4f0d10cfb2091afda9d5d3835.scn"
+uid="uid://dn1d86vmrgs74"
+path="res://.godot/imported/crystal03.glb-6b48062333fe2922f6cfc366e2232797.scn"
 
 [deps]
 
-source_file="res://models/moon.glb"
-dest_files=["res://.godot/imported/moon.glb-e54948b4f0d10cfb2091afda9d5d3835.scn"]
+source_file="res://models/detail/crystal03.glb"
+dest_files=["res://.godot/imported/crystal03.glb-6b48062333fe2922f6cfc366e2232797.scn"]
 
 [params]
 
@@ -34,13 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"Eye": {
+"crystal": {
 "use_external/enabled": true,
-"use_external/path": "uid://bv7g1x477o64a"
-},
-"moon": {
-"use_external/enabled": true,
-"use_external/path": "uid://bv7x7k62bufy8"
+"use_external/path": "uid://cs6rn4q3gch67"
 }
 }
 }

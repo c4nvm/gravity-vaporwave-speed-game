@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c7ewfnnj5v03w"
-path="res://.godot/imported/crystal02.glb-e2fd5e592997de48529969b60e4e7db6.scn"
+uid="uid://cfecyh04lhac6"
+path="res://.godot/imported/column.glb-2370e92ab29a67611ac37400ba7bf875.scn"
 
 [deps]
 
-source_file="res://Models/crystal02.glb"
-dest_files=["res://.godot/imported/crystal02.glb-e2fd5e592997de48529969b60e4e7db6.scn"]
+source_file="res://models/detail/column.glb"
+dest_files=["res://.godot/imported/column.glb-2370e92ab29a67611ac37400ba7bf875.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"crystal": {
+"Column": {
 "use_external/enabled": true,
-"use_external/path": "uid://cs6rn4q3gch67"
+"use_external/path": "uid://cbmxl8h6kg5wv"
 }
 }
 }

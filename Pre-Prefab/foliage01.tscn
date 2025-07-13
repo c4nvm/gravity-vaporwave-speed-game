@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dmssyvh1rsuue"]
 
-[ext_resource type="PackedScene" uid="uid://rn2t0xjmuuaf" path="res://models/foliage01.glb" id="1_1gv5p"]
+[ext_resource type="PackedScene" uid="uid://rn2t0xjmuuaf" path="res://models/detail/foliage01.glb" id="1_1gv5p"]
 
 [node name="Foliage01" type="Node3D"]
 

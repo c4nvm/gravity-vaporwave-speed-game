@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cxrlm4ogipasx"
-path="res://.godot/imported/rock01.glb-511cb9b8cc22b57294fb7ea9b92e4495.scn"
+uid="uid://xkn5mo4pwuke"
+path="res://.godot/imported/computer01.glb-fa50760b5451f2d11ddeb634e0ed1c51.scn"
 
 [deps]
 
-source_file="res://Models/rock01.glb"
-dest_files=["res://.godot/imported/rock01.glb-511cb9b8cc22b57294fb7ea9b92e4495.scn"]
+source_file="res://models/detail/computer01.glb"
+dest_files=["res://.godot/imported/computer01.glb-fa50760b5451f2d11ddeb634e0ed1c51.scn"]
 
 [params]
 
@@ -34,9 +34,19 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"rock": {
+"Macintosh": {
 "use_external/enabled": true,
-"use_external/path": "uid://smyb115mssa0"
+"use_external/path": "uid://dkiwsdr0tai5h"
+},
+"Macintosh_Screen": {
+"use_external/enabled": true,
+"use_external/path": "uid://bxrdjehesccof"
+}
+},
+"nodes": {
+"PATH:Mac": {
+"generate/physics": true,
+"physics/shape_type": 1
 }
 }
 }

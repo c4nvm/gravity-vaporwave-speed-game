@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b5r7lckxnnfq4"
-path="res://.godot/imported/island.glb-b74d1c2ce57c5d1dae1cd2d7adf18203.scn"
+uid="uid://dr1lb8iqngd8a"
+path="res://.godot/imported/rock05.glb-28aed262cd1b05a76351ac37f0122c50.scn"
 
 [deps]
 
-source_file="res://Models/island.glb"
-dest_files=["res://.godot/imported/island.glb-b74d1c2ce57c5d1dae1cd2d7adf18203.scn"]
+source_file="res://models/detail/rock05.glb"
+dest_files=["res://.godot/imported/rock05.glb-28aed262cd1b05a76351ac37f0122c50.scn"]
 
 [params]
 
@@ -34,26 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"grass": {
-"use_external/enabled": true,
-"use_external/path": "uid://c5brv84ueljll"
-},
-"grass_rock_blend": {
-"use_external/enabled": true,
-"use_external/path": "uid://n4yakju3yhm6"
-},
 "rock": {
 "use_external/enabled": true,
 "use_external/path": "uid://smyb115mssa0"
-},
-"tile": {
-"use_external/enabled": true,
-"use_external/path": "uid://2lgs4o1fog41"
-}
-},
-"nodes": {
-"PATH:Cube_002": {
-"generate/physics": true
 }
 }
 }

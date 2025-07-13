@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cmv35myqtg1a"
-path="res://.godot/imported/ring.glb-26ac43d74527a30dcde06236f951335f.scn"
+uid="uid://8kuwsrtonyo1"
+path="res://.godot/imported/moon.glb-06c1e2545b8eccb70371a2d69e37417a.scn"
 
 [deps]
 
-source_file="res://Models/ring.glb"
-dest_files=["res://.godot/imported/ring.glb-26ac43d74527a30dcde06236f951335f.scn"]
+source_file="res://models/detail/moon.glb"
+dest_files=["res://.godot/imported/moon.glb-06c1e2545b8eccb70371a2d69e37417a.scn"]
 
 [params]
 
@@ -32,6 +32,17 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={}
+_subresources={
+"materials": {
+"Eye": {
+"use_external/enabled": true,
+"use_external/path": "uid://bv7g1x477o64a"
+},
+"moon": {
+"use_external/enabled": true,
+"use_external/path": "uid://bv7x7k62bufy8"
+}
+}
+}
 gltf/naming_version=1
 gltf/embedded_image_handling=1

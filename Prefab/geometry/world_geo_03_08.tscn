@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dlao77fpvcmv5"]
+
+[ext_resource type="PackedScene" uid="uid://b1taxjge7d5f5" path="res://models/geometry/world_geo_03_08-col.glb" id="1_lktl6"]
+
+[node name="WorldGeo03" type="Node3D"]
+
+[node name="world_geo_03_08-col" parent="." instance=ExtResource("1_lktl6")]

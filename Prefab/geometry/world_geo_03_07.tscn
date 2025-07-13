@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://wav784vpr2eq"]
+
+[ext_resource type="PackedScene" uid="uid://dfn5traochmj0" path="res://models/geometry/world_geo_03_01-col.glb" id="1_gtr7q"]
+
+[node name="WorldGeo03" type="Node3D"]
+
+[node name="world_geo_03_01-col" parent="." instance=ExtResource("1_gtr7q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00204074, 0.00779223, -0.00373554)

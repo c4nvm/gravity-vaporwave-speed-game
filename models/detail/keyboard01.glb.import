@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dr1lb8iqngd8a"
-path="res://.godot/imported/rock05.glb-318af2864dd74f3a15534e38440e822b.scn"
+uid="uid://csm41sxkv1ats"
+path="res://.godot/imported/keyboard01.glb-64c0c11df72313e8491cba73a3b40b1b.scn"
 
 [deps]
 
-source_file="res://Models/rock05.glb"
-dest_files=["res://.godot/imported/rock05.glb-318af2864dd74f3a15534e38440e822b.scn"]
+source_file="res://models/detail/keyboard01.glb"
+dest_files=["res://.godot/imported/keyboard01.glb-64c0c11df72313e8491cba73a3b40b1b.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"rock": {
+"keyboard": {
 "use_external/enabled": true,
-"use_external/path": "uid://smyb115mssa0"
+"use_external/path": "uid://c52ti11as3dk"
 }
 }
 }

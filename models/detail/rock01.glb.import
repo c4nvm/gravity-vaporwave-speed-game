@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b4cirl1lps4w3"
-path="res://.godot/imported/crystal01.glb-1a6b9dfac4f2bc2aca1a0ab88f08117c.scn"
+uid="uid://cxrlm4ogipasx"
+path="res://.godot/imported/rock01.glb-3385e01e1951d830bb9e1574b6e6a93b.scn"
 
 [deps]
 
-source_file="res://Models/crystal01.glb"
-dest_files=["res://.godot/imported/crystal01.glb-1a6b9dfac4f2bc2aca1a0ab88f08117c.scn"]
+source_file="res://models/detail/rock01.glb"
+dest_files=["res://.godot/imported/rock01.glb-3385e01e1951d830bb9e1574b6e6a93b.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"crystal": {
+"rock": {
 "use_external/enabled": true,
-"use_external/path": "uid://cs6rn4q3gch67"
+"use_external/path": "uid://smyb115mssa0"
 }
 }
 }

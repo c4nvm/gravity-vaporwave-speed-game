@@ -1,5 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://cbf7rmanmeblt"]
 
-[ext_resource type="PackedScene" uid="uid://cemekbnvnhg55" path="res://models/tree.glb" id="1_2fpip"]
+[ext_resource type="PackedScene" uid="uid://cemekbnvnhg55" path="res://models/detail/tree.glb" id="1_2fpip"]
 
 [node name="tree" instance=ExtResource("1_2fpip")]

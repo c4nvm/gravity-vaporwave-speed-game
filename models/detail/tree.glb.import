@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bftsd0m1tl6ym"
-path="res://.godot/imported/rock07.glb-43cf25431229829c9b2a74ad01c33b33.scn"
+uid="uid://cemekbnvnhg55"
+path="res://.godot/imported/tree.glb-16f27d96d73e04dbd36c52191c966be1.scn"
 
 [deps]
 
-source_file="res://Models/rock07.glb"
-dest_files=["res://.godot/imported/rock07.glb-43cf25431229829c9b2a74ad01c33b33.scn"]
+source_file="res://models/detail/tree.glb"
+dest_files=["res://.godot/imported/tree.glb-16f27d96d73e04dbd36c52191c966be1.scn"]
 
 [params]
 
@@ -34,9 +34,9 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
-"rock": {
+"treepalm": {
 "use_external/enabled": true,
-"use_external/path": "uid://smyb115mssa0"
+"use_external/path": "uid://bt6gh8hs6207y"
 }
 }
 }
