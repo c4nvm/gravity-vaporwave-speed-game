@@ -1,0 +1,56 @@
+[gd_scene load_steps=14 format=3 uid="uid://7rx78mjtpkcc"]
+
+[ext_resource type="PackedScene" uid="uid://c1b5wr82pqljs" path="res://Prefab/geometry/world_geo_01.tscn" id="1_b32hs"]
+[ext_resource type="PackedScene" uid="uid://3vh5je04uf55" path="res://Prefab/geometry/world_geo_02.tscn" id="2_rui31"]
+[ext_resource type="PackedScene" uid="uid://hkdus6e3ydbb" path="res://Prefab/geometry/world_geo_03_01.tscn" id="3_jj6n4"]
+[ext_resource type="PackedScene" uid="uid://de53eeulec203" path="res://Prefab/geometry/world_geo_03_02.tscn" id="4_wcpg1"]
+[ext_resource type="PackedScene" uid="uid://fr57tlmcjc4p" path="res://Prefab/geometry/world_geo_03_03.tscn" id="5_kym3u"]
+[ext_resource type="PackedScene" uid="uid://bs837f2nhisdf" path="res://Prefab/geometry/world_geo_03_04.tscn" id="6_880qf"]
+[ext_resource type="PackedScene" uid="uid://dresm5ur6ws2h" path="res://Prefab/geometry/world_geo_03_05.tscn" id="7_4yrd0"]
+[ext_resource type="PackedScene" uid="uid://cim7ilj0lk81f" path="res://Prefab/geometry/world_geo_03_06.tscn" id="8_0oasx"]
+[ext_resource type="PackedScene" uid="uid://wav784vpr2eq" path="res://Prefab/geometry/world_geo_03_07.tscn" id="9_au3fx"]
+[ext_resource type="PackedScene" uid="uid://dlao77fpvcmv5" path="res://Prefab/geometry/world_geo_03_08.tscn" id="10_fmyx1"]
+[ext_resource type="PackedScene" uid="uid://c727rynf8yhsb" path="res://Prefab/geometry/world_geo_03_09.tscn" id="11_awda1"]
+[ext_resource type="PackedScene" uid="uid://b3cqyfdo18tv6" path="res://Prefab/geometry/world_geo_03_10.tscn" id="12_041ag"]
+[ext_resource type="PackedScene" uid="uid://clkkydecvoyq3" path="res://Prefab/geometry/world_geo_03_11.tscn" id="13_mb63o"]
+
+[node name="TestGeometry" type="Node3D"]
+
+[node name="WorldGeo01" parent="." instance=ExtResource("1_b32hs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.6766, 0, -0.754425)
+
+[node name="WorldGeo02" parent="." instance=ExtResource("2_rui31")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.60211, 0, -2.07599)
+
+[node name="WorldGeo04" parent="." instance=ExtResource("3_jj6n4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.195, 0, -2.69978)
+
+[node name="WorldGeo03" parent="." instance=ExtResource("4_wcpg1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.428, 0, -2.73887)
+
+[node name="WorldGeo05" parent="." instance=ExtResource("5_kym3u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8708, 0, -12.764)
+
+[node name="WorldGeo06" parent="." instance=ExtResource("6_880qf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.32503, 0, -12.771)
+
+[node name="WorldGeo07" parent="." instance=ExtResource("7_4yrd0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06448, 0, -12.8418)
+
+[node name="WorldGeo08" parent="." instance=ExtResource("8_0oasx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.46373, 0, -12.3814)
+
+[node name="WorldGeo09" parent="." instance=ExtResource("9_au3fx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.9943, 0, -18.0792)
+
+[node name="WorldGeo10" parent="." instance=ExtResource("10_fmyx1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.63741, 0, -18.7067)
+
+[node name="WorldGeo11" parent="." instance=ExtResource("11_awda1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.60092, 0, -18.5955)
+
+[node name="WorldGeo12" parent="." instance=ExtResource("12_041ag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.86353, 0, -18.9927)
+
+[node name="WorldGeo13" parent="." instance=ExtResource("13_mb63o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.8165, 0, -23.2544)
