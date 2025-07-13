@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bv7g1x477o64a"]
+
+[ext_resource type="Texture2D" uid="uid://5wni8prqwmn0" path="res://materials/placeholder/real-human-eye-texture-free.jpg" id="1_ulb3j"]
+
+[resource]
+albedo_texture = ExtResource("1_ulb3j")
+emission = Color(0.230315, 0.230315, 0.230315, 1)
+rim_enabled = true
+rim_tint = 0.0
+clearcoat_enabled = true
